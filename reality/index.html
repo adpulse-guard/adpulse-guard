@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reality Mode™</title>
+  <style>
+    :root {
+  --apg-bg: #1e1e2f;
+  --apg-card: #2a2a3b;
+  --apg-primary: #6366f1;
+  --apg-primary-soft: #818cf8;
+  --apg-text: #f3f4f6;
+  --apg-muted: #9ca3af;
+  --apg-danger: #ef4444;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: radial-gradient(
+    1200px 600px at top,
+    #25253a,
+    var(--apg-bg)
+  );
+  color: var(--apg-text);
+  padding: 48px 20px;
+  max-width: 720px;
+  margin: auto;
+}
+
+.box {
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.03),
+    rgba(255,255,255,0)
+  );
+  background-color: var(--apg-card);
+  padding: 28px;
+  border-radius: 16px;
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+h1 {
+  font-size: 24px;
+  margin-bottom: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+p {
+  margin-bottom: 10px;
+  line-height: 1.65;
+}
+
+.highlight {
+  color: var(--apg-primary);
+  font-weight: 600;
+}
+
+.fade {
+  opacity: 0.8;
+  font-size: 13px;
+  color: var(--apg-muted);
+}
+
+.quote {
+  margin-top: 26px;
+  font-style: italic;
+  color: var(--apg-muted);
+}
+
+/* Dashboard CTA */
+a.dashboard-link {
+  color: var(--apg-primary-soft);
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(129,140,248,0.6);
+}
+
+a.dashboard-link:hover {
+  color: #c7d2fe;
+  border-bottom-color: #c7d2fe;
+}
+  </style>
+</head>
+<body>
+  <div style="
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:16px;
+    padding:0 4px;
+  ">
+    <div style="
+      font-size:14px;
+      font-weight:500;
+      letter-spacing:0.02em;
+      color:#c7d2fe;
+    ">
+      AdPulse Guard
+      <span style="opacity:0.6;">· Reality Mode™</span>
+    </div>
+  </div>
+
+  <div class="box">
+  <h1 id="title">Reality check loading…</h1>
+  <p id="summary">Just a sec…</p>
+
+  <div id="details"></div>
+
+  <p class="quote" id="quote"></p>
+  <p class="fade" id="dashboardLink" style="margin-top:24px;"></p>
+</div>
+
+  <script>
+    const titles = [
+  "This is why we can't have nice things.",
+  "Another day, another mess.",
+  "May the ad gods have mercy.",
+  "You break it, you track it.",
+  "Look what you did.",
+  "Oh goodie. Issues again. It’s like I never left.",
+  "Did you see your revenue drop? I did.",
+  "It's giving: no QA.",
+  "Who needs stability anyway?",
+  "The ads tried. You didn’t.",
+  "Same page, same chaos.",
+  "Your stack, your circus.",
+  "The numbers are in. They're crying.",
+  "Fixing things is optional, right?",
+  "Today's mood: broken impressions.",
+  "I ran the diagnostics. You're not gonna like it.",
+  "Guess which slot failed this time.",
+  "Your creative is doing stand-up. Not rendering.",
+  "Some people meditate. I monitor your mistakes.",
+  "Your tags are fine. Said no one ever.",
+  "Let me guess. No one tested this.",
+  "Reality called. It wants its fill rate back.",
+  "At least the background color is nice.",
+  "Well, at least some slots tried.",
+  "Good news: the alert works. Bad news: the alert works.",
+  "Welcome back to the crime scene.",
+  "Someone deployed that? Bold.",
+  "Revenue down? Color me unsurprised.",
+  "Your revenue graph just sighed.",
+  "Ever seen an ad cry? See below.",
+  "Remember when things worked? Me neither.",
+  "Would you like a tissue or a dev?",
+  "It broke itself, sure. Let’s go with that.",
+  "Revenue leaking like a gossip at lunch.",
+  "You ignored yesterday’s alert. Bold strategy.",
+  "Revenue called. It’s not coming back.",
+  "You test in prod? How avant-garde.",
+  "Another day, another dollar... lost.",
+  "Don’t look at me. I just report the damage.",
+  "This could’ve been prevented. So naturally, it wasn’t.",
+  "I told you yesterday. You didn’t listen."
+];
+
+    const issueLines = [
+      issues => `Your page has <span class="highlight">${issues}</span> complaints from the ad gods,`,
+      issues => `The ad gods have filed <span class="highlight">${issues}</span> formal complaints.`,
+      issues => `<span class="highlight">${issues}</span> ways you've disappointed the algorithm today.`,
+      issues => `Page karma: <span class="highlight">${issues}</span> infractions.`,
+      issues => `This page annoyed the ad gods <span class="highlight">${issues}</span> times.`,
+      issues => `<span class="highlight">${issues}</span> violations detected.`,
+      issues => `Your ad setup triggered <span class="highlight">${issues}</span> alerts.`,
+      issues => `<span class="highlight">${issues}</span> slots walk into a page. Fewer walk out.`,
+      issues => `Reality check: <span class="highlight">${issues}</span> sins found.`
+    ];
+
+    const slotLines = [
+      slots => `spread across <span class="highlight">${slots}</span> innocent slots.`,
+      slots => `<span class="highlight">${slots}</span> slots are now emotionally unavailable.`,
+      slots => `affecting <span class="highlight">${slots}</span> units just trying to exist.`,
+      slots => `<span class="highlight">${slots}</span> slots are somewhere crying in binary.`,
+      slots => `disrupting <span class="highlight">${slots}</span> little ad lives.`
+    ];
+
+    const quotes = [
+      "Enough to hurt, not enough to cry over. Yet.",
+      "Fixing things builds character.",
+      "Just pretend it's all working fine.",
+      "We're not mad. Just disappointed.",
+      "May tomorrow bring fewer alerts.",
+      "Nice drop in revenue today. Was that part of the plan?",
+      "'It’s probably fine.' — You, yesterday. Me, not laughing.",
+      "Fun fact: Ignoring issues doesn’t fix them.",
+      "Stop pretending everything’s working.",
+      "Take me back to the world of fake smiles.",
+      "Have you tried turning it off and on again?",
+      "Try clearing cache and pretending everything's fine.",
+      "Restart browser. Pray to ad gods. Repeat.",
+      "Reboot your hope. It might help.",
+      "Clear cookies. Clean conscience.",
+      "Ignore it and see if it fixes itself. Spoiler alert, it doesn’t.",
+      "Refresh the page. That’s the extent of our support.",
+      "Blame it on the intern. Works every time.",
+      "Maybe it’s a feature, not a bug.",
+      "At this point, just scream into the void.",
+      "Try yoga. Or debugging. Both are painful.",
+      "Tell your boss you’re handling it. Then don’t.",
+      "Sometimes, the fix is emotional detachment.",
+      "Check if the WiFi light is blinking. Always helps.",
+      "Drink water. Fix ads. In that order.",
+      "Have you sacrificed an ad slot to the algorithm lately?"
+];
+    const dashboardCTAs = [
+  "Want receipts? <a class='dashboard-link' href='{url}'>Open the dashboard.</a>",
+  "Enough sarcasm. <a class='dashboard-link' href='{url}'>Show me the dashboard.</a>",
+  "Curious how bad it really is? <a class='dashboard-link' href='{url}'>Dashboard’s this way.</a>",
+  "This is the summary. <a class='dashboard-link' href='{url}'>The damage is in the dashboard.</a>",
+  "Reality hurts less with charts. <a class='dashboard-link' href='{url}'>Open dashboard.</a>",
+  "Ready for the uncomfortable truth? <a class='dashboard-link' href='{url}'>Dashboard’s waiting.</a>",
+  "You’ve seen the jokes. <a class='dashboard-link' href='{url}'>Now see the data.</a>",
+  "This is the sarcasm layer. <a class='dashboard-link' href='{url}'>Reality lives in the dashboard.</a>",
+  "I made it funny. <a class='dashboard-link' href='{url}'>The dashboard won’t.</a>",
+  "Laugh now. <a class='dashboard-link' href='{url}'>Fix it later.</a>",
+  "Feeling skeptical? <a class='dashboard-link' href='{url}'>Here are the receipts.</a>",
+  "Want proof I’m not exaggerating? <a class='dashboard-link' href='{url}'>Open the dashboard.</a>",
+  "I wish this was a joke. <a class='dashboard-link' href='{url}'>It’s not.</a>",
+  "Receipts > vibes. <a class='dashboard-link' href='{url}'>Dashboard.</a>",
+  "Charts don’t lie. <a class='dashboard-link' href='{url}'>Unfortunately.</a>",
+  "Curious where the money went? <a class='dashboard-link' href='{url}'>Follow the trail.</a>",
+  "That drop wasn’t imaginary. <a class='dashboard-link' href='{url}'>See it here.</a>",
+  "If revenue could scream, it would point here → <a class='dashboard-link' href='{url}'>Dashboard</a>",
+  "Want to stop the bleeding? <a class='dashboard-link' href='{url}'>Start here.</a>",
+  "This view is opinionated. <a class='dashboard-link' href='{url}'>The dashboard is factual.</a>",
+  "You can’t unsee this. <a class='dashboard-link' href='{url}'>Might as well open the dashboard.</a>",
+  "I did my part. <a class='dashboard-link' href='{url}'>Your move.</a>",
+  "This is where denial ends. <a class='dashboard-link' href='{url}'>Dashboard.</a>",
+  "Still think it’s fine? <a class='dashboard-link' href='{url}'>Check again.</a>",
+];
+
+    const detailsMessages = {
+      gptFail: [
+        "GPT engine failed.",
+        "GPT said 'not today.'",
+        "GPT unit? Ghosted.",
+        "Guess who forgot the script?",
+        "Existential crisis much?",
+        "GPT? Never showed up.",
+        "It's 2026. GPT still needs to be invited.",
+        "No GPT, no party.",
+        "This page ghosted GPT first.",
+        "GPT not found. Like your QA process."
+      ],
+      domFail: [
+        "Slots ghosted the GPT. Pity.",
+        "GPT who?",
+        "Rendered into the void.",
+        "Slot appeared in DOM but not in GPT. Classic.",
+        "A DOM slot that doesn’t even exist in GPT. Bold.",
+        "Hiding from GPT again.",
+        "Maybe the div is shy.",
+        "No div, no deal.",
+        "DOM is a concept. Apparently.",
+        "Have you tried actually putting the thing on the page?"
+      ],
+      wrongNetwork: [
+        "Really?",
+        "Someone fat-fingered again.",
+        "Misconfigured network ID. Surprise!",
+        "Wrong address, try again.",
+        "Ad call sent to the void.",
+        "Cosplay gone wrong.",
+        "This isn't even your ad network. Bold.",
+        "Calling ads from the wrong house again?",
+        "It's giving: wrong number.",
+        "You mixed up your networks. Again."
+      ],
+      emptyResponse: [
+        "slots got ghosted by the ad server.",
+        "Ad server said: nope.",
+        "404: creative not found.",
+        "Awkward silence. No ad. Just vibes.",
+        "An ad that showed up... nowhere.",
+        "Creative skipped leg day. And delivery.",
+        "Ad call went out. Nobody came back.",
+        "Crickets. Literal ad crickets.",
+        "Empty response. Much wow.",
+        "No ad. No explanation. Just vibes."
+      ],
+      unexpectedSize: [
+        "slots couldn’t commit to a size.",
+        "Creative trying to squeeze where it doesn’t fit.",
+        "Creative size mismatch. Like, by a lot.",
+        "Wrong outfit for the slot party.",
+        "Cosplay gone wrong: size edition.",
+        "Creative squeezed where it didn't belong.",
+        "Size mismatch: it's not you, it's the layout.",
+        "Trying to wear a size S in a size L slot.",
+        "Slot size drama, again.",
+        "That creative was never going to fit."
+      ],
+      noDom: [
+        "No matching DOM. Classic.",
+        "Rendered in GPT, nowhere to go.",
+        "DOM who?",
+        "GPT spoke, DOM didn’t listen.",
+        "Invisible slots are a choice, I guess.",
+        "Someone forgot to place the actual div.",
+        "DefineSlot... to nowhere.",
+        "Rendered in code, missing in action.",
+        "DOM skipped its shift again.",
+        "You're defining slots for ghosts now?",
+        "GPT slots with abandonment issues."
+]
+    };
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const slots = parseInt(urlParams.get('slots') || '0');
+    const issues = parseInt(urlParams.get('issues') || '0');
+    const loss = parseFloat(urlParams.get('loss') || '0');
+    const gptFail = parseInt(urlParams.get('gptFail') || '0');
+    const domFail = parseInt(urlParams.get('domFail') || '0');
+    const noDom = parseInt(urlParams.get('noDom') || '0');
+    const wrongNetwork = parseInt(urlParams.get('wrongNetwork') || '0');
+    const emptyResponse = parseInt(urlParams.get('emptyResponse') || '0');
+    const unexpectedSize = parseInt(urlParams.get('unexpectedSize') || '0');
+
+    const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+
+    document.getElementById("title").innerHTML = pick(titles);
+    document.getElementById("summary").innerHTML = `${pick(issueLines)(issues)} ${pick(slotLines)(slots)}`;
+
+    const details = [];
+    if (loss > 0) details.push(`🩸 Revenue bleeding per day: <span class="highlight">$${loss}</span>`);
+    if (gptFail > 0) details.push(`🧠 ${gptFail} GPT load failures. ${pick(detailsMessages.gptFail)}`);
+    if (domFail > 0) details.push(`🕳️ ${domFail} DOM slots not registered in GPT. ${pick(detailsMessages.domFail)}`);
+    if (noDom > 0) details.push(`🫥 ${noDom} GPT slots had no matching DOM. ${pick(detailsMessages.noDom)}`);
+    if (wrongNetwork > 0) details.push(`🔌 ${wrongNetwork} Wrong network IDs. ${pick(detailsMessages.wrongNetwork)}`);
+    if (emptyResponse > 0) details.push(`📭 ${emptyResponse} Empty ad responses. ${pick(detailsMessages.emptyResponse)}`);
+    if (unexpectedSize > 0) details.push(`📏 ${unexpectedSize} Unexpected creative sizes. ${pick(detailsMessages.unexpectedSize)}`);
+
+    document.getElementById("details").innerHTML =
+    details.map(d => `<p>${d}</p>`).join('');
+    document.getElementById("quote").innerText = pick(quotes);
+    const dashboardUrl = urlParams.get('dash');
+if (dashboardUrl) {
+  const decodedUrl = decodeURIComponent(dashboardUrl);
+  const cta = pick(dashboardCTAs).replace('{url}', decodedUrl);
+  document.getElementById('dashboardLink').innerHTML = cta;
+}
+  </script>
+</body>
+</html>
