@@ -508,12 +508,13 @@ issueChart = new Chart(issueChartEl, {
     }
   }
 });
+const isDark = document.documentElement.classList.contains('dark');
 const severityColorMap = {
   HIGH: APG_BRAND.danger,
   MEDIUM: APG_BRAND.warning,
   LOW: APG_BRAND.success,
   INFO: isDark
-    ? '#4ade80' 
+    ? '#22c55e'
     : '#86efac'
 };
 
