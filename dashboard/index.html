@@ -514,8 +514,8 @@ const severityColorMap = {
   MEDIUM: APG_BRAND.warning,
   LOW: APG_BRAND.success,
   INFO: isDark
-    ? '#22c55e'
-    : '#86efac'
+    ? '#4ade80'
+    : 'rgba(16, 185, 129, 0.55)'
 };
 
 const severityLabels = Object.keys(severities);
@@ -707,6 +707,7 @@ darkModeBtn.addEventListener('click', () => {
   const isDark = document.documentElement.classList.toggle('dark');
   localStorage.setItem('theme', isDark ? 'dark' : 'light');
   modeLabel.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+  renderDashboard(allRows, activeDate);
 });
 
 // CACHE
