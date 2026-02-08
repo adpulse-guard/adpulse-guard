@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AdPulse Guard</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            darkcard: '#2a2a3b',
+            darkbg: '#1e1e2f'
+          }
+        }
+      }
+    };
+  </script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-white font-sans min-h-screen">
+
+<!-- LOADER -->
+<div id="loadingIndicator" class="fixed inset-0 z-50 flex items-center justify-center bg-white/70 dark:bg-darkbg/70 text-sm text-gray-500">
+  <div class="flex flex-col items-center">
+    <svg class="animate-spin h-6 w-6 text-indigo-500 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+    </svg>
+    Loading dashboard…
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="bg-white dark:bg-darkcard shadow-sm">
+  <div class="max-w-6xl mx-auto px-4 py-3 flex flex-col gap-3 md:flex-row md:justify-between md:items-center">
+    <h1 class="text-sm font-semibold tracking-wide">
+      AdPulse Guard
+    </h1>
+
+    <div class="flex flex-wrap items-center gap-2 text-xs md:flex-nowrap">
+
+  <!-- VIEW MODE LABEL -->
+  <span
+    id="viewModeLabel"
+    class="px-2 py-0.5 rounded bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-300 uppercase tracking-wide"
+  >
+    Summary view
+  </span>
+
+  <!-- DATE FILTER -->
+  <div class="flex items-center gap-2 w-full md:w-auto">
+    <input
+      type="date"
+      id="dateFilter"
+      class="px-2 py-1 border rounded dark:bg-darkcard w-full md:w-auto">
+    <button id="clearDate" class="text-indigo-500 hover:underline">Clear</button>
+  </div>
+
+  <button
+  id="darkModeBtn"
+  class="ml-2 px-2 py-1 rounded bg-gray-200 dark:bg-gray-700">
+  <span id="modeLabel">🌙</span>
+</button>
+</div>
+  </div>
+</header>
+
+<div id="dashboardContent" class="max-w-6xl mx-auto py-8 px-4">
+<!-- ISSUE FILTER -->
+<div class="bg-white dark:bg-darkcard rounded-xl shadow p-4 mb-4 flex flex-wrap items-center gap-3">
+  <span class="text-xs uppercase tracking-wide text-gray-500">
+    Filter by issue
+  </span>
+
+  <select
+    id="issueFilter"
+    class="px-2 py-1 text-sm border rounded dark:bg-darkcard"
+  >
+    <option value="">All issues</option>
+    <option value="gpt_not_loaded">GPT not loaded</option>
+    <option value="wrong_network">Wrong network</option>
+    <option value="slot_not_registered">DOM slot not in GPT</option>
+    <option value="defined_without_dom">GPT slot without DOM</option>
+    <option value="empty_response">Empty response</option>
+    <option value="unexpected_size">Unexpected size</option>
+    <!-- 🧠 INFO / layout -->
+  <option value="layout_overlap">Layout overlap</option>
+  <option value="ad_visibility_impaired">Ad visibility impaired</option>
+  </select>
+  <button
+  id="clearIssueFilter"
+  class="hidden inline-flex items-center justify-center
+         w-5 h-5 rounded-full
+         bg-indigo-50 text-indigo-600
+         hover:bg-indigo-100 hover:text-indigo-700
+         dark:bg-indigo-900/30 dark:text-indigo-300
+         dark:hover:bg-indigo-900/50
+         text-xs leading-none"
+  title="Clear issue filter"
+  aria-label="Clear issue filter"
+>
+  ✕
+</button>
+  <span
+    id="issueFilterNote"
+    class="text-xs text-gray-400 hidden"
+  ></span>
+</div>
+  <!-- TOP OFFENDER -->
+  <div id="topOffenderBox" class="hidden bg-white dark:bg-darkcard rounded-xl shadow p-6 mb-6">
+    <h2 class="text-lg font-semibold mb-2">
+  🚨 Top Offender · <span class="text-red-600">Fix this first</span>
+</h2>
+    <p><strong>Slot:</strong> <span id="offenderSlot"></span></p>
+    <p><strong>Loss:</strong> <span id="offenderLoss"></span></p>
+    <p><strong>Page:</strong> <span id="offenderPage"></span></p>
+    <p><strong>Issue:</strong> <span id="offenderIssue"></span></p>
+  </div>
+
+  <!-- KPI -->
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+    <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center">
+      <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">Detected Issues</div>
+      <div id="issueCount" class="text-3xl font-bold">—</div>
+    </div>
+    <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center">
+      <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">Impacted Slots</div>
+      <div id="slotCount" class="text-3xl font-bold">—</div>
+    </div>
+    <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center">
+      <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">Estimated Daily Risk</div>
+      <div id="dailyLoss" class="text-3xl font-bold text-red-600">$—</div>
+    </div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="bg-white dark:bg-darkcard rounded-xl shadow p-4">
+      <h2 class="text-xs uppercase tracking-wide text-gray-500 mb-2">Detected Issues</h2>
+      <div class="h-64">
+        <canvas id="issueChart"></canvas>
+      </div>
+    </div>
+
+    <div class="bg-white dark:bg-darkcard rounded-xl shadow p-4">
+      <h2 class="text-xs uppercase tracking-wide text-gray-500 mb-2">Severity Breakdown</h2>
+      <div class="h-64">
+        <canvas id="severityChart"></canvas>
+      </div>
+    </div>
+
+    <div id="lossChartWrapper" class="bg-white dark:bg-darkcard rounded-xl shadow p-4 md:col-span-2">
+      <h2 class="text-xs uppercase tracking-wide text-gray-500 mb-2">Revenue at Risk · Daily</h2>
+      <div class="h-64">
+        <canvas id="lossTrendChart"></canvas>
+      </div>
+    </div>
+  </div>
+<p class="text-xs mt-6 text-right">
+  <span id="lastUpdated" class="text-indigo-600 dark:text-indigo-300">—</span>
+</p>
+</div>
+  <script>
+  // 🔐 DASHBOARD ACCESS TOKEN (FROM EMAIL)
+const params = new URLSearchParams(window.location.search);
+const fromParam = params.get('from');
+const token = params.get('token');
+let activeDate = params.get('date') || '';
+const cameFromReality = fromParam === 'reality';
+
+if (!token) {
+  document.body.innerHTML = `
+    <div style="padding:40px;font-family:Inter,sans-serif">
+      <h2>Access denied</h2>
+      <p>This dashboard link is client-specific.</p>
+    </div>
+  `;
+  throw new Error('Missing dashboard token');
+}
+Chart.register(ChartDataLabels);
+const issueChartEl = document.getElementById('issueChart');
+const severityChartEl = document.getElementById('severityChart');
+const lossTrendChartEl = document.getElementById('lossTrendChart');
+
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbx-PFUcYyEXUR7Thw8kqzAWpCX74XY-4c-Si9myS69jloI9Vir_5YaZLXGCUiUquxMn/exec';
+const CACHE_KEY = 'apg_cache';
+const CACHE_TTL = 5 * 60 * 1000;
+
+const labelMap = {
+  gpt_not_loaded: 'GPT not loaded',
+  wrong_network: 'Wrong network',
+  slot_not_registered: 'DOM slot not in GPT',
+  defined_without_dom: 'GPT slot without DOM',
+  unexpected_size: 'Unexpected size',
+  empty_response: 'Empty response',
+   // 🧠 layout / visibility (INFO)
+  layout_overlap: 'Layout overlap',
+  ad_visibility_impaired: 'Ad visibility impaired'
+};
+
+    const APG_BRAND = {
+  primary: '#6366f1',        // indigo
+  primarySoft: '#818cf8',
+
+  danger: '#b91c1c',
+  warning: '#d97706',
+  success: '#15803d',
+
+  textMuted: '#6b7280',
+  textMutedDark: '#c7c9d1',
+
+  chartBorderLight: 'rgba(255,255,255,0.35)',
+  chartBorderDark: 'rgba(0,0,0,0.25)',
+
+  bgInfoLight: '#eef2ff',
+  bgInfoDark: 'rgba(99,102,241,0.2)'
+};
+
+let issueChart, severityChart, lossTrendChart;
+let allRows = [];
+
+const dateInput = document.getElementById('dateFilter');
+const clearDate = document.getElementById('clearDate');
+const viewModeLabel = document.getElementById('viewModeLabel');
+const issueFilter = document.getElementById('issueFilter');
+const issueFilterNote = document.getElementById('issueFilterNote');
+const clearIssueFilterBtn = document.getElementById('clearIssueFilter');
+const lossChartWrapper = document.getElementById('lossChartWrapper');
+
+let selectedIssueFilter = '';
+function updateIssueClearVisibility() {
+  if (selectedIssueFilter) {
+    clearIssueFilterBtn.classList.remove('hidden');
+  } else {
+    clearIssueFilterBtn.classList.add('hidden');
+  }
+}
+function updateViewModeLabel(selectedDate) {
+  if (cameFromReality) {
+    viewModeLabel.textContent = '🎭 Entered via Reality Mode™';
+    viewModeLabel.classList.add('bg-purple-100', 'text-purple-700');
+    return;
+  }
+
+  if (selectedDate) {
+    viewModeLabel.textContent = 'Daily view';
+  } else {
+    viewModeLabel.textContent = 'Summary view';
+  }
+}
+  updateViewModeLabel(cameFromReality ? null : activeDate);
+function getLastIssueTimestamp(rows) {
+  if (!rows || !rows.length) return null;
+
+  const timestamps = rows
+    .map(r => new Date(r.receivedAt).getTime())
+    .filter(ts => !isNaN(ts));
+
+  return timestamps.length ? Math.max(...timestamps) : null;
+}
+
+function renderDashboard(rows, selectedDate = null, selectedClient = '') {
+  const issueTypes = {};
+  const severities = {};
+  const dailyTotals = {};        
+  const dedupeMap = new Map();  
+  const slotSet = new Set();
+  const offenderMap = {};
+  const isSingleDayView = !!selectedDate;  
+
+  rows.forEach(r => {
+  if (!r || !r.issueType || !r.receivedAt) return;
+  const dateKey = r.receivedAt.split('T')[0];
+  if (selectedDate && dateKey !== selectedDate) return;
+  if (selectedIssueFilter && r.issueType !== selectedIssueFilter) return;
+    slotSet.add(r.slotId);
+
+
+  const severity = (r.severity || '').toUpperCase();
+  const isBudgetRelevant =
+  severity === 'HIGH' || severity === 'MEDIUM';
+
+const loss = isBudgetRelevant
+  ? Number(r.estimatedDailyRevenueRisk) || 0
+  : 0;
+
+// ✅ DEDUPE: slot + page + day
+const dedupeKey = `${r.slotId}__${r.pageUrl}__${dateKey}`;
+
+if (!dedupeMap.has(dedupeKey)) {
+  dedupeMap.set(dedupeKey, loss);
+  dailyTotals[dateKey] = (dailyTotals[dateKey] || 0) + loss;
+}
+
+  // === ostalo je INFO, ne budžet ===
+  const type = labelMap[r.issueType] || r.issueType;
+  const sev = (r.severity || 'unknown').toUpperCase();
+
+  issueTypes[type] = (issueTypes[type] || 0) + 1;
+  severities[sev] = (severities[sev] || 0) + 1;
+
+  // === TOP OFFENDER MAP ===
+  if (!offenderMap[r.slotId]) {
+    offenderMap[r.slotId] = {
+      slotId: r.slotId,
+      issues: new Set(),
+      pages: new Map() // pageUrl → loss
+    };
+  }
+
+  offenderMap[r.slotId].issues.add(r.issueType);
+
+  if (!offenderMap[r.slotId].pages.has(r.pageUrl)) {
+    offenderMap[r.slotId].pages.set(r.pageUrl, loss);
+  }
+});
+
+
+  /* === TOP OFFENDER CALCULATION === */
+  let topSlot = null;
+  let topLoss = 0;
+
+  Object.values(offenderMap).forEach(o => {
+    const slotLoss = Array.from(o.pages.values())
+  .reduce((a, b) => a + b, 0);
+
+if (slotLoss > topLoss) {
+  topLoss = slotLoss;
+  topSlot = o;
+}
+  });
+// === KPI COUNTERS ===
+document.getElementById('issueCount').textContent =
+  Object.keys(issueTypes).length;
+
+document.getElementById('slotCount').textContent = slotSet.size;
+
+const dedupedTotalLoss = Array.from(dedupeMap.values())
+  .reduce((a, b) => a + b, 0);
+
+document.getElementById('dailyLoss').textContent =
+  `$${dedupedTotalLoss.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+
+// 🎉 CONFETTI: samo DAILY view + ZERO issues
+if (
+  isSingleDayView &&
+  Object.keys(issueTypes).length === 0
+) {
+  confetti({
+    particleCount: 120,
+    spread: 70,
+    origin: { y: 0.6 }
+  });
+}
+  const box = document.getElementById('topOffenderBox');
+
+  if (topSlot) {
+    box.classList.remove('hidden');
+
+    document.getElementById('offenderSlot').textContent = topSlot.slotId;
+    document.getElementById('offenderLoss').textContent =
+      `$${topLoss.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+
+    const pages = Array.from(topSlot.pages.keys());
+
+const maxVisible = 3;
+const visiblePages = pages.slice(0, maxVisible);
+const remaining = pages.length - maxVisible;
+
+document.getElementById('offenderPage').innerHTML = `
+  <ul class="list-disc list-inside space-y-1">
+    ${visiblePages.map(p =>
+      `<li>
+        <a href="${p}" target="_blank"
+           class="text-indigo-400 hover:text-indigo-300 no-underline hover:underline break-all">
+          ${p}
+        </a>
+      </li>`
+    ).join('')}
+    ${
+      remaining > 0
+        ? `<li class="text-gray-500 italic">and ${remaining} more…</li>`
+        : ''
+    }
+  </ul>
+`;
+
+document.getElementById('offenderIssue').innerHTML =
+  Array.from(topSlot.issues)
+    .map(i => `
+      <span class="inline-flex items-center
+             bg-indigo-50 text-indigo-600
+             dark:bg-indigo-900/30 dark:text-indigo-300
+             hover:bg-indigo-100 dark:hover:bg-indigo-900/50
+             text-xs px-2 py-0.5 rounded
+             font-medium tracking-tight mr-1">
+        ${labelMap[i] || i}
+      </span>
+    `)
+    .join('');
+  } else {
+    box.classList.add('hidden');
+  }
+  if (issueChart) issueChart.destroy();
+
+issueChart = new Chart(issueChartEl, {
+  type: 'bar',
+  data: {
+    labels: Object.keys(issueTypes),
+    datasets: [{
+      data: Object.values(issueTypes),
+      backgroundColor: APG_BRAND.primary,
+      hoverBackgroundColor: APG_BRAND.primarySoft
+    }]
+  },
+  options: {
+    maintainAspectRatio: false,
+
+    hover: {
+      mode: 'index',
+      intersect: false
+    },
+
+    animation: {
+      duration: 300,
+      easing: 'easeOutCubic'
+    },
+
+    onClick: (evt, elements) => {
+      if (!elements.length) return;
+
+      const index = elements[0].index;
+      const clickedLabel = issueChart.data.labels[index];
+
+      const issueKey = Object.keys(labelMap)
+        .find(k => labelMap[k] === clickedLabel);
+
+      if (!issueKey) return;
+
+      selectedIssueFilter = issueKey;
+      issueFilter.value = issueKey;
+      updateIssueClearVisibility();
+
+      issueFilterNote.textContent = `Showing impact related to: ${clickedLabel}`;
+      issueFilterNote.classList.remove('hidden');
+
+      renderDashboard(allRows, activeDate);
+    },
+
+    plugins: {
+      tooltip: {
+        backgroundColor: document.documentElement.classList.contains('dark')
+          ? '#2a2a3b'
+          : '#111827',
+        titleColor: '#ffffff',
+        bodyColor: '#e5e7eb',
+        borderColor: '#6366f1',
+        borderWidth: 1,
+        padding: 10,
+        cornerRadius: 6,
+        displayColors: false,
+        caretPadding: 8,
+        callbacks: {
+          title: () => null,
+          label: (ctx) => {
+            const value = ctx.raw;
+            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+            const pct = total ? Math.round((value / total) * 100) : 0;
+
+            return [
+              `${value} issues`,
+              `~${pct}% of all issues`
+            ];
+          }
+        }
+      },
+
+      legend: { display: false },
+
+      datalabels: {
+        color: '#ffffff',
+        anchor: 'center',
+        align: 'center',
+        font: { weight: 'bold', size: 12 }
+      }
+    },
+
+    scales: {
+      x: { ticks: { color: '#9ca3af' } },
+      y: {
+        beginAtZero: true,
+        ticks: { color: '#9ca3af', font: { size: 11 } },
+        grid: { color: 'rgba(156,163,175,0.2)' }
+      }
+    }
+  }
+});
+const severityColorMap = {
+  HIGH: APG_BRAND.danger,
+  MEDIUM: APG_BRAND.warning,
+  LOW: APG_BRAND.success
+};
+
+const severityLabels = Object.keys(severities);
+const severityData = Object.values(severities);
+const severityColors = severityLabels.map(
+  s => severityColorMap[s] || '#9ca3af'
+);
+
+if (severityChart) severityChart.destroy();
+severityChart = new Chart(severityChartEl, {
+  type: 'pie',
+  data: {
+    labels: severityLabels,
+    datasets: [{
+      data: severityData,
+      backgroundColor: severityColors,
+      borderColor: 'rgba(203, 213, 225, 0.25)', 
+      borderWidth: 1.4
+    }]
+  },
+  options: {
+    maintainAspectRatio: false,
+    plugins: {
+  tooltip: {
+  backgroundColor: document.documentElement.classList.contains('dark')
+    ? '#2a2a3b'
+    : '#111827',
+  titleColor: '#ffffff',
+  bodyColor: '#e5e7eb',
+  borderColor: '#6366f1',
+  borderWidth: 1,
+  padding: 10,
+  cornerRadius: 6,
+  displayColors: false,
+  caretPadding: 8,
+
+  callbacks: {
+    title: () => null,
+    label: (ctx) => {
+      const value = ctx.raw;
+      const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+      const pct = Math.round((value / total) * 100);
+      return [
+  `${value} issues`,
+  `~${pct}% of all issues`
+];
+    }
+  }
+},
+  legend: { position: 'bottom' },
+  datalabels: {
+    color: '#ffffff',
+    font: {
+      weight: '600',
+      size: 12
+    },
+    formatter: (value, ctx) => {
+      const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+      return Math.round((value / total) * 100) + '%';
+    }
+  }
+}
+  }
+});
+
+  // === LOSS TREND CHART ===
+if (isSingleDayView) {
+  if (lossTrendChart) {
+    lossTrendChart.destroy();
+    lossTrendChart = null;
+  }
+  lossChartWrapper.style.display = 'none';
+} else {
+  lossChartWrapper.style.display = 'block';
+
+  if (lossTrendChart) lossTrendChart.destroy();
+
+  const sortedDates = Object.keys(dailyTotals).sort();
+
+  lossTrendChart = new Chart(lossTrendChartEl, {
+    type: 'line',
+    data: {
+      labels: sortedDates,
+      datasets: [{
+        data: sortedDates.map(d => dailyTotals[d]),
+        borderColor: '#6366f1',
+        backgroundColor: 'rgba(99,102,241,0.04)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 4
+      }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      animation: {
+        duration: 400,
+        easing: 'easeOutQuart'
+      },
+      interaction: {
+        mode: 'index',
+        intersect: false
+      },
+      plugins: {
+        tooltip: {
+          backgroundColor: document.documentElement.classList.contains('dark')
+            ? '#2a2a3b'
+            : '#111827',
+          titleColor: '#ffffff',
+          bodyColor: '#e5e7eb',
+          borderColor: '#6366f1',
+          borderWidth: 1,
+          padding: 10,
+          cornerRadius: 6,
+          displayColors: false,
+          caretPadding: 8,
+          callbacks: {
+            title: (items) => `Date: ${items[0].label}`,
+            label: (ctx) => `Estimated risk: $${ctx.raw.toLocaleString()}`
+          }
+        },
+        legend: { display: false },
+        datalabels: {
+          align: 'top',
+          anchor: 'end',
+          offset: 6,
+          font: { size: 11, weight: '400' },
+          color: () =>
+            document.documentElement.classList.contains('dark')
+              ? '#9ca3af'
+              : '#6b7280',
+          formatter: v => `$${v.toLocaleString()}`
+        }
+      }
+    }
+  });
+}
+
+// === STATUS FOOTER (last issue time) ===
+const lastIssueTs = getLastIssueTimestamp(rows);
+
+let minutesAgo = null;
+if (lastIssueTs) {
+  minutesAgo = Math.floor((Date.now() - lastIssueTs) / 60000);
+}
+
+let statusText = '';
+
+if (!lastIssueTs) {
+  statusText = 'Monitoring active · No issues detected yet';
+} else if (minutesAgo < 10) {
+  statusText = 'Monitoring active · Issues detected recently';
+} else if (minutesAgo < 60) {
+  statusText = `Monitoring active · Last issue ${minutesAgo}m ago`;
+} else if (minutesAgo < 1440) {
+  const hours = Math.floor(minutesAgo / 60);
+  statusText = `Monitoring active · Last issue ${hours}h ago`;
+} else {
+  const days = Math.floor(minutesAgo / 1440);
+  statusText = `Monitoring active · Last issue ${days}d ago`;
+}
+
+const statusEl = document.getElementById('lastUpdated');
+if (statusEl) {
+  statusEl.textContent = statusText;
+
+  statusEl.classList.remove(
+    'text-indigo-600',
+    'dark:text-indigo-300',
+    'text-gray-400',
+    'dark:text-gray-500'
+  );
+
+  if (!lastIssueTs || minutesAgo < 1440) {
+    statusEl.classList.add('text-indigo-600', 'dark:text-indigo-300');
+  } else {
+    statusEl.classList.add('text-gray-400', 'dark:text-gray-500');
+  }
+}
+
+document.getElementById('loadingIndicator').style.display = 'none';
+}
+
+// DARK MODE
+const darkModeBtn = document.getElementById('darkModeBtn');
+const modeLabel = document.getElementById('modeLabel');
+if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
+modeLabel.textContent = document.documentElement.classList.contains('dark') ? 'Light Mode' : 'Dark Mode';
+darkModeBtn.addEventListener('click', () => {
+  const isDark = document.documentElement.classList.toggle('dark');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  modeLabel.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+});
+
+// CACHE
+let renderedFromCache = false;
+const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+if (cached && Date.now() - cached.ts < CACHE_TTL) {
+  allRows = cached.data;
+  renderedFromCache = true;
+
+  if (activeDate) dateInput.value = activeDate;
+  updateViewModeLabel(cameFromReality ? null : activeDate);
+  renderDashboard(allRows, activeDate);
+}
+fetch(`${SHEET_URL}?token=${token}`)
+  .then(r => r.json())
+  .then(j => {
+  allRows = j.data || [];
+
+  localStorage.setItem(
+    CACHE_KEY,
+    JSON.stringify({ ts: Date.now(), data: allRows })
+  );
+  if (renderedFromCache) return;
+  if (activeDate) dateInput.value = activeDate;
+    updateViewModeLabel(cameFromReality ? null : activeDate);
+    renderDashboard(allRows, activeDate);
+  })
+  .catch((error) => {
+    console.error('Error fetching data:', error);
+    // Ako dođe do greške, loading indikator se skriva
+    document.getElementById('loadingIndicator').style.display = 'none';
+  })
+  .finally(() => {
+    document.getElementById('loadingIndicator').style.display = 'none';
+  });
+
+dateInput.addEventListener('change', () => {
+  activeDate = dateInput.value;
+  const url = new URL(window.location);
+  if (activeDate) {
+  url.searchParams.set('date', activeDate);
+} else {
+  url.searchParams.delete('date');
+}
+
+if (fromParam) {
+  url.searchParams.set('from', fromParam);
+}
+  window.history.replaceState({}, '', url);
+  updateViewModeLabel(cameFromReality ? null : activeDate);
+  renderDashboard(allRows, activeDate);
+});
+
+clearDate.addEventListener('click', () => {
+  activeDate = '';
+  dateInput.value = '';
+  const url = new URL(window.location);
+url.searchParams.delete('date');
+
+if (fromParam) {
+  url.searchParams.set('from', fromParam);
+}
+
+window.history.replaceState({}, '', url);
+
+  updateViewModeLabel(cameFromReality ? null : '');
+  renderDashboard(allRows, '');
+});
+
+  issueFilter.addEventListener('change', () => {
+  selectedIssueFilter = issueFilter.value;
+
+  if (selectedIssueFilter) {
+    const label = labelMap[selectedIssueFilter] || selectedIssueFilter;
+    issueFilterNote.textContent = `Showing impact related to: ${label}`;
+    issueFilterNote.classList.remove('hidden');
+  } else {
+    issueFilterNote.classList.add('hidden');
+  }
+  updateIssueClearVisibility();
+  renderDashboard(allRows, activeDate);
+});
+  clearIssueFilterBtn.addEventListener('click', () => {
+  selectedIssueFilter = '';
+  issueFilter.value = '';
+  issueFilterNote.classList.add('hidden');
+  issueFilter.blur();
+  updateIssueClearVisibility();
+  renderDashboard(allRows, activeDate);
+});
+  updateIssueClearVisibility();
+</script>
+
+</body>
+</html>
