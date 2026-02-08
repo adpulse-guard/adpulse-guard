@@ -304,10 +304,13 @@ if (!dedupeMap.has(dedupeKey)) {
 
   // === ostalo je INFO, ne budžet ===
   const type = labelMap[r.issueType] || r.issueType;
-  const sev = (r.severity || 'unknown').toUpperCase();
+  const rawSev = (r.severity || 'INFO').toUpperCase();
+const sev = ['HIGH', 'MEDIUM', 'LOW', 'INFO'].includes(rawSev)
+  ? rawSev
+  : 'INFO';
 
-  issueTypes[type] = (issueTypes[type] || 0) + 1;
   severities[sev] = (severities[sev] || 0) + 1;
+  issueTypes[type] = (issueTypes[type] || 0) + 1;
 
   // === TOP OFFENDER MAP ===
   if (!offenderMap[r.slotId]) {
@@ -508,7 +511,8 @@ issueChart = new Chart(issueChartEl, {
 const severityColorMap = {
   HIGH: APG_BRAND.danger,
   MEDIUM: APG_BRAND.warning,
-  LOW: APG_BRAND.success
+  LOW: APG_BRAND.success,
+  INFO: '#86efac'
 };
 
 const severityLabels = Object.keys(severities);
