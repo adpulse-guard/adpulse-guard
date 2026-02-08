@@ -512,7 +512,9 @@ const severityColorMap = {
   HIGH: APG_BRAND.danger,
   MEDIUM: APG_BRAND.warning,
   LOW: APG_BRAND.success,
-  INFO: 'rgba(21,128,61,0.35)'
+  INFO: isDark
+    ? '#4ade80' 
+    : '#86efac'
 };
 
 const severityLabels = Object.keys(severities);
