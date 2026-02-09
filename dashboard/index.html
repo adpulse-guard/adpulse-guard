@@ -423,7 +423,7 @@ if (selectedIssueFilter && affectedSlots.size) {
   affectedSlotsList.innerHTML = Array.from(affectedSlots)
   .sort()
   .map(s =>
-    <li class="font-sans text-xs tracking-tight text-gray-700 dark:text-gray-300 leading-relaxed">
+    `<li class="font-sans text-xs tracking-tight text-gray-700 dark:text-gray-300 leading-relaxed">
       <span class="text-gray-400 dark:text-gray-500 mr-1">•</span>${s}
     </li>`
   )
