@@ -153,7 +153,7 @@
     class="text-xs space-y-1 max-h-48 overflow-auto"
   ></ul>
 
-  <p class="text-xs text-gray-400 mt-2">
+  <p class="text-[11px] text-gray-400 mt-4 opacity-80">
     Showing slots affected by selected issue filter
   </p>
 </div>
@@ -423,8 +423,13 @@ if (selectedIssueFilter && affectedSlots.size) {
   affectedSlotsList.innerHTML = Array.from(affectedSlots)
     .sort()
     .map(s =>
-      `<li class="font-mono text-gray-700 dark:text-gray-300">• ${s}</li>`
-    )
+  `<li class="flex items-start gap-2 text-xs text-gray-600 dark:text-gray-300">
+     <span class="text-gray-400">•</span>
+     <span class="font-mono text-[11px] text-gray-500 dark:text-gray-400 break-all">
+       ${s}
+     </span>
+   </li>`
+)
     .join('');
 } else {
   affectedSlotsPanel.classList.add('hidden');
