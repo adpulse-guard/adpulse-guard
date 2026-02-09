@@ -87,22 +87,39 @@ a.dashboard-link:hover {
 </head>
 <body>
   <div style="
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:16px;
+  padding:0 4px;
+">
+  <!-- LEFT: brand -->
+  <div style="
     display:flex;
     align-items:center;
-    justify-content:space-between;
-    margin-bottom:16px;
-    padding:0 4px;
+    gap:8px;
+    font-size:14px;
+    font-weight:500;
+    letter-spacing:0.02em;
+    color:#c7d2fe;
   ">
-    <div style="
-      font-size:14px;
-      font-weight:500;
-      letter-spacing:0.02em;
-      color:#c7d2fe;
-    ">
+    <img
+      src="Logo Shield.png"
+      alt="AdPulse Guard"
+      style="
+        width:18px;
+        height:18px;
+        opacity:0.65;
+        filter: drop-shadow(0 0 6px rgba(99,102,241,0.25));
+      "
+      title="Detected by AdPulse Guard · Reality Mode™"
+    />
+    <span>
       AdPulse Guard
       <span style="opacity:0.6;">· Reality Mode™</span>
-    </div>
+    </span>
   </div>
+</div>
 
   <div class="box">
   <h1 id="title">Reality check loading…</h1>
