@@ -96,7 +96,6 @@
   <span class="text-xs uppercase tracking-wide text-gray-500">
     Filter by issue
   </span>
-
   <select
     id="issueFilter"
     class="px-2 py-1 text-sm border rounded dark:bg-darkcard"
@@ -130,6 +129,33 @@
     id="issueFilterNote"
     class="text-xs text-gray-400 hidden"
   ></span>
+</div>
+  <!-- AFFECTED SLOTS PANEL -->
+<div
+  id="affectedSlotsPanel"
+  class="hidden bg-white dark:bg-darkcard rounded-xl shadow p-4 mb-6"
+>
+  <div class="flex items-center justify-between mb-3">
+    <h3 class="text-sm font-semibold">
+      🎯 Affected slots
+    </h3>
+
+    <button
+      id="copySlotsBtn"
+      class="text-xs text-indigo-600 hover:underline dark:text-indigo-300"
+    >
+      Copy list
+    </button>
+  </div>
+
+  <ul
+    id="affectedSlotsList"
+    class="text-xs space-y-1 max-h-48 overflow-auto"
+  ></ul>
+
+  <p class="text-xs text-gray-400 mt-2">
+    Showing slots affected by selected issue filter
+  </p>
 </div>
   <!-- TOP OFFENDER -->
   <div id="topOffenderBox" class="hidden bg-white dark:bg-darkcard rounded-xl shadow p-6 mb-6">
@@ -192,6 +218,18 @@ const fromParam = params.get('from');
 const token = params.get('token');
 let activeDate = params.get('date') || '';
 const cameFromReality = fromParam === 'reality';
+const affectedSlotsPanel = document.getElementById('affectedSlotsPanel');
+const affectedSlotsList = document.getElementById('affectedSlotsList');
+const copySlotsBtn = document.getElementById('copySlotsBtn');
+copySlotsBtn.addEventListener('click', () => {
+  const text = Array.from(
+    affectedSlotsList.querySelectorAll('li')
+  )
+    .map(li => li.textContent.replace('• ', ''))
+    .join('\n');
+
+  navigator.clipboard.writeText(text);
+});
 
 if (!token) {
   document.body.innerHTML = `
@@ -369,8 +407,29 @@ const sev = ['HIGH', 'MEDIUM', 'LOW', 'INFO'].includes(rawSev)
     offenderMap[r.slotId].pages.set(r.pageUrl, loss);
   }
 });
+  
+// === AFFECTED SLOTS (per issue filter) ===
+const affectedSlots = new Set();
 
+rows.forEach(r => {
+  if (!r.slotId) return;
+  if (selectedIssueFilter && r.issueType === selectedIssueFilter) {
+    affectedSlots.add(r.slotId);
+  }
+});
+if (selectedIssueFilter && affectedSlots.size) {
+  affectedSlotsPanel.classList.remove('hidden');
 
+  affectedSlotsList.innerHTML = Array.from(affectedSlots)
+    .sort()
+    .map(s =>
+      `<li class="font-mono text-gray-700 dark:text-gray-300">• ${s}</li>`
+    )
+    .join('');
+} else {
+  affectedSlotsPanel.classList.add('hidden');
+  affectedSlotsList.innerHTML = '';
+}
   /* === TOP OFFENDER CALCULATION === */
   let topSlot = null;
   let topLoss = 0;
