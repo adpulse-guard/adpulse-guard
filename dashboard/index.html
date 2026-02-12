@@ -528,10 +528,9 @@ const labels = Object.keys(issueTypes);
 const values = Object.values(issueTypes);
 
 const bgColors = labels.map(label => {
-  const isSecurity = SECURITY_ISSUES.some(
-    key => labelMap[key] === label
-  );
-  return isSecurity ? '#dc2626' : APG_BRAND.primary;
+  return label.startsWith('Security ·')
+  ? '#b91c1c'   // deep red (već imaš u brand)
+  : APG_BRAND.primary;
 });
 
 issueChart = new Chart(issueChartEl, {
