@@ -339,7 +339,6 @@ function updateIssueClearVisibility() {
   }
 }
 function updateViewModeLabel(selectedDate) {
-  // reset boja
   viewModeLabel.className =
     'px-2 py-0.5 rounded uppercase tracking-wide text-xs';
 
@@ -400,59 +399,73 @@ function renderDashboard(rows, selectedDate = null, selectedClient = '') {
   const isSingleDayView = !!selectedDate;  
 
   rows.forEach(r => {
+
   if (!r || !r.issueType || !r.receivedAt) return;
+
   const dateKey = r.receivedAt.split('T')[0];
+
   if (selectedDate && dateKey !== selectedDate) return;
   if (selectedIssueFilter && r.issueType !== selectedIssueFilter) return;
-  if (!SECURITY_ISSUES.includes(r.issueType)) {
-  slotSet.add(r.slotId);
-}
 
+  const isSecurity = SECURITY_ISSUES.includes(r.issueType);
+
+  if (!isSecurity) {
+    slotSet.add(r.slotId);
+  }
 
   const severity = (r.severity || '').toUpperCase();
+
   const isBudgetRelevant =
-  severity === 'HIGH' || severity === 'MEDIUM';
+    !isSecurity &&
+    (severity === 'HIGH' || severity === 'MEDIUM');
 
-const loss = isBudgetRelevant
-  ? Number(r.estimatedDailyRevenueRisk) || 0
-  : 0;
+  const loss = isBudgetRelevant
+    ? Number(r.estimatedDailyRevenueRisk) || 0
+    : 0;
 
-// ✅ DEDUPE: slot + page + day
-const dedupeKey = `${r.slotId}__${r.pageUrl}__${dateKey}`;
+  const dedupeKey = `${r.slotId}__${r.pageUrl}__${dateKey}`;
 
-if (!dedupeMap.has(dedupeKey)) {
-  dedupeMap.set(dedupeKey, loss);
-  dailyTotals[dateKey] = (dailyTotals[dateKey] || 0) + loss;
-}
+  if (!isSecurity && !dedupeMap.has(dedupeKey)) {
+    dedupeMap.set(dedupeKey, loss);
+    dailyTotals[dateKey] = (dailyTotals[dateKey] || 0) + loss;
+  }
 
-  let type = labelMap[r.issueType] || r.issueType;
+  const typeLabel = labelMap[r.issueType] || r.issueType;
 
-if (SECURITY_ISSUES.includes(r.issueType)) {
-  securityCounts[type] = (securityCounts[type] || 0) + 1;
-} else {
-  issueTypes[type] = (issueTypes[type] || 0) + 1;
-}
+  if (isSecurity) {
+    securityCounts[typeLabel] =
+      (securityCounts[typeLabel] || 0) + 1;
+  } else {
+    issueTypes[typeLabel] =
+      (issueTypes[typeLabel] || 0) + 1;
+  }
 
   const rawSev = (r.severity || 'INFO').toUpperCase();
-const sev = ['HIGH', 'MEDIUM', 'LOW', 'INFO'].includes(rawSev)
-  ? rawSev
-  : 'INFO';
+  const sev =
+    ['HIGH','MEDIUM','LOW','INFO'].includes(rawSev)
+      ? rawSev
+      : 'INFO';
 
   severities[sev] = (severities[sev] || 0) + 1;
 
-  if (!offenderMap[r.slotId]) {
-    offenderMap[r.slotId] = {
-      slotId: r.slotId,
-      issues: new Set(),
-      pages: new Map() 
-    };
+  if (!isSecurity) {
+
+    if (!offenderMap[r.slotId]) {
+      offenderMap[r.slotId] = {
+        slotId: r.slotId,
+        issues: new Set(),
+        pages: new Map()
+      };
+    }
+
+    offenderMap[r.slotId].issues.add(r.issueType);
+
+    if (!offenderMap[r.slotId].pages.has(r.pageUrl)) {
+      offenderMap[r.slotId].pages.set(r.pageUrl, loss);
+    }
+
   }
 
-  offenderMap[r.slotId].issues.add(r.issueType);
-
-  if (!offenderMap[r.slotId].pages.has(r.pageUrl)) {
-    offenderMap[r.slotId].pages.set(r.pageUrl, loss);
-  }
 });
   
 const affectedSlots = new Set();
@@ -465,6 +478,7 @@ rows.forEach(r => {
   if (selectedDate && dateKey !== selectedDate) return;
   if (selectedIssueFilter && r.issueType !== selectedIssueFilter) return;
 
+  if (SECURITY_ISSUES.includes(r.issueType)) return;
   affectedSlots.add(r.slotId);
 });
 if (selectedIssueFilter && affectedSlots.size) {
