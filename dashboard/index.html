@@ -266,7 +266,7 @@ const labelMap = {
   'expectedNetworkId_mismatch',
   'unauthorized_domain'
 ];
-
+    
     const APG_BRAND = {
   primary: '#6366f1',        
   primarySoft: '#818cf8',
@@ -524,34 +524,36 @@ document.getElementById('offenderIssue').innerHTML =
   }
   if (issueChart) issueChart.destroy();
 
+const labels = Object.keys(issueTypes);
+const values = Object.values(issueTypes);
+
+const bgColors = labels.map(label => {
+  const isSecurity = SECURITY_ISSUES.some(
+    key => labelMap[key] === label
+  );
+  return isSecurity ? '#dc2626' : APG_BRAND.primary;
+});
+
 issueChart = new Chart(issueChartEl, {
   type: 'bar',
   data: {
-    labels: Object.keys(issueTypes),
+    labels: labels,
     datasets: [{
-      data: Object.values(issueTypes),
-      backgroundColor: APG_BRAND.primary,
-      hoverBackgroundColor: APG_BRAND.primarySoft
+      data: values,
+      backgroundColor: bgColors,
+      hoverBackgroundColor: bgColors
     }]
   },
   options: {
     maintainAspectRatio: false,
-
-    hover: {
-      mode: 'index',
-      intersect: false
-    },
-
-    animation: {
-      duration: 300,
-      easing: 'easeOutCubic'
-    },
+    hover: { mode: 'index', intersect: false },
+    animation: { duration: 300, easing: 'easeOutCubic' },
 
     onClick: (evt, elements) => {
       if (!elements.length) return;
 
       const index = elements[0].index;
-      const clickedLabel = issueChart.data.labels[index];
+      const clickedLabel = labels[index];
 
       const issueKey = Object.keys(labelMap)
         .find(k => labelMap[k] === clickedLabel);
@@ -595,9 +597,7 @@ issueChart = new Chart(issueChartEl, {
           }
         }
       },
-
       legend: { display: false },
-
       datalabels: {
         color: '#ffffff',
         anchor: 'center',
@@ -607,7 +607,9 @@ issueChart = new Chart(issueChartEl, {
     },
 
     scales: {
-      x: { ticks: { color: '#9ca3af' } },
+      x: {
+        ticks: { color: '#9ca3af', maxRotation: 0 }
+      },
       y: {
         beginAtZero: true,
         ticks: { color: '#9ca3af', font: { size: 11 } },
@@ -616,6 +618,7 @@ issueChart = new Chart(issueChartEl, {
     }
   }
 });
+
 const isDark = document.documentElement.classList.contains('dark');
 const severityColorMap = {
   HIGH: APG_BRAND.danger,
