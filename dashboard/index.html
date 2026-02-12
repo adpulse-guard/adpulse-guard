@@ -168,20 +168,47 @@
   </div>
 
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-    <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center">
-      <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">Detected Issues</div>
-      <div id="issueCount" class="text-3xl font-bold">—</div>
+
+  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center">
+    <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">
+      Detected Issues
     </div>
-    <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center">
-      <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">Impacted Slots</div>
-      <div id="slotCount" class="text-3xl font-bold">—</div>
-    </div>
-    <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center">
-      <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">Estimated Daily Risk</div>
-      <div id="dailyLoss" class="text-3xl font-bold text-red-600">$—</div>
-    </div>
+    <div id="issueCount" class="text-3xl font-bold">—</div>
   </div>
 
+  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center">
+    <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">
+      Impacted Slots
+    </div>
+    <div id="slotCount" class="text-3xl font-bold">—</div>
+  </div>
+
+  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center">
+    <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">
+      Estimated Daily Risk
+    </div>
+    <div id="dailyLoss" class="text-3xl font-bold text-red-600">$—</div>
+  </div>
+</div>
+<div id="securityWidget"
+     class="hidden bg-white dark:bg-darkcard rounded-xl shadow p-6 mb-8 border border-gray-200 dark:border-gray-700">
+
+  <div class="flex items-center justify-between mb-3">
+    <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+      🔐 Security Signals
+    </h2>
+    <span id="securityCount"
+          class="text-xs px-2 py-1 rounded bg-gray-100 text-gray-600
+                 dark:bg-gray-700 dark:text-gray-300">
+    </span>
+  </div>
+
+  <ul id="securityList"
+      class="text-xs space-y-2 text-gray-600 dark:text-gray-400">
+  </ul>
+
+</div>
+  
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
     <div class="bg-white dark:bg-darkcard rounded-xl shadow p-4">
       <h2 class="text-xs uppercase tracking-wide text-gray-500 mb-2">Detected Issues</h2>
@@ -205,9 +232,10 @@
     </div>
   </div>
 <p class="text-xs mt-6 text-right">
-  <span id="lastUpdated" class="text-indigo-600 dark:text-indigo-300">—</span>
-</p>
-</div>
+    <span id="lastUpdated" class="text-indigo-600 dark:text-indigo-300">—</span>
+  </p>
+</div> 
+
   <script>
 
 const params = new URLSearchParams(window.location.search);
@@ -357,6 +385,7 @@ function getLastIssueTimestamp(rows) {
 
 function renderDashboard(rows, selectedDate = null, selectedClient = '') {
   const issueTypes = {};
+  const securityCounts = {};
   const severities = {};
   const dailyTotals = {};        
   const dedupeMap = new Map();  
@@ -391,9 +420,10 @@ if (!dedupeMap.has(dedupeKey)) {
   let type = labelMap[r.issueType] || r.issueType;
 
 if (SECURITY_ISSUES.includes(r.issueType)) {
-  type = `Security · ${type}`;
+  securityCounts[type] = (securityCounts[type] || 0) + 1;
+} else {
+  issueTypes[type] = (issueTypes[type] || 0) + 1;
 }
-issueTypes[type] = (issueTypes[type] || 0) + 1;
 
   const rawSev = (r.severity || 'INFO').toUpperCase();
 const sev = ['HIGH', 'MEDIUM', 'LOW', 'INFO'].includes(rawSev)
@@ -420,10 +450,14 @@ const sev = ['HIGH', 'MEDIUM', 'LOW', 'INFO'].includes(rawSev)
 const affectedSlots = new Set();
 
 rows.forEach(r => {
-  if (!r.slotId) return;
-  if (selectedIssueFilter && r.issueType === selectedIssueFilter) {
-    affectedSlots.add(r.slotId);
-  }
+  if (!r || !r.slotId || !r.issueType || !r.receivedAt) return;
+
+  const dateKey = r.receivedAt.split('T')[0];
+
+  if (selectedDate && dateKey !== selectedDate) return;
+  if (selectedIssueFilter && r.issueType !== selectedIssueFilter) return;
+
+  affectedSlots.add(r.slotId);
 });
 if (selectedIssueFilter && affectedSlots.size) {
   affectedSlotsPanel.classList.remove('hidden');
@@ -523,15 +557,11 @@ document.getElementById('offenderIssue').innerHTML =
     box.classList.add('hidden');
   }
   if (issueChart) issueChart.destroy();
-
+  
 const labels = Object.keys(issueTypes);
 const values = Object.values(issueTypes);
 
-const bgColors = labels.map(label => {
-  return label.startsWith('Security ·')
-  ? '#b91c1c'   // deep red (već imaš u brand)
-  : APG_BRAND.primary;
-});
+const bgColors = labels.map(() => APG_BRAND.primary);
 
 issueChart = new Chart(issueChartEl, {
   type: 'bar',
@@ -634,6 +664,31 @@ const severityColors = severityLabels.map(
   s => severityColorMap[s] || '#9ca3af'
 );
 
+ const securityWidget = document.getElementById('securityWidget');
+const securityList = document.getElementById('securityList');
+const securityCountEl = document.getElementById('securityCount');
+
+const totalSecurity = Object.values(securityCounts)
+  .reduce((a, b) => a + b, 0);
+
+if (totalSecurity > 0) {
+  securityWidget.classList.remove('hidden');
+  securityCountEl.textContent =
+    `${totalSecurity} signal${totalSecurity > 1 ? 's' : ''}`;
+
+  securityList.innerHTML = Object.entries(securityCounts)
+    .map(([label, count]) => `
+      <li class="flex justify-between items-center">
+        <span>${label}</span>
+        <span class="text-gray-500">${count}</span>
+      </li>
+    `)
+    .join('');
+} else {
+  securityWidget.classList.add('hidden');
+  securityList.innerHTML = '';
+} 
+  
 if (severityChart) severityChart.destroy();
 severityChart = new Chart(severityChartEl, {
   type: 'pie',
