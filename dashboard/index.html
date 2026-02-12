@@ -29,7 +29,6 @@
 
 <body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-white font-sans min-h-screen">
 
-<!-- LOADER -->
 <div id="loadingIndicator" class="fixed inset-0 z-50 flex items-center justify-center bg-white/70 dark:bg-darkbg/70 text-sm text-gray-500">
   <div class="flex flex-col items-center">
     <svg class="animate-spin h-6 w-6 text-indigo-500 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -40,11 +39,9 @@
   </div>
 </div>
 
-<!-- HEADER -->
 <header class="bg-white dark:bg-darkcard shadow-sm">
   <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
     
-    <!-- LEFT: logo + name -->
     <div class="flex items-center gap-2">
       <img
         src="Logo Shield.png"
@@ -56,7 +53,6 @@
       </span>
     </div>
 
-    <!-- RIGHT: controls -->
     <div class="flex flex-wrap items-center gap-2 text-xs md:flex-nowrap">
 
       <span
@@ -91,8 +87,8 @@
 </header>
 
 <div id="dashboardContent" class="max-w-6xl mx-auto py-8 px-4">
-<!-- ISSUE FILTER -->
-<div class="bg-white dark:bg-darkcard rounded-xl shadow p-4 mb-4 flex flex-wrap items-center gap-3">
+
+  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-4 mb-4 flex flex-wrap items-center gap-3">
   <span class="text-xs uppercase tracking-wide text-gray-500">
     Filter by issue
   </span>
@@ -107,9 +103,12 @@
     <option value="defined_without_dom">GPT slot without DOM</option>
     <option value="empty_response">Empty response</option>
     <option value="unexpected_size">Unexpected size</option>
-    <!-- 🧠 INFO / layout -->
-  <option value="layout_overlap">Layout overlap</option>
-  <option value="ad_visibility_impaired">Ad visibility impaired</option>
+    <option value="layout_overlap">Layout overlap</option>
+    <option value="ad_visibility_impaired">Ad visibility impaired</option>
+    <option value="token_invalid">Invalid security token</option>
+    <option value="clientId_mismatch">Client ID mismatch</option>
+    <option value="expectedNetworkId_mismatch">Network configuration mismatch</option>
+    <option value="unauthorized_domain">Unauthorized domain</option>
   </select>
   <button
   id="clearIssueFilter"
@@ -130,7 +129,7 @@
     class="text-xs text-gray-400 hidden"
   ></span>
 </div>
-  <!-- AFFECTED SLOTS PANEL -->
+
 <div
   id="affectedSlotsPanel"
   class="hidden bg-white dark:bg-darkcard rounded-xl shadow p-4 mb-6"
@@ -157,7 +156,7 @@
     Showing slots affected by selected issue filter
   </p>
 </div>
-  <!-- TOP OFFENDER -->
+
   <div id="topOffenderBox" class="hidden bg-white dark:bg-darkcard rounded-xl shadow p-6 mb-6">
     <h2 class="text-lg font-semibold mb-2">
   🚨 Top Offender · <span class="text-red-600">Fix this first</span>
@@ -168,7 +167,6 @@
     <p><strong>Issue:</strong> <span id="offenderIssue"></span></p>
   </div>
 
-  <!-- KPI -->
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
     <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center">
       <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">Detected Issues</div>
@@ -184,7 +182,6 @@
     </div>
   </div>
 
-  <!-- CHARTS -->
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
     <div class="bg-white dark:bg-darkcard rounded-xl shadow p-4">
       <h2 class="text-xs uppercase tracking-wide text-gray-500 mb-2">Detected Issues</h2>
@@ -212,7 +209,7 @@
 </p>
 </div>
   <script>
-  // 🔐 DASHBOARD ACCESS TOKEN (FROM EMAIL)
+
 const params = new URLSearchParams(window.location.search);
 const fromParam = params.get('from');
 const token = params.get('token');
@@ -256,13 +253,22 @@ const labelMap = {
   defined_without_dom: 'GPT slot without DOM',
   unexpected_size: 'Unexpected size',
   empty_response: 'Empty response',
-   // 🧠 layout / visibility (INFO)
   layout_overlap: 'Layout overlap',
-  ad_visibility_impaired: 'Ad visibility impaired'
+  ad_visibility_impaired: 'Ad visibility impaired',
+  token_invalid: 'Invalid security token',
+  clientId_mismatch: 'Client ID mismatch',
+  expectedNetworkId_mismatch: 'Network configuration mismatch',
+  unauthorized_domain: 'Unauthorized domain access'
 };
+  const SECURITY_ISSUES = [
+  'token_invalid',
+  'clientId_mismatch',
+  'expectedNetworkId_mismatch',
+  'unauthorized_domain'
+];
 
     const APG_BRAND = {
-  primary: '#6366f1',        // indigo
+  primary: '#6366f1',        
   primarySoft: '#818cf8',
 
   danger: '#b91c1c',
@@ -382,22 +388,25 @@ if (!dedupeMap.has(dedupeKey)) {
   dailyTotals[dateKey] = (dailyTotals[dateKey] || 0) + loss;
 }
 
-  // === ostalo je INFO, ne budžet ===
-  const type = labelMap[r.issueType] || r.issueType;
+  let type = labelMap[r.issueType] || r.issueType;
+
+if (SECURITY_ISSUES.includes(r.issueType)) {
+  type = `Security · ${type}`;
+}
+issueTypes[type] = (issueTypes[type] || 0) + 1;
+
   const rawSev = (r.severity || 'INFO').toUpperCase();
 const sev = ['HIGH', 'MEDIUM', 'LOW', 'INFO'].includes(rawSev)
   ? rawSev
   : 'INFO';
 
   severities[sev] = (severities[sev] || 0) + 1;
-  issueTypes[type] = (issueTypes[type] || 0) + 1;
 
-  // === TOP OFFENDER MAP ===
   if (!offenderMap[r.slotId]) {
     offenderMap[r.slotId] = {
       slotId: r.slotId,
       issues: new Set(),
-      pages: new Map() // pageUrl → loss
+      pages: new Map() 
     };
   }
 
@@ -408,7 +417,6 @@ const sev = ['HIGH', 'MEDIUM', 'LOW', 'INFO'].includes(rawSev)
   }
 });
   
-// === AFFECTED SLOTS (per issue filter) ===
 const affectedSlots = new Set();
 
 rows.forEach(r => {
@@ -432,7 +440,6 @@ if (selectedIssueFilter && affectedSlots.size) {
   affectedSlotsPanel.classList.add('hidden');
   affectedSlotsList.innerHTML = '';
 }
-  /* === TOP OFFENDER CALCULATION === */
   let topSlot = null;
   let topLoss = 0;
 
@@ -445,7 +452,6 @@ if (slotLoss > topLoss) {
   topSlot = o;
 }
   });
-// === KPI COUNTERS ===
 document.getElementById('issueCount').textContent =
   Object.keys(issueTypes).length;
 
@@ -457,7 +463,6 @@ const dedupedTotalLoss = Array.from(dedupeMap.values())
 document.getElementById('dailyLoss').textContent =
   `$${dedupedTotalLoss.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 
-// 🎉 CONFETTI: samo DAILY view + ZERO issues
 if (
   isSingleDayView &&
   Object.keys(issueTypes).length === 0
@@ -684,7 +689,6 @@ severityChart = new Chart(severityChartEl, {
   }
 });
 
-  // === LOSS TREND CHART ===
 if (isSingleDayView) {
   if (lossTrendChart) {
     lossTrendChart.destroy();
@@ -756,7 +760,6 @@ if (isSingleDayView) {
   });
 }
 
-// === STATUS FOOTER (last issue time) ===
 const lastIssueTs = getLastIssueTimestamp(rows);
 
 let minutesAgo = null;
@@ -801,7 +804,6 @@ if (statusEl) {
 document.getElementById('loadingIndicator').style.display = 'none';
 }
 
-// DARK MODE
 const darkModeBtn = document.getElementById('darkModeBtn');
 const modeLabel = document.getElementById('modeLabel');
 if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
@@ -813,7 +815,6 @@ darkModeBtn.addEventListener('click', () => {
   renderDashboard(allRows, activeDate);
 });
 
-// CACHE
 let renderedFromCache = false;
 const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
 if (cached && Date.now() - cached.ts < CACHE_TTL) {
