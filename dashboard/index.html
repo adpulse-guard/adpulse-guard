@@ -404,7 +404,9 @@ function renderDashboard(rows, selectedDate = null, selectedClient = '') {
   const dateKey = r.receivedAt.split('T')[0];
   if (selectedDate && dateKey !== selectedDate) return;
   if (selectedIssueFilter && r.issueType !== selectedIssueFilter) return;
-    slotSet.add(r.slotId);
+  if (!SECURITY_ISSUES.includes(r.issueType)) {
+  slotSet.add(r.slotId);
+}
 
 
   const severity = (r.severity || '').toUpperCase();
