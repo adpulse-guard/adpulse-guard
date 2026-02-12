@@ -156,18 +156,7 @@
     Showing slots affected by selected issue filter
   </p>
 </div>
-
-  <div id="topOffenderBox" class="hidden bg-white dark:bg-darkcard rounded-xl shadow p-6 mb-6">
-    <h2 class="text-lg font-semibold mb-2">
-  🚨 Top Offender · <span class="text-red-600">Fix this first</span>
-</h2>
-    <p><strong>Slot:</strong> <span id="offenderSlot"></span></p>
-    <p><strong>Loss:</strong> <span id="offenderLoss"></span></p>
-    <p><strong>Page:</strong> <span id="offenderPage"></span></p>
-    <p><strong>Issue:</strong> <span id="offenderIssue"></span></p>
-  </div>
-
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
 
   <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center">
     <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">
@@ -190,8 +179,25 @@
     <div id="dailyLoss" class="text-3xl font-bold text-red-600">$—</div>
   </div>
 </div>
+  <div id="topOffenderBox"
+     class="hidden bg-white dark:bg-darkcard
+            rounded-xl shadow p-5 mb-6
+            border border-gray-200 dark:border-gray-700">
+
+    <h2 class="text-lg font-semibold mb-2">
+  🚨 Top Offender
+<span class="text-red-600 text-sm font-medium">Requires attention</span>
+</h2>
+    <p><strong>Slot:</strong> <span id="offenderSlot"></span></p>
+    <p><strong>Loss:</strong> <span id="offenderLoss"></span></p>
+    <p><strong>Page:</strong> <span id="offenderPage"></span></p>
+    <p><strong>Issue:</strong> <span id="offenderIssue"></span></p>
+  </div>
+
 <div id="securityWidget"
-     class="hidden bg-white dark:bg-darkcard rounded-xl shadow p-6 mb-8 border border-gray-200 dark:border-gray-700">
+     class="hidden bg-gray-50 dark:bg-darkcard
+            rounded-xl shadow p-5 mb-8
+            border-l-4 border-gray-300 dark:border-gray-600">
 
   <div class="flex items-center justify-between mb-3">
     <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300">
@@ -486,21 +492,31 @@ if (slotLoss > topLoss) {
   topSlot = o;
 }
   });
-document.getElementById('issueCount').textContent =
-  Object.keys(issueTypes).length;
+const totalIssues = Object.values(issueTypes)
+  .reduce((a, b) => a + b, 0);
+
+document.getElementById('issueCount').textContent = totalIssues;
 
 document.getElementById('slotCount').textContent = slotSet.size;
 
 const dedupedTotalLoss = Array.from(dedupeMap.values())
   .reduce((a, b) => a + b, 0);
 
-document.getElementById('dailyLoss').textContent =
+const dailyLossEl = document.getElementById('dailyLoss');
+
+dailyLossEl.textContent =
   `$${dedupedTotalLoss.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 
-if (
-  isSingleDayView &&
-  Object.keys(issueTypes).length === 0
-) {
+if (dedupedTotalLoss > 0) {
+  dailyLossEl.classList.remove('text-green-600');
+  dailyLossEl.classList.add('text-red-600');
+} else {
+  dailyLossEl.classList.remove('text-red-600');
+  dailyLossEl.classList.add('text-green-600');
+}
+
+if (isSingleDayView && totalIssues === 0)
+ {
   confetti({
     particleCount: 120,
     spread: 70,
