@@ -100,7 +100,8 @@
     <option value="gpt_not_loaded">GPT not loaded</option>
     <option value="wrong_network">Wrong network</option>
     <option value="slot_not_registered">DOM slot not in GPT</option>
-    <option value="defined_without_dom">GPT slot without DOM</option>
+    <option value="phantom_slot_requested">Phantom slot requested</option>
+    <option value="defined_without_dom_no_request">GPT slot defined without DOM</option>
     <option value="empty_response">Empty response</option>
     <option value="unexpected_size">Unexpected size</option>
     <option value="layout_overlap">Layout overlap</option>
@@ -284,7 +285,8 @@ const labelMap = {
   gpt_not_loaded: 'GPT not loaded',
   wrong_network: 'Wrong network',
   slot_not_registered: 'DOM slot not in GPT',
-  defined_without_dom: 'GPT slot without DOM',
+  defined_without_dom_no_request: 'GPT slot defined without DOM',
+  phantom_slot_requested: 'Phantom slot requested',
   unexpected_size: 'Unexpected size',
   empty_response: 'Empty response',
   layout_overlap: 'Layout overlap',
@@ -684,7 +686,7 @@ const isDark = document.documentElement.classList.contains('dark');
 const severityColorMap = {
   HIGH: APG_BRAND.danger,
   MEDIUM: APG_BRAND.warning,
-  LOW: APG_BRAND.success,
+  LOW: APG_BRAND.primarySoft,
   INFO: isDark
   ? '#6b7280'     
   : '#9ca3af'     
