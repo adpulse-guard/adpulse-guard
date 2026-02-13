@@ -447,36 +447,10 @@ a.dashboard-link:hover {
 }
     if (gptFail > 0) details.push(`🧠 ${gptFail} GPT load failures. ${pick(detailsMessages.gptFail)}`);
     if (domFail > 0) details.push(`🕳️ ${domFail} DOM slots not registered in GPT. ${pick(detailsMessages.domFail)}`);
-    if (phantom > 0) {
-    const intensity =
-  phantom === 1
-    ? "We’ll pretend this was a fluke."
-    : phantom > 6
-    ? "This is not a coincidence anymore."
-    : phantom > 3
-    ? "This is getting ambitious."
-    : "";
-
-  details.push(
-    `👻 ${phantom} Phantom slot requests. ${
-      intensity ? intensity + " " : ""
-    }${pick(detailsMessages.phantom)}`
-  );
-}
+    if (phantom > 0) details.push(`👻 ${phantom} Phantom slot requests. ${pick(detailsMessages.phantom)}`);
     if (noDomNoRequest > 0) details.push(`🫥 ${noDomNoRequest} GPT slots had no matching DOM (no request). ${pick(detailsMessages.noDomNoRequest)}`);
     if (wrongNetwork > 0) details.push(`🔌 ${wrongNetwork} Wrong network IDs. ${pick(detailsMessages.wrongNetwork)}`);
-    if (emptyResponse > 0) {
-  const emptyTone =
-    emptyResponse > 5
-      ? "That’s not a dip. That’s a strategy."
-      : "";
-
-  details.push(
-    `📭 ${emptyResponse} Empty ad responses. ${
-      emptyTone ? emptyTone + " " : ""
-    }${pick(detailsMessages.emptyResponse)}`
-  );
-}
+    if (emptyResponse > 0) details.push(`📭 ${emptyResponse} Empty ad responses. ${pick(detailsMessages.emptyResponse)}`);
     if (unexpectedSize > 0) details.push(`📏 ${unexpectedSize} Unexpected creative sizes. ${pick(detailsMessages.unexpectedSize)}`);
     if (Math.random() < 0.1) {
   details.push("Reality Mode™ does not exaggerate.");
