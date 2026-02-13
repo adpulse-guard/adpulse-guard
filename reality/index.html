@@ -136,6 +136,16 @@ a.dashboard-link:hover {
   <script>
     const titles = [
   "This is why we can't have nice things.",
+  "This deployment had confidence.",
+  "Somewhere, QA just looked away.",
+  "Minimal testing. Maximum consequences.",
+  "This page chose chaos.",
+  "It compiled. That was enough, apparently.",
+  "We call this ‘creative interpretation.’",
+  "Technically alive. Operational? Debatable.",
+  "This wasn’t reviewed. It was believed.",
+  "Bold strategy. Let’s see how it plays out.",
+  "You shipped it. The ads noticed.",
   "Another day, another mess.",
   "May the ad gods have mercy.",
   "You break it, you track it.",
@@ -200,6 +210,13 @@ a.dashboard-link:hover {
 
     const quotes = [
       "Enough to hurt, not enough to cry over. Yet.",
+      "Monitoring is cheaper than regret.",
+      "Silence from the ad server is never good.",
+      "Confidence is not a testing strategy.",
+      "Hope is not a fallback.",
+      "Everything is fine. Until it isn’t.",
+      "Your stack has trust issues.",
+      "The logs saw everything.",
       "Fixing things builds character.",
       "Just pretend it's all working fine.",
       "We're not mad. Just disappointed.",
@@ -258,6 +275,23 @@ a.dashboard-link:hover {
         "GPT engine failed.",
         "GPT said 'not today.'",
         "GPT unit? Ghosted.",
+        "GPT was invited. It did not RSVP.",
+        "Script loading was more of a suggestion.",
+        "The engine exists. Just not here.",
+        "Somewhere, GPT is working. Not on this page.",
+        "Script tag missing. So is revenue.",
+        "GPT never made it past planning.",
+        "GPT decided to take the day off.",
+        "No script. No drama. Just nothing.",
+        "This page is running on imagination.",
+        "GPT never showed up to work today.",
+        "This page is monetizing spiritually.",
+        "No GPT. No mercy.",
+        "Your ads are waiting for a bus that isn’t coming.",
+        "GPT said: absolutely not.",
+        "Somewhere, fill rate just evaporated.",
+        "GPT is currently reconsidering life choices.",
+        "This page forgot the fundamentals.",
         "Guess who forgot the script?",
         "Existential crisis much?",
         "GPT? Never showed up.",
@@ -266,6 +300,25 @@ a.dashboard-link:hover {
         "This page ghosted GPT first.",
         "GPT not found. Like your QA process."
       ],
+      phantom: [
+        "Defined in GPT. Requested. Nowhere to render. Impressive.",
+        "Requested a slot that doesn’t exist. Bold move.",
+        "Ad call sent. DOM said ‘who dis?’",
+        "You paid for that request. It rendered into vibes.",
+        "GPT delivered. The page ghosted it.",
+        "Phantom slot successfully billed to nowhere.",
+        "You paid for an ad call. The page disagreed.",
+        "An ad was requested. The page declined the invitation.",
+        "Live request. No container. Stunning execution.",
+        "Somewhere an ad server tried its best.",
+        "Phantom traffic is still traffic.",
+        "You’re paying for invisible impressions.",
+        "The DOM declined participation.",
+        "Ghost slot energy is strong today.",
+        "The ad server delivered into philosophical space.",
+        "This slot believes in itself. The page doesn’t.",
+        "Ad server delivered. DOM said ‘not my problem.’"
+    ],
       domFail: [
         "Slots ghosted the GPT. Pity.",
         "GPT who?",
@@ -281,6 +334,12 @@ a.dashboard-link:hover {
       wrongNetwork: [
         "Really?",
         "Someone fat-fingered again.",
+        "This is not your network. It never was.",
+        "You called the wrong house.",
+        "Network identity crisis detected.",
+        "Someone typed fast. Too fast.",
+        "Wrong network. Right confidence.",
+        "This isn’t even your ad stack.",
         "Misconfigured network ID. Surprise!",
         "Wrong address, try again.",
         "Ad call sent to the void.",
@@ -293,6 +352,14 @@ a.dashboard-link:hover {
       emptyResponse: [
         "slots got ghosted by the ad server.",
         "Ad server said: nope.",
+        "The ad server stared back. Blankly.",
+        "Delivery was attempted. Enthusiasm was not.",
+        "Fill rate is on vacation.",
+        "An ad call was made. It declined.",
+        "Your inventory feels unloved.",
+        "Silence is not a monetization strategy.",
+        "Empty is a bold aesthetic choice.",
+        "This is minimalism, but for revenue.",
         "404: creative not found.",
         "Awkward silence. No ad. Just vibes.",
         "An ad that showed up... nowhere.",
@@ -310,14 +377,28 @@ a.dashboard-link:hover {
         "Cosplay gone wrong: size edition.",
         "Creative squeezed where it didn't belong.",
         "Size mismatch: it's not you, it's the layout.",
+        "This creative came dressed incorrectly.",
+        "That size was optimistic.",
+        "The slot had boundaries. The creative didn’t.",
+        "Wrong dimensions. Right attitude.",
+        "Fit check: failed.",
         "Trying to wear a size S in a size L slot.",
         "Slot size drama, again.",
         "That creative was never going to fit."
       ],
-      noDom: [
+      noDomNoRequest: [
         "No matching DOM. Classic.",
+        "Defined in GPT. Forgot to put it on the page.",
         "Rendered in GPT, nowhere to go.",
         "DOM who?",
+        "This slot exists in theory.",
+        "Defined in code. Forgotten in layout.",
+        "A beautiful definition with nowhere to live.",
+        "Configuration without commitment.",
+        "Technically configured. Emotionally unsupported.",
+        "A slot exists… spiritually.",
+        "Configured beautifully. Rendered nowhere.",
+        "GPT knows about it. The page does not.",
         "GPT spoke, DOM didn’t listen.",
         "Invisible slots are a choice, I guess.",
         "Someone forgot to place the actual div.",
@@ -325,6 +406,9 @@ a.dashboard-link:hover {
         "Rendered in code, missing in action.",
         "DOM skipped its shift again.",
         "You're defining slots for ghosts now?",
+        "Defined. Forgotten. Classic.",
+        "This slot is living in configuration purgatory.",
+        "Someone typed defineSlot and walked away.",
         "GPT slots with abandonment issues."
 ]
     };
@@ -335,7 +419,8 @@ a.dashboard-link:hover {
     const loss = parseFloat(urlParams.get('loss') || '0');
     const gptFail = parseInt(urlParams.get('gptFail') || '0');
     const domFail = parseInt(urlParams.get('domFail') || '0');
-    const noDom = parseInt(urlParams.get('noDom') || '0');
+    const phantom = parseInt(urlParams.get('phantom') || '0');
+    const noDomNoRequest = parseInt(urlParams.get('noDomNoRequest') || '0');
     const wrongNetwork = parseInt(urlParams.get('wrongNetwork') || '0');
     const emptyResponse = parseInt(urlParams.get('emptyResponse') || '0');
     const unexpectedSize = parseInt(urlParams.get('unexpectedSize') || '0');
@@ -346,14 +431,56 @@ a.dashboard-link:hover {
     document.getElementById("summary").innerHTML = `${pick(issueLines)(issues)} ${pick(slotLines)(slots)}`;
 
     const details = [];
-    if (loss > 0) details.push(`🩸 Revenue bleeding per day: <span class="highlight">$${loss}</span>`);
+    if (loss > 0) {
+    const lossLine =
+    loss > 300
+      ? `🩸 Approx. <span class="highlight">$${loss}</span> quietly leaving the building.`
+      : `🩸 Around <span class="highlight">$${loss}</span> wandering off daily.`;
+
+  details.push(lossLine);
+}
+    if (issues === 1) {
+  details.push("Honestly? It could be worse. For now.");
+}
+    if (issues > 15) {
+  details.push("This feels less like a bug and more like a lifestyle.");
+}
     if (gptFail > 0) details.push(`🧠 ${gptFail} GPT load failures. ${pick(detailsMessages.gptFail)}`);
     if (domFail > 0) details.push(`🕳️ ${domFail} DOM slots not registered in GPT. ${pick(detailsMessages.domFail)}`);
-    if (noDom > 0) details.push(`🫥 ${noDom} GPT slots had no matching DOM. ${pick(detailsMessages.noDom)}`);
-    if (wrongNetwork > 0) details.push(`🔌 ${wrongNetwork} Wrong network IDs. ${pick(detailsMessages.wrongNetwork)}`);
-    if (emptyResponse > 0) details.push(`📭 ${emptyResponse} Empty ad responses. ${pick(detailsMessages.emptyResponse)}`);
-    if (unexpectedSize > 0) details.push(`📏 ${unexpectedSize} Unexpected creative sizes. ${pick(detailsMessages.unexpectedSize)}`);
+    if (phantom > 0) {
+    const intensity =
+  phantom === 1
+    ? "We’ll pretend this was a fluke."
+    : phantom > 6
+    ? "This is not a coincidence anymore."
+    : phantom > 3
+    ? "This is getting ambitious."
+    : "";
 
+  details.push(
+    `👻 ${phantom} Phantom slot requests. ${
+      intensity ? intensity + " " : ""
+    }${pick(detailsMessages.phantom)}`
+  );
+}
+    if (noDomNoRequest > 0) details.push(`🫥 ${noDomNoRequest} GPT slots had no matching DOM (no request). ${pick(detailsMessages.noDomNoRequest)}`);
+    if (wrongNetwork > 0) details.push(`🔌 ${wrongNetwork} Wrong network IDs. ${pick(detailsMessages.wrongNetwork)}`);
+    if (emptyResponse > 0) {
+  const emptyTone =
+    emptyResponse > 5
+      ? "That’s not a dip. That’s a strategy."
+      : "";
+
+  details.push(
+    `📭 ${emptyResponse} Empty ad responses. ${
+      emptyTone ? emptyTone + " " : ""
+    }${pick(detailsMessages.emptyResponse)}`
+  );
+}
+    if (unexpectedSize > 0) details.push(`📏 ${unexpectedSize} Unexpected creative sizes. ${pick(detailsMessages.unexpectedSize)}`);
+    if (Math.random() < 0.1) {
+  details.push("Reality Mode™ does not exaggerate.");
+}
     document.getElementById("details").innerHTML =
     details.map(d => `<p>${d}</p>`).join('');
     document.getElementById("quote").innerText = pick(quotes);
