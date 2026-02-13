@@ -296,6 +296,17 @@ const labelMap = {
   expectedNetworkId_mismatch: 'Network configuration mismatch',
   unauthorized_domain: 'Unauthorized domain access'
 };
+  const shortLabelMap = {
+  'GPT not loaded': 'GPT',
+  'Wrong network': 'Network',
+  'DOM slot not in GPT': 'Not in GPT',
+  'GPT slot defined without DOM': 'No DOM',
+  'Phantom slot requested': 'Phantom',
+  'Unexpected size': 'Size',
+  'Empty response': 'Empty',
+  'Layout overlap': 'Overlap',
+  'Ad visibility impaired': 'Visibility'
+};
   const SECURITY_ISSUES = [
   'token_invalid',
   'clientId_mismatch',
@@ -592,7 +603,8 @@ document.getElementById('offenderIssue').innerHTML =
   }
   if (issueChart) issueChart.destroy();
   
-const labels = Object.keys(issueTypes);
+const fullLabels = Object.keys(issueTypes);
+const labels = fullLabels.map(l => shortLabelMap[l] || l);
 const values = Object.values(issueTypes);
 
 const bgColors = labels.map(() => APG_BRAND.primary);
@@ -613,25 +625,26 @@ issueChart = new Chart(issueChartEl, {
     animation: { duration: 300, easing: 'easeOutCubic' },
 
     onClick: (evt, elements) => {
-      if (!elements.length) return;
+  if (!elements.length) return;
 
-      const index = elements[0].index;
-      const clickedLabel = labels[index];
+  const index = elements[0].index;
+  const fullLabel = fullLabels[index];
 
-      const issueKey = Object.keys(labelMap)
-        .find(k => labelMap[k] === clickedLabel);
+  const issueKey = Object.keys(labelMap)
+    .find(k => labelMap[k] === fullLabel);
 
-      if (!issueKey) return;
+  if (!issueKey) return;
 
-      selectedIssueFilter = issueKey;
-      issueFilter.value = issueKey;
-      updateIssueClearVisibility();
+  selectedIssueFilter = issueKey;
+  issueFilter.value = issueKey;
+  updateIssueClearVisibility();
 
-      issueFilterNote.textContent = `Showing impact related to: ${clickedLabel}`;
-      issueFilterNote.classList.remove('hidden');
+  issueFilterNote.textContent =
+    `Showing impact related to: ${fullLabel}`;
+  issueFilterNote.classList.remove('hidden');
 
-      renderDashboard(allRows, activeDate);
-    },
+  renderDashboard(allRows, activeDate);
+},
 
     plugins: {
       tooltip: {
@@ -647,12 +660,14 @@ issueChart = new Chart(issueChartEl, {
         displayColors: false,
         caretPadding: 8,
         callbacks: {
-          title: () => null,
+          title: (items) => {
+            const index = items[0].dataIndex;
+            return fullLabels[index]; 
+  },
           label: (ctx) => {
-            const value = ctx.raw;
-            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-            const pct = total ? Math.round((value / total) * 100) : 0;
-
+    const value = ctx.raw;
+    const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+    const pct = total ? Math.round((value / total) * 100) : 0;
             return [
               `${value} issues`,
               `~${pct}% of all issues`
@@ -671,7 +686,12 @@ issueChart = new Chart(issueChartEl, {
 
     scales: {
       x: {
-        ticks: { color: '#9ca3af', maxRotation: 0 }
+        ticks: {
+    color: '#9ca3af',
+    autoSkip: false,
+    maxRotation: 0,
+    font: { size: 11 }
+  }
       },
       y: {
         beginAtZero: true,
