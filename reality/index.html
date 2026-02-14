@@ -455,7 +455,7 @@ a.dashboard-link:hover {
     document.getElementById("summary").innerHTML = `${pick(issueLines)(issues)} ${pick(slotLines)(slots)}`;
 
     const details = [];
-    if (loss > 0) {
+    if (loss > 0) { 
     const lossLine =
     loss > 300
       ? `🩸 Approx. <span class="highlight">$${loss}</span> quietly leaving the building.`
