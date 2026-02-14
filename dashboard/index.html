@@ -99,7 +99,7 @@
     <option value="">All issues</option>
     <option value="gpt_script_missing">GPT script missing</option>
     <option value="slot_container_collapsed">Slot container collapsed</option>
-    <option value="gpt_not_initialized">GPT not initialized</option>
+    <option value="gpt_loaded_but_not_initialized">GPT Loaded but not initialized</option>
     <option value="gpt_no_slot_requests">No GPT slot requests</option>
     <option value="wrong_network">Wrong network</option>
     <option value="slot_not_registered">DOM slot not in GPT</option>
@@ -286,7 +286,7 @@ const CACHE_TTL = 5 * 60 * 1000;
 
 const labelMap = {
   gpt_script_missing: 'GPT script missing',
-  gpt_not_initialized: 'GPT not initialized',
+  gpt_loaded_but_not_initialized: 'GPT Loaded but not initialized',
   gpt_no_slot_requests: 'No GPT slot requests',
   wrong_network: 'Wrong network',
   slot_not_registered: 'DOM slot not in GPT',
@@ -304,7 +304,7 @@ const labelMap = {
 };
   const shortLabelMap = {
   'GPT script missing': 'GPT script',
-  'GPT not initialized': 'GPT init',
+  'GPT Loaded but not initialized': 'GPT init',
   'No GPT slot requests': 'No requests',
   'Wrong network': 'Network',
   'DOM slot not in GPT': 'Not in GPT',
@@ -433,7 +433,7 @@ function renderDashboard(rows, selectedDate = null, selectedClient = '') {
 
   const isGlobalType =
   r.issueType === 'gpt_script_missing' ||
-  r.issueType === 'gpt_not_initialized' ||
+  r.issueType === 'gpt_loaded_but_not_initialized' ||
   r.issueType === 'gpt_no_slot_requests';
 
 if (!isSecurity && !isGlobalType && r.slotId) {
@@ -494,19 +494,21 @@ if (!isSecurity && !isGlobalType && r.slotId) {
   }
 
 });
-if (slotSet.size === 0) {
-  const globalRow = rows.find(r =>
-    r.issueType === 'gpt_script_missing' ||
-    r.issueType === 'gpt_not_initialized' ||
-    r.issueType === 'gpt_no_slot_requests'
+const globalRows = rows.filter(r =>
+  r.issueType === 'gpt_script_missing' ||
+  r.issueType === 'gpt_loaded_but_not_initialized' ||
+  r.issueType === 'gpt_no_slot_requests'
+);
+
+if (globalRows.length) {
+  const maxCount = Math.max(
+    ...globalRows.map(r => Number(r.affectedSlotCount || 0))
   );
 
-  if (globalRow && globalRow.affectedSlotCount) {
-    const count = Number(globalRow.affectedSlotCount);
-    for (let i = 0; i < count; i++) {
-      slotSet.add(`GLOBAL_${i}`);
-    }
+  for (let i = 0; i < maxCount; i++) {
+    slotSet.add(`GLOBAL_${i}`);
   }
+}
 }
 const affectedSlots = new Set();
 
