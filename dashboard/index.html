@@ -97,7 +97,9 @@
     class="px-2 py-1 text-sm border rounded dark:bg-darkcard"
   >
     <option value="">All issues</option>
-    <option value="gpt_not_loaded">GPT not loaded</option>
+    <option value="gpt_script_missing">GPT script missing</option>
+    <option value="gpt_not_initialized">GPT not initialized</option>
+    <option value="gpt_no_slot_requests">No GPT slot requests</option>
     <option value="wrong_network">Wrong network</option>
     <option value="slot_not_registered">DOM slot not in GPT</option>
     <option value="phantom_slot_requested">Phantom slot requested</option>
@@ -282,7 +284,9 @@ const CACHE_KEY = 'apg_cache';
 const CACHE_TTL = 5 * 60 * 1000;
 
 const labelMap = {
-  gpt_not_loaded: 'GPT not loaded',
+  gpt_script_missing: 'GPT script missing',
+  gpt_not_initialized: 'GPT not initialized',
+  gpt_no_slot_requests: 'No GPT slot requests',
   wrong_network: 'Wrong network',
   slot_not_registered: 'DOM slot not in GPT',
   defined_without_dom_no_request: 'GPT slot defined without DOM',
@@ -297,7 +301,9 @@ const labelMap = {
   unauthorized_domain: 'Unauthorized domain access'
 };
   const shortLabelMap = {
-  'GPT not loaded': 'GPT',
+  'GPT script missing': 'GPT script',
+  'GPT not initialized': 'GPT init',
+  'No GPT slot requests': 'No requests',
   'Wrong network': 'Network',
   'DOM slot not in GPT': 'Not in GPT',
   'GPT slot defined without DOM': 'No DOM',
@@ -422,9 +428,14 @@ function renderDashboard(rows, selectedDate = null, selectedClient = '') {
 
   const isSecurity = SECURITY_ISSUES.includes(r.issueType);
 
-  if (!isSecurity) {
-    slotSet.add(r.slotId);
-  }
+  const isGlobalType =
+  r.issueType === 'gpt_script_missing' ||
+  r.issueType === 'gpt_not_initialized' ||
+  r.issueType === 'gpt_no_slot_requests';
+
+if (!isSecurity && !isGlobalType && r.slotId) {
+  slotSet.add(r.slotId);
+}
 
   const severity = (r.severity || '').toUpperCase();
 
@@ -461,7 +472,7 @@ function renderDashboard(rows, selectedDate = null, selectedClient = '') {
 
   severities[sev] = (severities[sev] || 0) + 1;
 
-  if (!isSecurity) {
+  if (!isSecurity && r.slotId) {
 
     if (!offenderMap[r.slotId]) {
       offenderMap[r.slotId] = {
@@ -480,7 +491,20 @@ function renderDashboard(rows, selectedDate = null, selectedClient = '') {
   }
 
 });
-  
+if (slotSet.size === 0) {
+  const globalRow = rows.find(r =>
+    r.issueType === 'gpt_script_missing' ||
+    r.issueType === 'gpt_not_initialized' ||
+    r.issueType === 'gpt_no_slot_requests'
+  );
+
+  if (globalRow && globalRow.affectedSlotCount) {
+    const count = Number(globalRow.affectedSlotCount);
+    for (let i = 0; i < count; i++) {
+      slotSet.add(`GLOBAL_${i}`);
+    }
+  }
+}
 const affectedSlots = new Set();
 
 rows.forEach(r => {
