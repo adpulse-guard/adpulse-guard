@@ -271,35 +271,57 @@ a.dashboard-link:hover {
 ];
 
     const detailsMessages = {
-      gptFail: [
+      gptScriptMissing: [
+        "Script loading was more of a suggestion.",
+        "Script tag missing. So is revenue.",
+        "No script. No drama. Just nothing.",
+        "This page is running on imagination.",
+        "This page is monetizing spiritually.",
+        "No GPT. No mercy.",
+        "Guess who forgot the script?",
+        "GPT? Never showed up.",
+        "It's 2026. GPT still needs to be invited.",
+        "No GPT, no party.",
+        "This page ghosted GPT first.",
+        "GPT not found. Like your QA process.",
+        "You removed the engine and expected movement.",
+        "The stack begins with a script. This one doesn’t.",
+        "You deployed vibes. Not infrastructure."
+],
+      gptNotInitialized: [
         "GPT engine failed.",
         "GPT said 'not today.'",
         "GPT unit? Ghosted.",
         "GPT was invited. It did not RSVP.",
-        "Script loading was more of a suggestion.",
         "The engine exists. Just not here.",
         "Somewhere, GPT is working. Not on this page.",
-        "Script tag missing. So is revenue.",
         "GPT never made it past planning.",
         "GPT decided to take the day off.",
-        "No script. No drama. Just nothing.",
-        "This page is running on imagination.",
         "GPT never showed up to work today.",
-        "This page is monetizing spiritually.",
-        "No GPT. No mercy.",
         "Your ads are waiting for a bus that isn’t coming.",
         "GPT said: absolutely not.",
         "Somewhere, fill rate just evaporated.",
         "GPT is currently reconsidering life choices.",
         "This page forgot the fundamentals.",
-        "Guess who forgot the script?",
         "Existential crisis much?",
-        "GPT? Never showed up.",
-        "It's 2026. GPT still needs to be invited.",
-        "No GPT, no party.",
-        "This page ghosted GPT first.",
-        "GPT not found. Like your QA process."
-      ],
+        "GPT exists. It just never woke up.",
+        "googletag.cmd.push() went on vacation.",
+        "The engine loaded. It chose not to function.",
+        "Initialization was optional, apparently.",
+        "Stack half-loaded. Confidence fully loaded.",
+        "Something blocked GPT. Probably you.",
+        "It started. Then it stopped believing."
+],
+      gptNoSlotRequests: [
+        "GPT loaded. Asked for nothing. Powerful minimalism.",
+        "No slot requests were made. On purpose?",
+        "You loaded the stack and forgot the ads.",
+        "Engine running. Nobody driving.",
+        "Slots defined. Requests missing. Classic.",
+        "The stack showed up. The ads didn’t.",
+        "GPT initialized and then… did nothing.",
+        "Infrastructure without intent."
+],
       phantom: [
         "Defined in GPT. Requested. Nowhere to render. Impressive.",
         "Requested a slot that doesn’t exist. Bold move.",
@@ -417,7 +439,8 @@ a.dashboard-link:hover {
     const slots = parseInt(urlParams.get('slots') || '0');
     const issues = parseInt(urlParams.get('issues') || '0');
     const loss = parseFloat(urlParams.get('loss') || '0');
-    const gptFail = parseInt(urlParams.get('gptFail') || '0');
+    const gptScriptMissing = parseInt(urlParams.get('gptScriptMissing') || '0');
+    const gptNoSlotRequests = parseInt(urlParams.get('gptNoSlotRequests') || '0');
     const domFail = parseInt(urlParams.get('domFail') || '0');
     const phantom = parseInt(urlParams.get('phantom') || '0');
     const noDomNoRequest = parseInt(urlParams.get('noDomNoRequest') || '0');
@@ -445,7 +468,9 @@ a.dashboard-link:hover {
     if (issues > 15) {
   details.push("This feels less like a bug and more like a lifestyle.");
 }
-    if (gptFail > 0) details.push(`🧠 ${gptFail} GPT load failures. ${pick(detailsMessages.gptFail)}`);
+    if (gptScriptMissing > 0) details.push(`🧠 ${gptScriptMissing} GPT script missing. ${pick(detailsMessages.gptScriptMissing)}`);
+    if (gptNotInitialized > 0) details.push(`🧠 ${gptNotInitialized} GPT not initialized. ${pick(detailsMessages.gptNotInitialized)}`);
+    if (gptNoSlotRequests > 0) details.push(`🧠 ${gptNoSlotRequests} No GPT slot requests. ${pick(detailsMessages.gptNoSlotRequests)}`);
     if (domFail > 0) details.push(`🕳️ ${domFail} DOM slots not registered in GPT. ${pick(detailsMessages.domFail)}`);
     if (phantom > 0) details.push(`👻 ${phantom} Phantom slot requests. ${pick(detailsMessages.phantom)}`);
     if (noDomNoRequest > 0) details.push(`🫥 ${noDomNoRequest} GPT slots had no matching DOM (no request). ${pick(detailsMessages.noDomNoRequest)}`);
