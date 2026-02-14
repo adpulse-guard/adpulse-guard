@@ -460,15 +460,8 @@ a.dashboard-link:hover {
     loss > 300
       ? `🩸 Approx. <span class="highlight">$${loss}</span> quietly leaving the building.`
       : `🩸 Around <span class="highlight">$${loss}</span> wandering off daily.`;
-
-  details.push(lossLine);
-}
-    if (issues === 1) {
-  details.push("Honestly? It could be worse. For now.");
-}
-    if (issues > 15) {
-  details.push("This feels less like a bug and more like a lifestyle.");
-}
+      details.push(lossLine);
+      
     if (gptScriptMissing > 0) details.push(`🧠 ${gptScriptMissing} GPT script missing. ${pick(detailsMessages.gptScriptMissing)}`);
     if (gptNotInitialized > 0) details.push(`🧠 ${gptNotInitialized} GPT not initialized. ${pick(detailsMessages.gptNotInitialized)}`);
     if (gptNoSlotRequests > 0) details.push(`🧠 ${gptNoSlotRequests} No GPT slot requests. ${pick(detailsMessages.gptNoSlotRequests)}`);
