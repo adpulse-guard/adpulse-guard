@@ -416,7 +416,6 @@ function renderDashboard(rows, selectedDate = null, selectedClient = '') {
   const severities = {};
   const dailyTotals = {};        
   const dedupeMap = new Map();  
-  const slotSet = new Set();
   const offenderMap = {};
   const isSingleDayView = !!selectedDate;  
 
@@ -436,10 +435,6 @@ function renderDashboard(rows, selectedDate = null, selectedClient = '') {
   r.issueType === 'gpt_loaded_but_not_initialized' ||
   r.issueType === 'gpt_no_slot_requests';
 
-if (!isSecurity && !isGlobalType && r.slotId) {
-  slotSet.add(r.slotId);
-}
-
   const severity = (r.severity || '').toUpperCase();
 
   const isBudgetRelevant =
@@ -450,12 +445,15 @@ if (!isSecurity && !isGlobalType && r.slotId) {
     ? Number(r.estimatedDailyRevenueRisk) || 0
     : 0;
 
-  const dedupeKey = `${r.slotId}__${r.pageUrl}__${dateKey}`;
+  if (!r.pageLoadId) return;
 
-  if (!isSecurity && !dedupeMap.has(dedupeKey)) {
-    dedupeMap.set(dedupeKey, loss);
-    dailyTotals[dateKey] = (dailyTotals[dateKey] || 0) + loss;
-  }
+const incidentKey = `${r.pageLoadId}__${dateKey}`;
+
+if (!isSecurity && !dedupeMap.has(incidentKey)) {
+  const incidentLoss = Number(r.estimatedDailyRevenueRisk) || 0;
+  dedupeMap.set(incidentKey, incidentLoss);
+  dailyTotals[dateKey] = (dailyTotals[dateKey] || 0) + incidentLoss;
+}
 
   const typeLabel = labelMap[r.issueType] || r.issueType;
 
@@ -494,21 +492,6 @@ if (!isSecurity && !isGlobalType && r.slotId) {
   }
 
 });
-const globalRows = rows.filter(r =>
-  r.issueType === 'gpt_script_missing' ||
-  r.issueType === 'gpt_loaded_but_not_initialized' ||
-  r.issueType === 'gpt_no_slot_requests'
-);
-
-if (globalRows.length) {
-  const maxCount = Math.max(
-    ...globalRows.map(r => Number(r.affectedSlotCount || 0))
-  );
-
-  for (let i = 0; i < maxCount; i++) {
-    slotSet.add(`GLOBAL_${i}`);
-  }
-}
 const affectedSlots = new Set();
 
 rows.forEach(r => {
@@ -553,8 +536,27 @@ const totalIssues = Object.values(issueTypes)
   .reduce((a, b) => a + b, 0);
 
 document.getElementById('issueCount').textContent = totalIssues;
+const incidentSlotMap = new Map();
 
-document.getElementById('slotCount').textContent = slotSet.size;
+rows.forEach(r => {
+  if (!r || !r.pageLoadId || !r.receivedAt) return;
+
+  const dateKey = r.receivedAt.split('T')[0];
+  if (selectedDate && dateKey !== selectedDate) return;
+  if (selectedIssueFilter && r.issueType !== selectedIssueFilter) return;
+  if (SECURITY_ISSUES.includes(r.issueType)) return;
+
+  const key = `${r.pageLoadId}__${dateKey}`;
+
+  if (!incidentSlotMap.has(key)) {
+    incidentSlotMap.set(key, Number(r.affectedSlotCount) || 0);
+  }
+});
+
+const totalImpactedSlots = Array.from(incidentSlotMap.values())
+  .reduce((a, b) => a + b, 0);
+
+document.getElementById('slotCount').textContent = totalImpactedSlots;
 
 const dedupedTotalLoss = Array.from(dedupeMap.values())
   .reduce((a, b) => a + b, 0);
