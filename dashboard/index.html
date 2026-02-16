@@ -414,8 +414,8 @@ function renderDashboard(rows, selectedDate = null, selectedClient = '') {
   const issueTypes = {};
   const securityCounts = {};
   const severities = {};
-  const dailyTotals = {};        
-  const dedupeMap = new Map();  
+  const dailyTotals = {};
+  const revenueIncidents = new Map();
   const offenderMap = {};
   const isSingleDayView = !!selectedDate;  
 
@@ -437,21 +437,23 @@ function renderDashboard(rows, selectedDate = null, selectedClient = '') {
 
   const severity = (r.severity || '').toUpperCase();
 
-  const isBudgetRelevant =
-    !isSecurity &&
-    (severity === 'HIGH' || severity === 'MEDIUM');
+  const BASE_DAILY_RISK = 12;
 
-  const loss = isBudgetRelevant
-    ? Number(r.estimatedDailyRevenueRisk) || 0
-    : 0;
+const isRevenueEligible =
+  !isSecurity &&
+  r.issueType !== 'ad_visibility_impaired' &&
+  (severity === 'HIGH' || severity === 'MEDIUM');
+
+const revenueKey = `${r.slotId}__${r.pageUrl}`;
+
+if (isRevenueEligible && !revenueIncidents.has(revenueKey)) {
+  revenueIncidents.set(revenueKey, BASE_DAILY_RISK);
+
+  dailyTotals[dateKey] =
+    (dailyTotals[dateKey] || 0) + BASE_DAILY_RISK;
+}
 
   const incidentKey = `${r.receivedAt}__${r.pageUrl}__${r.issueType}__${dateKey}`;
-
-if (!isSecurity && !dedupeMap.has(incidentKey)) {
-  const incidentLoss = Number(r.estimatedDailyRevenueRisk) || 0;
-  dedupeMap.set(incidentKey, incidentLoss);
-  dailyTotals[dateKey] = (dailyTotals[dateKey] || 0) + incidentLoss;
-}
 
   const typeLabel = labelMap[r.issueType] || r.issueType;
 
@@ -471,7 +473,7 @@ if (!isSecurity && !dedupeMap.has(incidentKey)) {
 
   severities[sev] = (severities[sev] || 0) + 1;
 
-  if (!isSecurity && r.slotId) {
+  if (isRevenueEligible && r.slotId) {
 
     if (!offenderMap[r.slotId]) {
       offenderMap[r.slotId] = {
@@ -484,8 +486,19 @@ if (!isSecurity && !dedupeMap.has(incidentKey)) {
     offenderMap[r.slotId].issues.add(r.issueType);
 
     if (!offenderMap[r.slotId].pages.has(r.pageUrl)) {
-      offenderMap[r.slotId].pages.set(r.pageUrl, loss);
-    }
+
+  const severity = (r.severity || '').toUpperCase();
+
+  const eligible =
+    !SECURITY_ISSUES.includes(r.issueType) &&
+    r.issueType !== 'ad_visibility_impaired' &&
+    (severity === 'HIGH' || severity === 'MEDIUM');
+
+  offenderMap[r.slotId].pages.set(
+    r.pageUrl,
+    eligible ? BASE_DAILY_RISK : 0
+  );
+}
 
   }
 
@@ -534,30 +547,13 @@ const totalIssues = Object.values(issueTypes)
   .reduce((a, b) => a + b, 0);
 
 document.getElementById('issueCount').textContent = totalIssues;
-const incidentSlotMap = new Map();
 
-rows.forEach(r => {
-  if (!r || !r.receivedAt) return;
-
-  const dateKey = r.receivedAt.split('T')[0];
-  if (selectedDate && dateKey !== selectedDate) return;
-  if (selectedIssueFilter && r.issueType !== selectedIssueFilter) return;
-  if (SECURITY_ISSUES.includes(r.issueType)) return;
-
-  const incidentKey = `${r.receivedAt}__${r.pageUrl}__${r.issueType}__${dateKey}`;
-
-  if (!incidentSlotMap.has(incidentKey)) {
-    incidentSlotMap.set(incidentKey, Number(r.affectedSlotCount) || 0);
-  }
-});
-
-const totalImpactedSlots = Array.from(incidentSlotMap.values())
+const dedupedTotalLoss = Array.from(revenueIncidents.values())
   .reduce((a, b) => a + b, 0);
+  
+const totalImpactedSlots = revenueIncidents.size;
 
 document.getElementById('slotCount').textContent = totalImpactedSlots;
-
-const dedupedTotalLoss = Array.from(dedupeMap.values())
-  .reduce((a, b) => a + b, 0);
 
 const dailyLossEl = document.getElementById('dailyLoss');
 
@@ -591,27 +587,21 @@ if (isSingleDayView && totalIssues === 0)
 
     const pages = Array.from(topSlot.pages.keys());
 
-const maxVisible = 3;
-const visiblePages = pages.slice(0, maxVisible);
-const remaining = pages.length - maxVisible;
-
 document.getElementById('offenderPage').innerHTML = `
-  <ul class="list-disc list-inside space-y-1">
-    ${visiblePages.map(p =>
-      `<li>
-        <a href="${p}" target="_blank"
-           class="text-indigo-400 hover:text-indigo-300 no-underline hover:underline break-all">
-          ${p}
-        </a>
-      </li>`
-    ).join('')}
-    ${
-      remaining > 0
-        ? `<li class="text-gray-500 italic">and ${remaining} more…</li>`
-        : ''
-    }
-  </ul>
+  <div class="max-h-40 overflow-auto pr-1">
+    <ul class="list-disc list-inside space-y-1 text-xs">
+      ${pages.map(p =>
+        `<li>
+          <a href="${p}" target="_blank"
+             class="text-indigo-400 hover:text-indigo-300 no-underline hover:underline break-all">
+            ${p}
+          </a>
+        </li>`
+      ).join('')}
+    </ul>
+  </div>
 `;
+
 
 document.getElementById('offenderIssue').innerHTML =
   Array.from(topSlot.issues)
