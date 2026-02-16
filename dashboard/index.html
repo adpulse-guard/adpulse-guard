@@ -445,9 +445,7 @@ function renderDashboard(rows, selectedDate = null, selectedClient = '') {
     ? Number(r.estimatedDailyRevenueRisk) || 0
     : 0;
 
-  if (!r.pageLoadId) return;
-
-const incidentKey = `${r.pageLoadId}__${dateKey}`;
+  const incidentKey = `${r.receivedAt}__${r.pageUrl}__${r.issueType}__${dateKey}`;
 
 if (!isSecurity && !dedupeMap.has(incidentKey)) {
   const incidentLoss = Number(r.estimatedDailyRevenueRisk) || 0;
@@ -539,17 +537,17 @@ document.getElementById('issueCount').textContent = totalIssues;
 const incidentSlotMap = new Map();
 
 rows.forEach(r => {
-  if (!r || !r.pageLoadId || !r.receivedAt) return;
+  if (!r || !r.receivedAt) return;
 
   const dateKey = r.receivedAt.split('T')[0];
   if (selectedDate && dateKey !== selectedDate) return;
   if (selectedIssueFilter && r.issueType !== selectedIssueFilter) return;
   if (SECURITY_ISSUES.includes(r.issueType)) return;
 
-  const key = `${r.pageLoadId}__${dateKey}`;
+  const incidentKey = `${r.receivedAt}__${r.pageUrl}__${r.issueType}__${dateKey}`;
 
-  if (!incidentSlotMap.has(key)) {
-    incidentSlotMap.set(key, Number(r.affectedSlotCount) || 0);
+  if (!incidentSlotMap.has(incidentKey)) {
+    incidentSlotMap.set(incidentKey, Number(r.affectedSlotCount) || 0);
   }
 });
 
