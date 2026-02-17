@@ -196,8 +196,15 @@ a.dashboard-link:hover {
       issues => `This page annoyed the ad gods <span class="highlight">${issues}</span> times.`,
       issues => `<span class="highlight">${issues}</span> violations detected.`,
       issues => `Your ad setup triggered <span class="highlight">${issues}</span> alerts.`,
-      issues => `<span class="highlight">${issues}</span> slots walk into a page. Fewer walk out.`,
-      issues => `Reality check: <span class="highlight">${issues}</span> sins found.`
+      issues => `<span class="highlight">${issues}</span> reminders that testing exists,`,
+      issues => `Your page collected <span class="highlight">${issues}</span> fresh mistakes today,`,
+      issues => `<span class="highlight">${issues}</span> ways this page chose violence,`,
+      issues => `<span class="highlight">${issues}</span> revenue betrayals detected,`,
+      issues => `The ad stack filed <span class="highlight">${issues}</span> grievances,`,
+      issues => `<span class="highlight">${issues}</span> things that absolutely did not need to break,`,
+      issues => `<span class="highlight">${issues}</span> opportunities to not ship this,`,
+      issues => `<span class="highlight">${issues}</span> problems walked into this page. None were invited,`,
+      issues => `<span class="highlight">${issues}</span> reminders that testing is optional here,`
     ];
 
     const slotLines = [
@@ -205,6 +212,13 @@ a.dashboard-link:hover {
       slots => `<span class="highlight">${slots}</span> slots are now emotionally unavailable.`,
       slots => `affecting <span class="highlight">${slots}</span> units just trying to exist.`,
       slots => `<span class="highlight">${slots}</span> slots are somewhere crying in binary.`,
+      slots => `spread across <span class="highlight">${slots}</span> unsuspecting ad slots.`,
+      slots => `<span class="highlight">${slots}</span> slots are reconsidering their career choices.`,
+      slots => `<span class="highlight">${slots}</span> slots are now spiritually exhausted.`,
+      slots => `impacting <span class="highlight">${slots}</span> tiny monetization soldiers.`,
+      slots => `<span class="highlight">${slots}</span> slots tried. The page did not.`,
+      slots => `<span class="highlight">${slots}</span> slots walked in hopeful. They left confused.`,
+      slots => `<span class="highlight">${slots}</span> slots are currently filing for emotional support.`,
       slots => `disrupting <span class="highlight">${slots}</span> little ad lives.`
     ];
 
@@ -455,12 +469,27 @@ a.dashboard-link:hover {
     document.getElementById("summary").innerHTML = `${pick(issueLines)(issues)} ${pick(slotLines)(slots)}`;
 
     const details = [];
-    if (loss > 0) { 
-    const lossLine =
+    if (loss > 0) {
+
+  const pulseLossLines = [
+    loss => `🩸 Your revenue has a pulse. It’s weakening — <span class="highlight">$${loss}</span> daily.`,
+    loss => `🩸 The monetization pulse is slipping — <span class="highlight">$${loss}</span> exposed.`,
+    loss => `🩸 Pulse detected. Stability questionable. <span class="highlight">$${loss}</span> daily.`,
+    loss => `🩸 Revenue heartbeat faltering — impact: <span class="highlight">$${loss}</span>.`,
+    loss => `🩸 Circulatory stress in your ad stack — <span class="highlight">$${loss}</span> per day.`,
+    loss => `🩸 Your pulse is still there. Barely. <span class="highlight">$${loss}</span> daily.`,
+    loss => `🩸 That’s not fluctuation. That’s pulse decay — <span class="highlight">$${loss}</span>.`
+  ];
+
+  const severePulseLine =
+    `🩸 Severe pulse disruption — <span class="highlight">$${loss}</span> bleeding daily.`;
+
+  const lossLine =
     loss > 300
-      ? `🩸 Approx. <span class="highlight">$${loss}</span> quietly leaving the building.`
-      : `🩸 Around <span class="highlight">$${loss}</span> wandering off daily.`;
-      details.push(lossLine);
+      ? severePulseLine
+      : pick(pulseLossLines)(loss);
+
+  details.push(lossLine);
       
     if (gptScriptMissing > 0) details.push(`🧠 ${gptScriptMissing} GPT script missing. ${pick(detailsMessages.gptScriptMissing)}`);
     if (gptNotInitialized > 0) details.push(`🧠 ${gptNotInitialized} GPT not initialized. ${pick(detailsMessages.gptNotInitialized)}`);
