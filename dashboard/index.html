@@ -416,7 +416,7 @@ function renderDashboard(rows, selectedDate = null, selectedClient = '') {
   const severities = {};
   const dailyTotals = {};
   const impactedSlotsPerDay = new Map();
-  const processedGlobalDates = new Set();
+  const processedGlobalKeys = new Set();
   const BASE_DAILY_RISK = 12;
   const offenderMap = {};
   const isSingleDayView = !!selectedDate;  
@@ -457,13 +457,15 @@ const isRevenueEligible =
     impactedSlotsPerDay.get(dateKey).add(impactKey);
   }
 }
-if (isGlobalType && !processedGlobalDates.has(dateKey)) {
+const globalKey = `${dateKey}__${r.pageUrl}`;
+
+if (isGlobalType && !processedGlobalKeys.has(globalKey)) {
 
   if (!impactedSlotsPerDay.has(dateKey)) {
     impactedSlotsPerDay.set(dateKey, new Set());
   }
 
-  processedGlobalDates.add(dateKey);
+  processedGlobalKeys.add(globalKey);
 
   const count = Number(r.affectedSlotCount || 0);
 
