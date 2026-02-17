@@ -189,37 +189,39 @@ a.dashboard-link:hover {
 ];
 
     const issueLines = [
-      issues => `Your page has <span class="highlight">${issues}</span> complaints from the ad gods,`,
-      issues => `The ad gods have filed <span class="highlight">${issues}</span> formal complaints,`,
-      issues => `<span class="highlight">${issues}</span> ways you've disappointed the algorithm today.`,
-      issues => `Page karma: <span class="highlight">${issues}</span> infractions,`,
-      issues => `This page annoyed the ad gods <span class="highlight">${issues}</span> times.`,
-      issues => `<span class="highlight">${issues}</span> violations detected.`,
-      issues => `Your ad setup triggered <span class="highlight">${issues}</span> alerts.`,
-      issues => `<span class="highlight">${issues}</span> reminders that testing exists,`,
-      issues => `Your page collected <span class="highlight">${issues}</span> fresh mistakes today,`,
+      issues => `Your page has <span class="highlight">${issues}</span> ${complaintWord} from the ad gods,`,
+      issues => `The ad gods have filed <span class="highlight">${issues}</span> formal ${complaintWord},`,
+      issues => `<span class="highlight">${issues}</span> ways you've disappointed the algorithm today,`,
+      issues => `Page karma: <span class="highlight">${issues}</span> ${violationWord},`,
+      issues => `This page annoyed the ad gods <span class="highlight">${issues}</span> ${timeWord},`,
+      issues => `<span class="highlight">${issues}</span> ${violationWord} detected,`,
+      issues => `Your ad setup triggered <span class="highlight">${issues}</span> ${alertWord},`,
+      issues => `<span class="highlight">${issues}</span> ${reminderWord} that testing exists,`,
+      issues => `Your page collected <span class="highlight">${issues}</span> ${mistakeWord} today,`,
       issues => `<span class="highlight">${issues}</span> ways this page chose violence,`,
-      issues => `<span class="highlight">${issues}</span> revenue betrayals detected,`,
-      issues => `The ad stack filed <span class="highlight">${issues}</span> grievances,`,
+      issues => `<span class="highlight">${issues}</span> ${betrayalWord} detected,`,
+      issues => `The ad stack filed <span class="highlight">${issues}</span> ${grievanceWord},`,
       issues => `<span class="highlight">${issues}</span> things that absolutely did not need to break,`,
       issues => `<span class="highlight">${issues}</span> opportunities to not ship this,`,
-      issues => `<span class="highlight">${issues}</span> problems walked into this page. None were invited, and`
-    ];
+      issues => `<span class="highlight">${issues}</span> ${problemWord} walked into this page. None were invited.`
+];
+
 
     const slotLines = [
-      slots => `spread across <span class="highlight">${slots}</span> innocent slots.`,
-      slots => `<span class="highlight">${slots}</span> slots are now emotionally unavailable.`,
-      slots => `affecting <span class="highlight">${slots}</span> units just trying to exist.`,
-      slots => `<span class="highlight">${slots}</span> slots are somewhere crying in binary.`,
-      slots => `spread across <span class="highlight">${slots}</span> unsuspecting ad slots.`,
-      slots => `<span class="highlight">${slots}</span> slots are reconsidering their career choices.`,
-      slots => `<span class="highlight">${slots}</span> slots are now spiritually exhausted.`,
-      slots => `impacting <span class="highlight">${slots}</span> tiny monetization soldiers.`,
-      slots => `<span class="highlight">${slots}</span> slots tried. The page did not.`,
-      slots => `<span class="highlight">${slots}</span> slots walked in hopeful. They left confused.`,
-      slots => `<span class="highlight">${slots}</span> slots are currently filing for emotional support.`,
-      slots => `disrupting <span class="highlight">${slots}</span> little ad lives.`
-    ];
+      slots => `spread across <span class="highlight">${slots}</span> innocent ${slotWord}.`,
+      slots => `<span class="highlight">${slots}</span> ${slotWord} ${slots === 1 ? "is" : "are"} now emotionally unavailable.`,
+      slots => `affecting <span class="highlight">${slots}</span> ${slotWord} just trying to exist.`,
+      slots => `<span class="highlight">${slots}</span> ${slotWord} ${slots === 1 ? "is" : "are"} somewhere crying in binary.`,
+      slots => `spread across <span class="highlight">${slots}</span> unsuspecting ${slotWord}.`,
+      slots => `<span class="highlight">${slots}</span> ${slotWord} ${slots === 1 ? "is" : "are"} reconsidering ${slots === 1 ? "its" : "their"} career choices.`,
+      slots => `<span class="highlight">${slots}</span> ${slotWord} ${slots === 1 ? "is" : "are"} now spiritually exhausted.`,
+      slots => `impacting <span class="highlight">${slots}</span> tiny monetization ${slotWord} just trying to get paid.`,
+      slots => `<span class="highlight">${slots}</span> ${slotWord} tried. The page did not.`,
+      slots => `<span class="highlight">${slots}</span> ${slotWord} walked in hopeful. ${slots === 1 ? "It left confused." : "They left confused."}`,
+      slots => `<span class="highlight">${slots}</span> ${slotWord} ${slots === 1 ? "is" : "are"} currently filing for emotional support.`,
+      slots => `disrupting <span class="highlight">${slots}</span> little ad ${slotWord}.`
+];
+
 
     const quotes = [
       "Enough to hurt, not enough to cry over. Yet.",
@@ -451,6 +453,20 @@ a.dashboard-link:hover {
     const urlParams = new URLSearchParams(window.location.search);
     const slots = parseInt(urlParams.get('slots') || '0');
     const issues = parseInt(urlParams.get('issues') || '0');
+    const pluralize = (count, singular, plural) =>
+     count === 1 ? singular : plural;
+
+    const issueWord = pluralize(issues, "issue", "issues");
+    const slotWord = pluralize(slots, "slot", "slots");
+    const complaintWord = pluralize(issues, "complaint", "complaints");
+    const violationWord = pluralize(issues, "violation", "violations");
+    const alertWord = pluralize(issues, "alert", "alerts");
+    const reminderWord = pluralize(issues, "reminder", "reminders");
+    const mistakeWord = pluralize(issues, "fresh mistake", "fresh mistakes");
+    const betrayalWord = pluralize(issues, "revenue betrayal", "revenue betrayals");
+    const grievanceWord = pluralize(issues, "grievance", "grievances");
+    const problemWord = pluralize(issues, "problem", "problems");
+    const timeWord = pluralize(issues, "time", "times");
     const loss = parseFloat(urlParams.get('loss') || '0');
     const gptScriptMissing = parseInt(urlParams.get('gptScriptMissing') || '0');
     const gptNotInitialized = parseInt(urlParams.get('gptNotInitialized') || '0');
