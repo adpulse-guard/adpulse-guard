@@ -446,18 +446,22 @@ const isRevenueEligible =
   r.issueType !== 'ad_visibility_impaired' &&
   (severity === 'HIGH' || severity === 'MEDIUM');
 
-if (isRevenueEligible || isGlobalType) {
+  if (isRevenueEligible) {
 
   if (!impactedSlotsPerDay.has(dateKey)) {
     impactedSlotsPerDay.set(dateKey, new Set());
   }
 
-  if (!isGlobalType && r.slotId && r.pageUrl) {
-  const impactKey = `${r.slotId}__${r.pageUrl}`;
-  impactedSlotsPerDay.get(dateKey).add(impactKey);
+  if (r.slotId && r.pageUrl) {
+    const impactKey = `${r.slotId}__${r.pageUrl}`;
+    impactedSlotsPerDay.get(dateKey).add(impactKey);
+  }
 }
+if (isGlobalType && !processedGlobalDates.has(dateKey)) {
 
-  if (isGlobalType && !processedGlobalDates.has(dateKey)) {
+  if (!impactedSlotsPerDay.has(dateKey)) {
+    impactedSlotsPerDay.set(dateKey, new Set());
+  }
 
   processedGlobalDates.add(dateKey);
 
@@ -468,9 +472,6 @@ if (isRevenueEligible || isGlobalType) {
       `GLOBAL_${r.pageUrl}_${i}`
     );
   }
-
-  return;
-}
 }
 
   const incidentKey = `${r.receivedAt}__${r.pageUrl}__${r.issueType}__${dateKey}`;
