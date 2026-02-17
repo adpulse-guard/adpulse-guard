@@ -415,119 +415,43 @@ function renderDashboard(rows, selectedDate = null, selectedClient = '') {
   const securityCounts = {};
   const severities = {};
   const dailyTotals = {};
+  const revenueIncidents = new Map();
+  const offenderMap = {};
+  const isSingleDayView = !!selectedDate;  
+
+  rows.forEach(r => {
+
+  if (!r || !r.issueType || !r.receivedAt) return;
+
+  const dateKey = r.receivedAt.split('T')[0];
+
+  if (selectedDate && dateKey !== selectedDate) return;
+  if (selectedIssueFilter && r.issueType !== selectedIssueFilter) return;
+
+  const isSecurity = SECURITY_ISSUES.includes(r.issueType);
+
+  const isGlobalType =
+  r.issueType === 'gpt_script_missing' ||
+  r.issueType === 'gpt_loaded_but_not_initialized' ||
+  r.issueType === 'gpt_no_slot_requests';
+
+  const severity = (r.severity || '').toUpperCase();
+
   const BASE_DAILY_RISK = 12;
 
-  const processedGlobalHalts = new Set();
-  const processedSlotIncidents = new Set();
+const isRevenueEligible =
+  !isSecurity &&
+  r.issueType !== 'ad_visibility_impaired' &&
+  (severity === 'HIGH' || severity === 'MEDIUM');
 
-rows.forEach(r => {
+const revenueKey = `${r.slotId}__${r.pageUrl}`;
 
-  if (!r || !r.issueType || !r.receivedAt) return;
+if (isRevenueEligible && !revenueIncidents.has(revenueKey)) {
+  revenueIncidents.set(revenueKey, BASE_DAILY_RISK);
 
-  const dateKey = r.receivedAt.split('T')[0];
-
-  if (selectedDate && dateKey !== selectedDate) return;
-  if (selectedIssueFilter && r.issueType !== selectedIssueFilter) return;
-
-  const isSecurity = SECURITY_ISSUES.includes(r.issueType);
-  const severity = (r.severity || '').toUpperCase();
-
-  const isRevenueEligible =
-    !isSecurity &&
-    r.issueType !== 'ad_visibility_impaired' &&
-    (severity === 'HIGH' || severity === 'MEDIUM');
-
-  if (!isRevenueEligible) return;
-
-  const isGlobalHalt =
-    r.issueType === 'gpt_script_missing' ||
-    r.issueType === 'gpt_loaded_but_not_initialized';
-
-  if (isGlobalHalt) {
-
-    const globalKey = `${r.pageUrl}__${dateKey}`;
-
-    if (!processedGlobalHalts.has(globalKey)) {
-
-      const slots = Number(r.affectedSlotCount || 0);
-
-      processedGlobalHalts.add(globalKey);
-
-      dailyTotals[dateKey] =
-        (dailyTotals[dateKey] || 0) + (slots * BASE_DAILY_RISK);
-    }
-
-  } else {
-
-    const slotKey = `${r.slotId}__${r.pageUrl}`;
-
-    if (!processedSlotIncidents.has(slotKey)) {
-
-      processedSlotIncidents.add(slotKey);
-
-      dailyTotals[dateKey] =
-        (dailyTotals[dateKey] || 0) + BASE_DAILY_RISK;
-    }
-
-  }
-
-});
-
-rows.forEach(r => {
-
-  if (!r || !r.issueType || !r.receivedAt) return;
-
-  const dateKey = r.receivedAt.split('T')[0];
-
-  if (selectedDate && dateKey !== selectedDate) return;
-  if (selectedIssueFilter && r.issueType !== selectedIssueFilter) return;
-
-  const isSecurity = SECURITY_ISSUES.includes(r.issueType);
-
-  const severity = (r.severity || '').toUpperCase();
-
-  const isRevenueEligible =
-    !isSecurity &&
-    r.issueType !== 'ad_visibility_impaired' &&
-    (severity === 'HIGH' || severity === 'MEDIUM');
-
-  const isGlobalHalt =
-    r.issueType === 'gpt_script_missing' ||
-    r.issueType === 'gpt_loaded_but_not_initialized';
-
-  if (!isRevenueEligible) return;
-
-  if (isGlobalHalt) {
-
-    const globalKey = `${r.pageUrl}__${dateKey}`;
-
-    if (!processedGlobalHalts.has(globalKey)) {
-
-      const slots = Number(r.affectedSlotCount || 0);
-
-      processedGlobalHalts.add(globalKey);
-
-      dailyTotals[dateKey] =
-        (dailyTotals[dateKey] || 0) + (slots * BASE_DAILY_RISK);
-
-    }
-
-  } else {
-
-    const slotKey = `${r.slotId}__${r.pageUrl}`;
-
-    if (!processedSlotIncidents.has(slotKey)) {
-
-      processedSlotIncidents.add(slotKey);
-
-      dailyTotals[dateKey] =
-        (dailyTotals[dateKey] || 0) + BASE_DAILY_RISK;
-
-    }
-
-  }
-
-});
+  dailyTotals[dateKey] =
+    (dailyTotals[dateKey] || 0) + BASE_DAILY_RISK;
+}
 
   const incidentKey = `${r.receivedAt}__${r.pageUrl}__${r.issueType}__${dateKey}`;
 
@@ -585,27 +509,7 @@ rows.forEach(r => {
   if (!r || !r.slotId || !r.issueType || !r.receivedAt) return;
 
   const dateKey = r.receivedAt.split('T')[0];
-  const isGlobalHalt =
-  r.issueType === 'gpt_script_missing' ||
-  r.issueType === 'gpt_loaded_but_not_initialized';
 
-if (isGlobalHalt) {
-
-  const slots = Number(r.affectedSlotCount || 0);
-
-  if (!dailyTotals[dateKey]) dailyTotals[dateKey] = 0;
-
-  dailyTotals[dateKey] += slots * BASE_DAILY_RISK;
-
-} else {
-  const revenueKey = `${r.slotId}__${r.pageUrl}`;
-
-  if (isRevenueEligible && !revenueIncidents.has(revenueKey)) {
-    revenueIncidents.set(revenueKey, BASE_DAILY_RISK);
-    dailyTotals[dateKey] =
-      (dailyTotals[dateKey] || 0) + BASE_DAILY_RISK;
-  }
-}
   if (selectedDate && dateKey !== selectedDate) return;
   if (selectedIssueFilter && r.issueType !== selectedIssueFilter) return;
 
@@ -644,12 +548,10 @@ const totalIssues = Object.values(issueTypes)
 
 document.getElementById('issueCount').textContent = totalIssues;
 
-const dedupedTotalLoss = Object.values(dailyTotals)
+const dedupedTotalLoss = Array.from(revenueIncidents.values())
   .reduce((a, b) => a + b, 0);
   
-const totalImpactedSlots =
-  processedSlotIncidents.size +
-  processedGlobalHalts.size;
+const totalImpactedSlots = revenueIncidents.size;
 
 document.getElementById('slotCount').textContent = totalImpactedSlots;
 
