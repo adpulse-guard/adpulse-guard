@@ -417,6 +417,7 @@ function renderDashboard(rows, selectedDate = null, selectedClient = '') {
   const severities = {};
   const dailyTotals = {};
   const pageLoadMap = new Map();
+  const pageRevenueMap = new Map();
   const offenderMap = {};
   const isSingleDayView = !!selectedDate;  
 
@@ -454,13 +455,16 @@ const isRevenueEligible =
   const slots = Number(r.affectedSlotCount || 0);
 
   if (!pageLoadMap.has(loadKey)) {
-    pageLoadMap.set(loadKey, {
-      dateKey,
-      pageUrl: r.pageUrl,
-      revenue,
-      slots
-    });
-  }
+  const loadData = {
+    dateKey,
+    pageUrl: r.pageUrl,
+    revenue,
+    slots
+  };
+
+  pageLoadMap.set(loadKey, loadData);
+  pageRevenueMap.set(loadKey, loadData);
+}
 }
 
   const typeLabel = labelMap[r.issueType] || r.issueType;
@@ -496,19 +500,78 @@ const isRevenueEligible =
   }
 
   offenderMap[offenderKey].issues.add(r.issueType);
-
-  const currentRevenue = Number(r.estimatedDailyRevenueRisk || 0);
-
-if (!offenderMap[offenderKey].pages.has(r.pageUrl)) {
-  offenderMap[offenderKey].pages.set(r.pageUrl, currentRevenue);
-} else {
-  const existing = offenderMap[offenderKey].pages.get(r.pageUrl);
-  if (currentRevenue > existing) {
-    offenderMap[offenderKey].pages.set(r.pageUrl, currentRevenue);
-    }
-  }
 }
 });
+pageRevenueMap.forEach((loadData, loadKey) => {
+
+  const { revenue, slots } = loadData;
+
+  const matchingRows = rows.filter(r => {
+
+  if (!r.pageLoadId) return false;
+
+  const dateKey = r.receivedAt.split('T')[0];
+
+  if (selectedDate && dateKey !== selectedDate) return false;
+  if (selectedIssueFilter && r.issueType !== selectedIssueFilter) return false;
+
+  const isSecurity = SECURITY_ISSUES.includes(r.issueType);
+  const severity = (r.severity || '').toUpperCase();
+
+  const isRevenueEligible =
+    !isSecurity &&
+    r.issueType !== 'ad_visibility_impaired' &&
+    (severity === 'HIGH' || severity === 'MEDIUM');
+
+  if (!isRevenueEligible) return false;
+
+  const key = `${dateKey}__${r.pageUrl}__${r.pageLoadId}`;
+  return key === loadKey;
+});
+
+  const uniqueSlots = new Set();
+  let hasGlobal = false;
+
+  matchingRows.forEach(r => {
+    const isGlobalType =
+      r.issueType === 'gpt_script_missing' ||
+      r.issueType === 'gpt_loaded_but_not_initialized' ||
+      r.issueType === 'gpt_no_slot_requests';
+
+    if (isGlobalType) {
+      hasGlobal = true;
+    } else {
+      uniqueSlots.add(r.slotId);
+    }
+  });
+
+  if (hasGlobal) {
+    if (!offenderMap['__global__']) {
+      offenderMap['__global__'] = {
+        slotId: '__global__',
+        issues: new Set(),
+        pages: new Map()
+      };
+    }
+
+    offenderMap['__global__'].pages.set(loadData.pageUrl, revenue);
+  }
+
+  const slotShare = slots > 0 ? revenue / slots : 0;  
+
+  uniqueSlots.forEach(slotId => {
+    if (!offenderMap[slotId]) {
+      offenderMap[slotId] = {
+        slotId,
+        issues: new Set(),
+        pages: new Map()
+      };
+    }
+
+    offenderMap[slotId].pages.set(loadData.pageUrl, slotShare);
+  });
+
+});  
 const affectedSlots = new Set();
 
 rows.forEach(r => {
