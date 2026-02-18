@@ -416,9 +416,7 @@ function renderDashboard(rows, selectedDate = null, selectedClient = '') {
   const securityCounts = {};
   const severities = {};
   const dailyTotals = {};
-  const impactedSlotsPerDay = new Map();
-  const processedGlobalKeys = new Set();
-  const BASE_DAILY_RISK = 12;
+  const pageLoadMap = new Map();
   const offenderMap = {};
   const isSingleDayView = !!selectedDate;  
 
@@ -447,37 +445,23 @@ const isRevenueEligible =
   r.issueType !== 'ad_visibility_impaired' &&
   (severity === 'HIGH' || severity === 'MEDIUM');
 
-  if (isRevenueEligible) {
+  if (isRevenueEligible && r.pageLoadId) {
 
-  if (!impactedSlotsPerDay.has(dateKey)) {
-    impactedSlotsPerDay.set(dateKey, new Set());
-  }
+  const dateKey = r.receivedAt.split('T')[0];
+  const loadKey = `${dateKey}__${r.pageUrl}__${r.pageLoadId}`;
 
-  if (!isGlobalType && r.slotId && r.pageUrl) {
-    const impactKey = `${r.slotId}__${r.pageUrl}`;
-    impactedSlotsPerDay.get(dateKey).add(impactKey);
-  }
-}
-const globalKey = `${dateKey}__${r.pageUrl}`;
+  const revenue = Number(r.estimatedDailyRevenueRisk || 0);
+  const slots = Number(r.affectedSlotCount || 0);
 
-if (isGlobalType && !processedGlobalKeys.has(globalKey)) {
-
-  if (!impactedSlotsPerDay.has(dateKey)) {
-    impactedSlotsPerDay.set(dateKey, new Set());
-  }
-
-  processedGlobalKeys.add(globalKey);
-
-  const count = Number(r.affectedSlotCount || 0);
-
-  for (let i = 0; i < count; i++) {
-    impactedSlotsPerDay.get(dateKey).add(
-      `GLOBAL_${r.pageUrl}_${i}`
-    );
+  if (!pageLoadMap.has(loadKey)) {
+    pageLoadMap.set(loadKey, {
+      dateKey,
+      pageUrl: r.pageUrl,
+      revenue,
+      slots
+    });
   }
 }
-
-  const incidentKey = `${r.receivedAt}__${r.pageUrl}__${r.issueType}__${dateKey}`;
 
   const typeLabel = labelMap[r.issueType] || r.issueType;
 
@@ -513,17 +497,16 @@ if (isGlobalType && !processedGlobalKeys.has(globalKey)) {
 
   offenderMap[offenderKey].issues.add(r.issueType);
 
-  if (!offenderMap[offenderKey].pages.has(r.pageUrl)) {
+  const currentRevenue = Number(r.estimatedDailyRevenueRisk || 0);
 
-  const slotCount = isGlobalType
-    ? Number(r.affectedSlotCount || 0)
-    : 1;
-
-  offenderMap[offenderKey].pages.set(
-    r.pageUrl,
-    slotCount * BASE_DAILY_RISK
-  );
-}
+if (!offenderMap[offenderKey].pages.has(r.pageUrl)) {
+  offenderMap[offenderKey].pages.set(r.pageUrl, currentRevenue);
+} else {
+  const existing = offenderMap[offenderKey].pages.get(r.pageUrl);
+  if (currentRevenue > existing) {
+    offenderMap[offenderKey].pages.set(r.pageUrl, currentRevenue);
+    }
+  }
 }
 });
 const affectedSlots = new Set();
@@ -593,13 +576,31 @@ const totalIssues = Object.values(issueTypes)
 let totalImpactedSlots = 0;
 let dedupedTotalLoss = 0;
 
-impactedSlotsPerDay.forEach((slotSet, dateKey) => {
-  const count = slotSet.size;
+const bestPerPagePerDay = new Map();
 
-  totalImpactedSlots += count;
-  dedupedTotalLoss += count * BASE_DAILY_RISK;
+pageLoadMap.forEach(load => {
 
-  dailyTotals[dateKey] = count * BASE_DAILY_RISK;
+  const pageDayKey = `${load.dateKey}__${load.pageUrl}`;
+
+  if (!bestPerPagePerDay.has(pageDayKey)) {
+    bestPerPagePerDay.set(pageDayKey, load);
+  } else {
+    const existing = bestPerPagePerDay.get(pageDayKey);
+
+    if (load.revenue > existing.revenue) {
+      bestPerPagePerDay.set(pageDayKey, load);
+    }
+  }
+});
+
+bestPerPagePerDay.forEach(load => {
+  totalImpactedSlots += load.slots;
+  dedupedTotalLoss += load.revenue;
+
+  if (!dailyTotals[load.dateKey]) {
+    dailyTotals[load.dateKey] = 0;
+  }
+  dailyTotals[load.dateKey] += load.revenue;
 });
 
 document.getElementById('slotCount').textContent = totalImpactedSlots;
