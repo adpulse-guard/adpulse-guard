@@ -160,7 +160,9 @@
     Showing slots impacted by selected incident type
   </p>
 </div>
-<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+<div class="bg-gray-100 dark:bg-[#232334] 
+            rounded-2xl p-6 mb-10 
+            grid grid-cols-1 sm:grid-cols-2 gap-6">
 
   <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center sm:col-span-1 flex flex-col justify-center">
     <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">
@@ -169,11 +171,13 @@
     <div id="slotCount" class="text-4xl font-bold">—</div>
   </div>
 
-  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center sm:col-span-2 border-l-4 border-red-500">
+  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center sm:col-span-2 border-l-4 border-red-300 dark:border-red-600">
     <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">
       Estimated Revenue at Risk
     </div>
-    <div id="dailyLoss" class="text-4xl font-bold text-red-600">$—</div>
+    <div id="dailyLoss" class="text-4xl font-semibold tracking-tight 
+       bg-gradient-to-r from-red-600 to-red-500 
+       bg-clip-text text-transparent">$—</div>
     <div class="text-xs text-gray-400 mt-1">
   Calculated based on impacted slots
 </div>
@@ -186,7 +190,7 @@
 
     <h2 class="text-lg font-semibold mb-2">
   🚨 Highest Impact Slot
-<span class="text-red-600 text-sm font-medium">Requires attention</span>
+<span class="text-red-600 text-sm font-medium">Action recommended</span>
 </h2>
     <p><strong>Slot:</strong> <span id="offenderSlot"></span></p>
     <p><strong>Estimated Impact:</strong> <span id="offenderLoss"></span></p>
@@ -323,7 +327,7 @@ const labelMap = {
   primary: '#6366f1',        
   primarySoft: '#818cf8',
 
-  danger: '#b91c1c',
+  danger: '#c2410c',
   warning: '#d97706',
   success: '#15803d',
 
@@ -584,12 +588,17 @@ const dailyLossEl = document.getElementById('dailyLoss');
 dailyLossEl.textContent =
   `$${dedupedTotalLoss.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 
-if (dedupedTotalLoss > 0) {
-  dailyLossEl.classList.remove('text-green-600');
-  dailyLossEl.classList.add('text-red-600');
-} else {
-  dailyLossEl.classList.remove('text-red-600');
+if (dedupedTotalLoss === 0) {
+  dailyLossEl.classList.remove(
+    'bg-gradient-to-r',
+    'from-red-600',
+    'to-red-500',
+    'bg-clip-text',
+    'text-transparent'
+  );
   dailyLossEl.classList.add('text-green-600');
+} else {
+  dailyLossEl.classList.remove('text-green-600');
 }
 
 if (isSingleDayView && totalIssues === 0)
@@ -746,7 +755,7 @@ issueChart = new Chart(issueChartEl, {
 
 const isDark = document.documentElement.classList.contains('dark');
 const severityColorMap = {
-  HIGH: APG_BRAND.danger,
+  HIGH: isDark ? 'rgba(239,68,68,0.85)' : 'rgba(220,38,38,0.85)',
   MEDIUM: APG_BRAND.warning,
   LOW: APG_BRAND.primarySoft,
   INFO: isDark
@@ -793,8 +802,10 @@ severityChart = new Chart(severityChartEl, {
     datasets: [{
       data: severityData,
       backgroundColor: severityColors,
-      borderColor: 'rgba(203, 213, 225, 0.25)', 
-      borderWidth: 1.4
+      borderColor: document.documentElement.classList.contains('dark')
+  ? 'rgba(0,0,0,0.25)'
+  : 'rgba(255,255,255,0.5)',
+borderWidth: 1
     }]
   },
   options: {
@@ -826,7 +837,17 @@ severityChart = new Chart(severityChartEl, {
     }
   }
 },
-  legend: { position: 'bottom' },
+  legend: {
+  position: 'bottom',
+  labels: {
+    boxWidth: 12,
+    padding: 18,
+    font: {
+      size: 11,
+      weight: '500'
+    }
+  }
+},
   datalabels: {
     color: '#ffffff',
     font: {
@@ -923,17 +944,17 @@ if (lastIssueTs) {
 let statusText = '';
 
 if (!lastIssueTs) {
-  statusText = '● Monitoring active · No issues detected yet';
+  statusText = 'System Status: Operational · No issues detected yet';
 } else if (minutesAgo < 10) {
-  statusText = '● Monitoring active · Issues detected recently';
+  statusText = 'System Status: Operational · Issues detected recently';
 } else if (minutesAgo < 60) {
-  statusText = `● Monitoring active · Last incident ${minutesAgo}m ago`;
+  statusText = `System Status: Operational · Last incident ${minutesAgo}m ago`;
 } else if (minutesAgo < 1440) {
   const hours = Math.floor(minutesAgo / 60);
-  statusText = `● Monitoring active · Last incident ${hours}h ago`;
+  statusText = `System Status: Operational · Last incident ${hours}h ago`;
 } else {
   const days = Math.floor(minutesAgo / 1440);
-  statusText = `● Monitoring active · Last incident ${days}d ago`;
+  statusText = `System Status: Operational · Last incident ${days}d ago`;
 }
 
 const statusEl = document.getElementById('lastUpdated');
