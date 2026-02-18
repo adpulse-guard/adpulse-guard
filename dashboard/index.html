@@ -561,7 +561,6 @@ if (slotLoss > topLoss) {
   });
 const totalIssues = Object.values(issueTypes)
   .reduce((a, b) => a + b, 0);
-document.getElementById('issueCount').textContent = totalIssues;
 
 let totalImpactedSlots = 0;
 let dedupedTotalLoss = 0;
@@ -921,17 +920,17 @@ if (lastIssueTs) {
 let statusText = '';
 
 if (!lastIssueTs) {
-  statusText = 'Monitoring active · No issues detected yet';
+  statusText = '● Monitoring active · No issues detected yet';
 } else if (minutesAgo < 10) {
-  statusText = 'Monitoring active · Issues detected recently';
+  statusText = '● Monitoring active · Issues detected recently';
 } else if (minutesAgo < 60) {
-  statusText = `Monitoring active · Last issue ${minutesAgo}m ago`;
+  statusText = `● Monitoring active · Last issue ${minutesAgo}m ago`;
 } else if (minutesAgo < 1440) {
   const hours = Math.floor(minutesAgo / 60);
-  statusText = `Monitoring active · Last issue ${hours}h ago`;
+  statusText = `● Monitoring active · Last issue ${hours}h ago`;
 } else {
   const days = Math.floor(minutesAgo / 1440);
-  statusText = `Monitoring active · Last issue ${days}d ago`;
+  statusText = `● Monitoring active · Last issue ${days}d ago`;
 }
 
 const statusEl = document.getElementById('lastUpdated');
