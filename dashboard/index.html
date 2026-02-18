@@ -961,17 +961,19 @@ if (statusEl) {
   statusEl.textContent = statusText;
 
   statusEl.classList.remove(
-    'text-indigo-600',
-    'dark:text-indigo-300',
-    'text-gray-400',
-    'dark:text-gray-500'
-  );
+  'text-indigo-600',
+  'text-indigo-500',
+  'text-indigo-400',
+  'dark:text-indigo-300',
+  'dark:text-indigo-400',
+  'text-gray-400',
+  'dark:text-gray-500'
+);
 
-  if (!lastIssueTs || minutesAgo < 1440) {
-    statusEl.classList.add('text-indigo-600', 'dark:text-indigo-300');
-  } else {
-    statusEl.classList.add('text-gray-400', 'dark:text-gray-500');
-  }
+if (!lastIssueTs || minutesAgo < 1440) {
+  statusEl.classList.add('text-indigo-500', 'dark:text-indigo-400');
+} else {
+  statusEl.classList.add('text-gray-400', 'dark:text-gray-500');
 }
 
 document.getElementById('loadingIndicator').style.display = 'none';
