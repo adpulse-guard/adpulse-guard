@@ -961,19 +961,20 @@ if (statusEl) {
   statusEl.textContent = statusText;
 
   statusEl.classList.remove(
-  'text-indigo-600',
-  'text-indigo-500',
-  'text-indigo-400',
-  'dark:text-indigo-300',
-  'dark:text-indigo-400',
-  'text-gray-400',
-  'dark:text-gray-500'
-);
+    'text-indigo-600',
+    'text-indigo-500',
+    'text-indigo-400',
+    'dark:text-indigo-300',
+    'dark:text-indigo-400',
+    'text-gray-400',
+    'dark:text-gray-500'
+  );
 
-if (!lastIssueTs || minutesAgo < 1440) {
-  statusEl.classList.add('text-indigo-500', 'dark:text-indigo-400');
-} else {
-  statusEl.classList.add('text-gray-400', 'dark:text-gray-500');
+  if (!lastIssueTs || minutesAgo < 1440) {
+    statusEl.classList.add('text-indigo-500', 'dark:text-indigo-400');
+  } else {
+    statusEl.classList.add('text-gray-400', 'dark:text-gray-500');
+  }
 }
 
 document.getElementById('loadingIndicator').style.display = 'none';
@@ -1016,7 +1017,6 @@ fetch(`${SHEET_URL}?token=${token}`)
   })
   .catch((error) => {
     console.error('Error fetching data:', error);
-    // Ako dođe do greške, loading indikator se skriva
     document.getElementById('loadingIndicator').style.display = 'none';
   })
   .finally(() => {
