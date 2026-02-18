@@ -636,7 +636,18 @@ if (isSingleDayView && totalIssues === 0)
   if (topSlot) {
     box.classList.remove('hidden');
 
-    document.getElementById('offenderSlot').textContent = topSlot.slotId;
+    const offenderSlotEl = document.getElementById('offenderSlot');
+
+const isGlobalSlot =
+  !topSlot.slotId ||
+  topSlot.slotId === '__global__' ||
+  topSlot.slotId.toLowerCase().includes('global');
+
+if (isGlobalSlot) {
+  offenderSlotEl.textContent = 'All ad slots on affected page';
+} else {
+  offenderSlotEl.textContent = topSlot.slotId;
+}
     document.getElementById('offenderLoss').textContent =
       `$${topLoss.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 
