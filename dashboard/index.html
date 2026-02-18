@@ -540,20 +540,41 @@ rows.forEach(r => {
   if (SECURITY_ISSUES.includes(r.issueType)) return;
   affectedSlots.add(r.slotId);
 });
-if (selectedIssueFilter && affectedSlots.size) {
-  affectedSlotsPanel.classList.remove('hidden');
+if (selectedIssueFilter) {
 
-  affectedSlotsList.innerHTML = Array.from(affectedSlots)
-  .sort()
-  .map(s =>
-    `<li class="font-sans text-xs tracking-tight text-gray-700 dark:text-gray-300 leading-relaxed">
-      <span class="text-gray-400 dark:text-gray-500 mr-1">•</span>${s}
-    </li>`
-  )
-  .join('');
-} else {
-  affectedSlotsPanel.classList.add('hidden');
-  affectedSlotsList.innerHTML = '';
+  const globalIssueTypes = [
+    'gpt_script_missing',
+    'gpt_loaded_but_not_initialized',
+    'gpt_no_slot_requests'
+  ];
+
+  if (globalIssueTypes.includes(selectedIssueFilter)) {
+
+    affectedSlotsPanel.classList.remove('hidden');
+
+    affectedSlotsList.innerHTML = `
+      <li class="text-xs text-gray-600 dark:text-gray-400 italic">
+        This incident impacts all ad slots on the page.
+      </li>
+    `;
+
+  } else if (affectedSlots.size) {
+
+    affectedSlotsPanel.classList.remove('hidden');
+
+    affectedSlotsList.innerHTML = Array.from(affectedSlots)
+      .sort()
+      .map(s => `
+        <li class="font-sans text-xs tracking-tight text-gray-700 dark:text-gray-300 leading-relaxed">
+          <span class="text-gray-400 dark:text-gray-500 mr-1">•</span>${s}
+        </li>
+      `)
+      .join('');
+
+  } else {
+    affectedSlotsPanel.classList.add('hidden');
+    affectedSlotsList.innerHTML = '';
+  }
 }
   let topSlot = null;
   let topLoss = 0;
