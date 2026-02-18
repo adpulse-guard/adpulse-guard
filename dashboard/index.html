@@ -35,7 +35,7 @@
       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
       <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
     </svg>
-    Loading dashboard…
+    Loading monitoring data…
   </div>
 </div>
 
@@ -90,22 +90,22 @@
 
   <div class="bg-white dark:bg-darkcard rounded-xl shadow p-4 mb-4 flex flex-wrap items-center gap-3">
   <span class="text-xs uppercase tracking-wide text-gray-500">
-    Filter by issue
+    Filter by Incident Type
   </span>
   <select
     id="issueFilter"
     class="px-2 py-1 text-sm border rounded dark:bg-darkcard"
   >
-    <option value="">All issues</option>
-    <option value="gpt_script_missing">GPT script missing</option>
+    <option value="">All Incident Types</option>
+    <option value="gpt_script_missing">GPT script not detected</option>
     <option value="slot_container_collapsed">Slot container collapsed</option>
     <option value="gpt_loaded_but_not_initialized">GPT Loaded but not initialized</option>
     <option value="gpt_no_slot_requests">No GPT slot requests</option>
-    <option value="wrong_network">Wrong network</option>
+    <option value="wrong_network">Network configuration mismatch</option>
     <option value="slot_not_registered">DOM slot not in GPT</option>
     <option value="phantom_slot_requested">Phantom slot requested</option>
     <option value="defined_without_dom_no_request">GPT slot defined without DOM</option>
-    <option value="empty_response">Empty response</option>
+    <option value="empty_response">No ad response returned</option>
     <option value="unexpected_size">Unexpected size</option>
     <option value="layout_overlap">Layout overlap</option>
     <option value="ad_visibility_impaired">Ad visibility impaired</option>
@@ -140,7 +140,7 @@
 >
   <div class="flex items-center justify-between mb-3">
     <h3 class="text-sm font-semibold">
-      🎯 Affected slots
+      🎯 Impacted Slots (Filtered View)
     </h3>
 
     <button
@@ -157,23 +157,26 @@
   ></ul>
 
   <p class="text-[11px] text-gray-400 mt-4 opacity-80">
-    Showing slots affected by selected issue filter
+    Showing slots impacted by selected incident type
   </p>
 </div>
-<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
 
-  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center">
+  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center sm:col-span-1">
     <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">
-      Impacted Slots
+      Slots at Risk
     </div>
     <div id="slotCount" class="text-3xl font-bold">—</div>
   </div>
 
-  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center">
+  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center sm:col-span-2 border-l-4 border-red-500">
     <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">
       Estimated Revenue at Risk
     </div>
-    <div id="dailyLoss" class="text-3xl font-bold text-red-600">$—</div>
+    <div id="dailyLoss" class="text-4xl font-bold text-red-600">$—</div>
+    <div class="text-xs text-gray-400 mt-1">
+  Calculated based on impacted slots
+</div>
   </div>
 </div>
   <div id="topOffenderBox"
@@ -182,11 +185,11 @@
             border border-gray-200 dark:border-gray-700">
 
     <h2 class="text-lg font-semibold mb-2">
-  🚨 Top Offender
+  🚨 Highest Impact Slot
 <span class="text-red-600 text-sm font-medium">Requires attention</span>
 </h2>
     <p><strong>Slot:</strong> <span id="offenderSlot"></span></p>
-    <p><strong>Loss:</strong> <span id="offenderLoss"></span></p>
+    <p><strong>Estimated Impact:</strong> <span id="offenderLoss"></span></p>
     <p><strong>Page:</strong> <span id="offenderPage"></span></p>
     <p><strong>Issue:</strong> <span id="offenderIssue"></span></p>
   </div>
@@ -198,7 +201,7 @@
 
   <div class="flex items-center justify-between mb-3">
     <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300">
-      🔐 Security Signals
+      🔐 Security & Access Signals
     </h2>
     <span id="securityCount"
           class="text-xs px-2 py-1 rounded bg-gray-100 text-gray-600
@@ -214,7 +217,7 @@
   
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
     <div class="bg-white dark:bg-darkcard rounded-xl shadow p-4">
-      <h2 class="text-xs uppercase tracking-wide text-gray-500 mb-2">Detected Issues</h2>
+      <h2 class="text-xs uppercase tracking-wide text-gray-500 mb-2">Incident Types</h2>
       <div class="h-64">
         <canvas id="issueChart"></canvas>
       </div>
@@ -228,7 +231,7 @@
     </div>
 
     <div id="lossChartWrapper" class="bg-white dark:bg-darkcard rounded-xl shadow p-4 md:col-span-2">
-      <h2 class="text-xs uppercase tracking-wide text-gray-500 mb-2">Revenue at Risk · Daily</h2>
+      <h2 class="text-xs uppercase tracking-wide text-gray-500 mb-2">Revenue at Risk Trend</h2>
       <div class="h-64">
         <canvas id="lossTrendChart"></canvas>
       </div>
@@ -924,13 +927,13 @@ if (!lastIssueTs) {
 } else if (minutesAgo < 10) {
   statusText = '● Monitoring active · Issues detected recently';
 } else if (minutesAgo < 60) {
-  statusText = `● Monitoring active · Last issue ${minutesAgo}m ago`;
+  statusText = `● Monitoring active · Last incident ${minutesAgo}m ago`;
 } else if (minutesAgo < 1440) {
   const hours = Math.floor(minutesAgo / 60);
-  statusText = `● Monitoring active · Last issue ${hours}h ago`;
+  statusText = `● Monitoring active · Last incident ${hours}h ago`;
 } else {
   const days = Math.floor(minutesAgo / 1440);
-  statusText = `● Monitoring active · Last issue ${days}d ago`;
+  statusText = `● Monitoring active · Last incident ${days}d ago`;
 }
 
 const statusEl = document.getElementById('lastUpdated');
