@@ -574,7 +574,7 @@ const totalIssues = Object.values(issueTypes)
   .reduce((a, b) => a + b, 0);
 
 let totalImpactedSlots = 0;
-let totalLoss = 0;
+let dedupedTotalLoss = 0;
 
 pageLoadMap.forEach(load => {
   totalImpactedSlots += load.slots;
