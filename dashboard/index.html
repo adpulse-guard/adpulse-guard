@@ -574,26 +574,9 @@ const totalIssues = Object.values(issueTypes)
   .reduce((a, b) => a + b, 0);
 
 let totalImpactedSlots = 0;
-let dedupedTotalLoss = 0;
-
-const bestPerPagePerDay = new Map();
+let totalLoss = 0;
 
 pageLoadMap.forEach(load => {
-
-  const pageDayKey = `${load.dateKey}__${load.pageUrl}`;
-
-  if (!bestPerPagePerDay.has(pageDayKey)) {
-    bestPerPagePerDay.set(pageDayKey, load);
-  } else {
-    const existing = bestPerPagePerDay.get(pageDayKey);
-
-    if (load.revenue > existing.revenue) {
-      bestPerPagePerDay.set(pageDayKey, load);
-    }
-  }
-});
-
-bestPerPagePerDay.forEach(load => {
   totalImpactedSlots += load.slots;
   dedupedTotalLoss += load.revenue;
 
