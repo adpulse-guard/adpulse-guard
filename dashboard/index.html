@@ -123,8 +123,8 @@
          dark:bg-indigo-900/30 dark:text-indigo-300
          dark:hover:bg-indigo-900/50
          text-xs leading-none"
-  title="Clear issue filter"
-  aria-label="Clear issue filter"
+  title="Clear incident filter"
+  aria-label="Clear incident filter"
 >
   ✕
 </button>
@@ -190,13 +190,13 @@
             border border-gray-200 dark:border-gray-700">
 
     <h2 class="text-lg font-semibold mb-2">
-  🚨 Highest Impact Slot
+  🚨 Highest Impact Incident
 <span class="text-red-600 text-sm font-medium">Action recommended</span>
 </h2>
     <p><strong>Slot:</strong> <span id="offenderSlot"></span></p>
     <p><strong>Estimated Impact:</strong> <span id="offenderLoss"></span></p>
     <p><strong>Page:</strong> <span id="offenderPage"></span></p>
-    <p><strong>Issue:</strong> <span id="offenderIssue"></span></p>
+    <p><strong>Incident:</strong> <span id="offenderIssue"></span></p>
   </div>
 
 <div id="securityWidget"
@@ -497,35 +497,29 @@ if (isGlobalType && !processedGlobalKeys.has(globalKey)) {
 
   severities[sev] = (severities[sev] || 0) + 1;
 
-  if (isRevenueEligible && r.slotId) {
+  if (isRevenueEligible) {
 
-    if (!offenderMap[r.slotId]) {
-      offenderMap[r.slotId] = {
-        slotId: r.slotId,
-        issues: new Set(),
-        pages: new Map()
-      };
-    }
+  const offenderKey = isGlobalType
+    ? '__global__'
+    : r.slotId;
 
-    offenderMap[r.slotId].issues.add(r.issueType);
-
-    if (!offenderMap[r.slotId].pages.has(r.pageUrl)) {
-
-  const severity = (r.severity || '').toUpperCase();
-
-  const eligible =
-    !SECURITY_ISSUES.includes(r.issueType) &&
-    r.issueType !== 'ad_visibility_impaired' &&
-    (severity === 'HIGH' || severity === 'MEDIUM');
-
-  offenderMap[r.slotId].pages.set(
-    r.pageUrl,
-    eligible ? BASE_DAILY_RISK : 0
-  );
-}
-
+  if (!offenderMap[offenderKey]) {
+    offenderMap[offenderKey] = {
+      slotId: offenderKey,
+      issues: new Set(),
+      pages: new Map()
+    };
   }
 
+  offenderMap[offenderKey].issues.add(r.issueType);
+
+  if (!offenderMap[offenderKey].pages.has(r.pageUrl)) {
+    offenderMap[offenderKey].pages.set(
+      r.pageUrl,
+      BASE_DAILY_RISK
+    );
+  }
+}
 });
 const affectedSlots = new Set();
 
@@ -634,22 +628,27 @@ if (isSingleDayView && totalIssues === 0)
   const box = document.getElementById('topOffenderBox');
 
   if (topSlot) {
-    box.classList.remove('hidden');
+  box.classList.remove('hidden');
 
-    const offenderSlotEl = document.getElementById('offenderSlot');
+  const offenderSlotEl = document.getElementById('offenderSlot');
+  const offenderSlotLabelEl =
+    document.querySelector('#topOffenderBox strong');
 
-const isGlobalSlot =
-  !topSlot.slotId ||
-  topSlot.slotId === '__global__' ||
-  topSlot.slotId.toLowerCase().includes('global');
+  const isGlobalSlot =
+    !topSlot.slotId ||
+    topSlot.slotId === '__global__' ||
+    (topSlot.slotId && topSlot.slotId.toLowerCase().includes('global'));
 
-if (isGlobalSlot) {
-  offenderSlotEl.textContent = 'All ad slots on affected page';
-} else {
-  offenderSlotEl.textContent = topSlot.slotId;
-}
-    document.getElementById('offenderLoss').textContent =
-      `$${topLoss.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+  if (isGlobalSlot) {
+    offenderSlotLabelEl.textContent = 'Scope:';
+    offenderSlotEl.textContent = 'Page-level impact (all ad slots)';
+  } else {
+    offenderSlotLabelEl.textContent = 'Slot:';
+    offenderSlotEl.textContent = topSlot.slotId;
+  }
+
+  document.getElementById('offenderLoss').textContent =
+    `$${topLoss.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 
     const pages = Array.from(topSlot.pages.keys());
 
@@ -753,8 +752,8 @@ issueChart = new Chart(issueChartEl, {
     const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
     const pct = total ? Math.round((value / total) * 100) : 0;
             return [
-              `${value} issues`,
-              `~${pct}% of all issues`
+              `${value} incidents`,
+              `~${pct}% of all incidents`
             ];
           }
         }
@@ -862,8 +861,8 @@ severityChart = new Chart(severityChartEl, {
       const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
       const pct = Math.round((value / total) * 100);
       return [
-  `${value} issues`,
-  `~${pct}% of all issues`
+  `${value} incidents`,
+  `~${pct}% of all incidents`
 ];
     }
   }
@@ -975,9 +974,9 @@ if (lastIssueTs) {
 let statusText = '';
 
 if (!lastIssueTs) {
-  statusText = 'System Status: Operational · No issues detected yet';
+  statusText = 'System Status: Operational · No incident detected yet';
 } else if (minutesAgo < 10) {
-  statusText = 'System Status: Operational · Issues detected recently';
+  statusText = 'System Status: Operational · Incident detected recently';
 } else if (minutesAgo < 60) {
   statusText = `System Status: Operational · Last incident ${minutesAgo}m ago`;
 } else if (minutesAgo < 1440) {
