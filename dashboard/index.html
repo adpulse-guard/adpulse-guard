@@ -166,14 +166,14 @@
     <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">
       Slots at Risk
     </div>
-    <div id="slotCount" class="text-3xl font-bold">—</div>
+    <div id="slotCount" class="text-4xl font-bold">—</div>
   </div>
 
   <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center sm:col-span-2 border-l-4 border-red-500">
     <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">
       Estimated Revenue at Risk
     </div>
-    <div id="dailyLoss" class="text-4xl font-bold text-red-600">$—</div>
+    <div id="dailyLoss" class="text-5xl font-bold text-red-600">$—</div>
     <div class="text-xs text-gray-400 mt-1">
   Calculated based on impacted slots
 </div>
@@ -282,14 +282,14 @@ const CACHE_TTL = 5 * 60 * 1000;
 
 const labelMap = {
   gpt_script_missing: 'GPT script missing',
-  gpt_loaded_but_not_initialized: 'GPT Loaded but not initialized',
+  gpt_loaded_but_not_initialized: 'GPT loaded but not initialized',
   gpt_no_slot_requests: 'No GPT slot requests',
   wrong_network: 'Incorrect ad network ID',
   slot_not_registered: 'DOM slot not in GPT',
   defined_without_dom_no_request: 'GPT slot defined without DOM',
   phantom_slot_requested: 'Phantom slot requested',
   unexpected_size: 'Unexpected size',
-  empty_response: 'Empty response',
+  empty_response: 'No ad response returned',
   layout_overlap: 'Layout overlap',
   ad_visibility_impaired: 'Ad visibility impaired',
   slot_container_collapsed: 'Slot container collapsed',
@@ -302,12 +302,12 @@ const labelMap = {
   'GPT script missing': 'GPT script',
   'GPT Loaded but not initialized': 'GPT init',
   'No GPT slot requests': 'No requests',
-  'Wrong network': 'Network',
+  'Incorrect ad network ID': 'Network',
   'DOM slot not in GPT': 'Not in GPT',
   'GPT slot defined without DOM': 'No DOM',
   'Phantom slot requested': 'Phantom',
   'Unexpected size': 'Size',
-  'Empty response': 'Empty',
+  'No ad response returned': 'Empty',
   'Layout overlap': 'Overlap',
   'Ad visibility impaired': 'Visibility',
   'Slot container collapsed': 'Collapsed'
