@@ -514,11 +514,16 @@ if (isGlobalType && !processedGlobalKeys.has(globalKey)) {
   offenderMap[offenderKey].issues.add(r.issueType);
 
   if (!offenderMap[offenderKey].pages.has(r.pageUrl)) {
-    offenderMap[offenderKey].pages.set(
-      r.pageUrl,
-      BASE_DAILY_RISK
-    );
-  }
+
+  const slotCount = isGlobalType
+    ? Number(r.affectedSlotCount || 0)
+    : 1;
+
+  offenderMap[offenderKey].pages.set(
+    r.pageUrl,
+    slotCount * BASE_DAILY_RISK
+  );
+}
 }
 });
 const affectedSlots = new Set();
