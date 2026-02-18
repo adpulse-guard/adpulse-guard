@@ -160,14 +160,7 @@
     Showing slots affected by selected issue filter
   </p>
 </div>
-<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-
-  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center">
-    <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">
-      Detected Issues
-    </div>
-    <div id="issueCount" class="text-3xl font-bold">—</div>
-  </div>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
 
   <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center">
     <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">
@@ -568,7 +561,6 @@ if (slotLoss > topLoss) {
   });
 const totalIssues = Object.values(issueTypes)
   .reduce((a, b) => a + b, 0);
-
 document.getElementById('issueCount').textContent = totalIssues;
 
 let totalImpactedSlots = 0;
