@@ -175,9 +175,8 @@
     <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">
       Estimated Revenue at Risk
     </div>
-    <div id="dailyLoss" class="text-4xl font-semibold tracking-tight 
-       bg-gradient-to-r from-red-600 to-red-500 
-       bg-clip-text text-transparent">$—</div>
+    <div id="dailyLoss"
+     class="text-[40px] font-extrabold whitespace-nowrap text-red-700">$—</div>
     <div class="text-xs text-gray-400 mt-1">
   Calculated based on impacted slots
 </div>
@@ -802,10 +801,8 @@ severityChart = new Chart(severityChartEl, {
     datasets: [{
       data: severityData,
       backgroundColor: severityColors,
-      borderColor: document.documentElement.classList.contains('dark')
-  ? 'rgba(0,0,0,0.25)'
-  : 'rgba(255,255,255,0.5)',
-borderWidth: 1
+      borderColor: '#ffffff',
+      borderWidth: 1.5
     }]
   },
   options: {
