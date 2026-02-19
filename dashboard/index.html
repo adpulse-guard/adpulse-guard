@@ -623,14 +623,6 @@ rows.forEach(r => {
 
 let dedupedTotalLoss = 0;
 
-slotRiskMap.forEach((obj, key) => {
-  dedupedTotalLoss += obj.revenue;
-
-  const dateKey = key.split('__')[0];
-  if (!dailyTotals[dateKey]) dailyTotals[dateKey] = 0;
-  dailyTotals[dateKey] += obj.revenue;
-});
-
 pageMaxRisk.forEach((obj, key) => {
   dedupedTotalLoss += obj.revenue;
 
