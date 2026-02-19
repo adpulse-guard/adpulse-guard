@@ -419,8 +419,8 @@ function renderDashboard(rows, selectedDate = null, selectedClient = '') {
   const offenderMap = {};
   const isSingleDayView = !!selectedDate;  
   const slotRiskMap = new Map();
-  const globalRiskMap = new Map();
-
+  const pageMaxRisk = new Map(); 
+  
   rows.forEach(r => {
 
   if (!r || !r.issueType || !r.receivedAt) return;
@@ -466,34 +466,27 @@ const isRevenueEligible =
 
   if (isRevenueEligible) {
 
-   if (isGlobalType) {
+  if (isGlobalType) {
 
-      const key = `${dateKey}__${r.pageUrl}`;
-      const revenue = Number(r.estimatedDailyRevenueRisk || 0);
+    const key = `${dateKey}__${r.pageUrl}`;
+    const revenue = Number(r.estimatedDailyRevenueRisk || 0);
+    const ts = new Date(r.receivedAt).getTime();
 
-      if (!globalRiskMap.has(key)) {
-         globalRiskMap.set(key, revenue);
-      } else {
-         globalRiskMap.set(
-            key,
-            Math.max(globalRiskMap.get(key), revenue)
-         );
-      }
+    if (!pageMaxRisk.has(key) || ts > pageMaxRisk.get(key).ts) {
+      pageMaxRisk.set(key, { revenue, ts });
+    }
 
-   } else if (r.slotId) {
+  } else if (r.slotId) {
 
-      const key = `${dateKey}__${r.pageUrl}__${r.slotId}`;
-      const revenue = Number(r.estimatedDailyRevenueRisk || 0);
+    const key = `${dateKey}__${r.pageUrl}__${r.slotId}`;
+    const revenue = Number(r.estimatedDailyRevenueRisk || 0);
+    const ts = new Date(r.receivedAt).getTime();
 
-      if (!slotRiskMap.has(key)) {
-         slotRiskMap.set(key, revenue);
-      } else {
-         slotRiskMap.set(
-            key,
-            Math.max(slotRiskMap.get(key), revenue)
-         );
-      }
-   }
+    if (!slotRiskMap.has(key) || ts > slotRiskMap.get(key).ts) {
+      slotRiskMap.set(key, { revenue, ts });
+    }
+
+  }
 
 }
 
@@ -623,12 +616,13 @@ rows.forEach(r => {
 let globalLoss = 0;
 let slotLoss = 0;
 
-slotRiskMap.forEach((revenue, key) => {
+slotRiskMap.forEach((value, key) => {
+  const revenue = value.revenue;
   const parts = key.split('__');
   const dateKey = parts[0];
   const pageUrl = parts[1];
 
-  if (globalRiskMap.has(`${dateKey}__${pageUrl}`)) return;
+  if (pageMaxRisk.has(`${dateKey}__${pageUrl}`)) return;
 
   slotLoss += revenue;
 
@@ -636,18 +630,20 @@ slotRiskMap.forEach((revenue, key) => {
   dailyTotals[dateKey] += revenue;
 });
 
-globalRiskMap.forEach((revenue, key) => {
+pageMaxRisk.forEach((value, key) => {
   const dateKey = key.split('__')[0];
 
-  globalLoss += revenue;
+  globalLoss += value.revenue;
 
   if (!dailyTotals[dateKey]) dailyTotals[dateKey] = 0;
-  dailyTotals[dateKey] += revenue;
+  dailyTotals[dateKey] += value.revenue;
 });
 
 const dedupedTotalLoss = slotLoss + globalLoss;
 
-slotRiskMap.forEach((revenue, key) => {
+slotRiskMap.forEach((value, key) => {
+  const revenue = value.revenue;
+
   const parts = key.split('__');
   const pageUrl = parts[1];
   const slotId = parts[2];
@@ -663,28 +659,6 @@ slotRiskMap.forEach((revenue, key) => {
   const existing = offenderMap[slotId].pages.get(pageUrl) || 0;
 
   offenderMap[slotId].pages.set(
-    pageUrl,
-    Math.max(existing, revenue)
-  );
-});
-
-globalRiskMap.forEach((revenue, key) => {
-  const parts = key.split('__');
-  const pageUrl = parts[1];
-
-  const globalKey = '__global__';
-
-  if (!offenderMap[globalKey]) {
-    offenderMap[globalKey] = {
-      slotId: globalKey,
-      issues: new Set(),
-      pages: new Map()
-    };
-  }
-
-  const existing = offenderMap[globalKey].pages.get(pageUrl) || 0;
-
-  offenderMap[globalKey].pages.set(
     pageUrl,
     Math.max(existing, revenue)
   );
