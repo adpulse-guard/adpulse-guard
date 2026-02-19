@@ -422,11 +422,6 @@ function renderDashboard(rows, selectedDate = null, selectedClient = '') {
   const isSingleDayView = !!selectedDate;  
   const slotRiskMap = new Map();
   const pageMaxRisk = new Map(); 
-  const ASSUMED_IMPRESSIONS_PER_HOUR = 500;
-  const ASSUMED_RPM = 1;
-  const BASE_HOURLY_RISK =
-  (ASSUMED_IMPRESSIONS_PER_HOUR / 1000) * ASSUMED_RPM;
-  const BASE_DAILY_RISK = BASE_HOURLY_RISK * 24;
 
   
   rows.forEach(r => {
@@ -681,30 +676,61 @@ rows.forEach(r => {
 });
   
   let topSlot = null;
-  let topLoss = 0;
+let topLoss = 0;
 
-slotPageSet.forEach((pagesSet, slotId) => {
-  const loss = pagesSet.size * BASE_DAILY_RISK;
+const slotPageRevenueMap = new Map();
 
-  if (loss > topLoss) {
-    topLoss = loss;
+rows.forEach(r => {
+  if (!r.slotId || !r.pageUrl) return;
 
-    const issuesForSlot = new Set(
-      rows
-        .filter(r => r.slotId === slotId)
-        .map(r => r.issueType)
-    );
+  const severity = (r.severity || '').toUpperCase();
+  if (!['HIGH','MEDIUM'].includes(severity)) return;
 
+  const key = `${r.slotId}__${r.pageUrl}`;
+  const revenue = Number(r.estimatedDailyRevenueRisk || 0);
+
+  slotPageRevenueMap.set(
+    key,
+    Math.max(slotPageRevenueMap.get(key) || 0, revenue)
+  );
+});
+
+const slotAggregatedMap = new Map();
+
+slotPageRevenueMap.forEach((revenue, key) => {
+  const [slotId, pageUrl] = key.split('__');
+
+  if (!slotAggregatedMap.has(slotId)) {
+    slotAggregatedMap.set(slotId, {
+      totalRevenue: 0,
+      pages: new Set(),
+      issues: new Set()
+    });
+  }
+
+  const slotData = slotAggregatedMap.get(slotId);
+
+  slotData.totalRevenue += revenue;
+  slotData.pages.add(pageUrl);
+});
+
+rows.forEach(r => {
+  if (!r.slotId) return;
+  if (!slotAggregatedMap.has(r.slotId)) return;
+
+  slotAggregatedMap.get(r.slotId).issues.add(r.issueType);
+});
+
+slotAggregatedMap.forEach((data, slotId) => {
+  if (data.totalRevenue > topLoss) {
+    topLoss = data.totalRevenue;
     topSlot = {
       slotId,
-      pages: new Map(
-        Array.from(pagesSet).map(p => [p, BASE_DAILY_RISK])
-      ),
-      issues: issuesForSlot
+      pages: data.pages,
+      issues: data.issues
     };
   }
 });
-
 document.getElementById('slotCount').textContent = totalImpactedSlots;
 
 const dailyLossEl = document.getElementById('dailyLoss');
@@ -758,7 +784,7 @@ if (isSingleDayView && totalIssues === 0)
   document.getElementById('offenderLoss').textContent =
     `$${topLoss.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 
-    const pages = Array.from(topSlot.pages.keys());
+    const pages = Array.from(topSlot.pages);
 
 document.getElementById('offenderPage').innerHTML = `
   <div class="max-h-40 overflow-auto pr-1">
