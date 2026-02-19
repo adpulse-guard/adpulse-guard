@@ -685,7 +685,10 @@ rows.forEach(r => {
   ? `${r.slotId}__${r.pageUrl}`
   : `${r.slotId}__${r.pageUrl}__${dateKey}`;
 
-  const revenue = Number(r.estimatedDailyRevenueRisk || 0);
+  const revenue =
+  r.affectedSlotCount
+    ? Number(r.estimatedDailyRevenueRisk || 0) / Number(r.affectedSlotCount)
+    : 0;
 
   slotPageRevenueMap.set(
     key,
