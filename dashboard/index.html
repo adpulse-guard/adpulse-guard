@@ -613,33 +613,32 @@ rows.forEach(r => {
   }
 });
 
-let globalLoss = 0;
-let slotLoss = 0;
+const pageDailyRisk = new Map();
 
-slotRiskMap.forEach((value, key) => {
-  const revenue = value.revenue;
-  const parts = key.split('__');
-  const dateKey = parts[0];
-  const pageUrl = parts[1];
+rows.forEach(r => {
+  if (!r || !r.receivedAt || !r.pageUrl) return;
 
-  if (pageMaxRisk.has(`${dateKey}__${pageUrl}`)) return;
+  const dateKey = r.receivedAt.split('T')[0];
+  if (selectedDate && dateKey !== selectedDate) return;
 
-  slotLoss += revenue;
+  const revenue = Number(r.estimatedDailyRevenueRisk || 0);
+  const key = `${dateKey}__${r.pageUrl}`;
 
+  pageDailyRisk.set(
+    key,
+    Math.max(pageDailyRisk.get(key) || 0, revenue)
+  );
+});
+
+let dedupedTotalLoss = 0;
+
+pageDailyRisk.forEach((revenue, key) => {
+  dedupedTotalLoss += revenue;
+
+  const dateKey = key.split('__')[0];
   if (!dailyTotals[dateKey]) dailyTotals[dateKey] = 0;
   dailyTotals[dateKey] += revenue;
 });
-
-pageMaxRisk.forEach((value, key) => {
-  const dateKey = key.split('__')[0];
-
-  globalLoss += value.revenue;
-
-  if (!dailyTotals[dateKey]) dailyTotals[dateKey] = 0;
-  dailyTotals[dateKey] += value.revenue;
-});
-
-const dedupedTotalLoss = slotLoss + globalLoss;
 
 slotRiskMap.forEach((value, key) => {
   const revenue = value.revenue;
