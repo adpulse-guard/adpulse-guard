@@ -510,7 +510,6 @@ const isRevenueEligible =
   }
 
   offenderMap[offenderKey].issues.add(r.issueType);
-}
 });
 
 const affectedSlots = new Set();
@@ -567,49 +566,87 @@ const totalIssues = Object.values(issueTypes)
 
 let totalImpactedSlots = slotRiskMap.size;
 
-if (globalRiskMap.size > 0) {
-   const globalSlots = rows
-      .filter(r =>
-         r.issueType === 'gpt_script_missing' ||
-         r.issueType === 'gpt_loaded_but_not_initialized' ||
-         r.issueType === 'gpt_no_slot_requests'
-      )
-      .reduce((max, r) =>
-         Math.max(max, Number(r.affectedSlotCount || 0)),
-         0
-      );
+const globalSlotsMap = new Map();
 
-   totalImpactedSlots = Math.max(totalImpactedSlots, globalSlots);
-}
+rows.forEach(r => {
+  if (!r || !r.receivedAt || !r.pageUrl) return;
 
-const slotLoss =
-   Array.from(slotRiskMap.values()).reduce((a,b)=>a+b,0);
+  const dateKey = r.receivedAt.split('T')[0];
+  if (selectedDate && dateKey !== selectedDate) return;
 
-const globalLoss =
-   Array.from(globalRiskMap.values()).reduce((a,b)=>a+b,0);
+  const isGlobalType =
+    r.issueType === 'gpt_script_missing' ||
+    r.issueType === 'gpt_loaded_but_not_initialized' ||
+    r.issueType === 'gpt_no_slot_requests';
 
-const dedupedTotalLoss = slotLoss + globalLoss;
+  if (!isGlobalType) return;
+
+  const key = `${dateKey}__${r.pageUrl}`;
+  const slots = Number(r.affectedSlotCount || 0);
+
+  if (!globalSlotsMap.has(key)) {
+    globalSlotsMap.set(key, slots);
+  } else {
+    globalSlotsMap.set(
+      key,
+      Math.max(globalSlotsMap.get(key), slots)
+    );
+  }
+});
+
+const globalSlotsTotal = Array.from(globalSlotsMap.values())
+  .reduce((a,b)=>a+b,0);
+
+totalImpactedSlots += globalSlotsTotal;
+
+
+Object.keys(dailyTotals).forEach(k => delete dailyTotals[k]);
+
+const pagesWithGlobalForDaily = new Set();
+
+rows.forEach(r => {
+  if (!r || !r.receivedAt || !r.pageUrl) return;
+
+  const dateKey = r.receivedAt.split('T')[0];
+  if (selectedDate && dateKey !== selectedDate) return;
+
+  const isGlobalType =
+    r.issueType === 'gpt_script_missing' ||
+    r.issueType === 'gpt_loaded_but_not_initialized' ||
+    r.issueType === 'gpt_no_slot_requests';
+
+  if (isGlobalType) {
+    pagesWithGlobalForDaily.add(`${dateKey}__${r.pageUrl}`);
+  }
+});
+
+let globalLoss = 0;
+let slotLoss = 0;
 
 slotRiskMap.forEach((revenue, key) => {
-  const dateKey = key.split('__')[0];
+  const parts = key.split('__');
+  const dateKey = parts[0];
+  const pageUrl = parts[1];
 
-  if (!dailyTotals[dateKey]) {
-    dailyTotals[dateKey] = 0;
-  }
+  if (globalRiskMap.has(`${dateKey}__${pageUrl}`)) return;
 
+  slotLoss += revenue;
+
+  if (!dailyTotals[dateKey]) dailyTotals[dateKey] = 0;
   dailyTotals[dateKey] += revenue;
 });
 
 globalRiskMap.forEach((revenue, key) => {
   const dateKey = key.split('__')[0];
 
-  if (!dailyTotals[dateKey]) {
-    dailyTotals[dateKey] = 0;
-  }
+  globalLoss += revenue;
 
+  if (!dailyTotals[dateKey]) dailyTotals[dateKey] = 0;
   dailyTotals[dateKey] += revenue;
 });
-  // SLOT offenders
+
+const dedupedTotalLoss = slotLoss + globalLoss;
+
 slotRiskMap.forEach((revenue, key) => {
   const parts = key.split('__');
   const pageUrl = parts[1];
