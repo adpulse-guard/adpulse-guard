@@ -412,6 +412,8 @@ function getLastIssueTimestamp(rows) {
 }
 
 function renderDashboard(rows, selectedDate = null, selectedClient = '') {
+  affectedSlotsPanel.classList.add('hidden');
+  affectedSlotsList.innerHTML = '';
   const issueTypes = {};
   const securityCounts = {};
   const severities = {};
@@ -518,7 +520,12 @@ rows.forEach(r => {
   if (SECURITY_ISSUES.includes(r.issueType)) return;
   affectedSlots.add(r.slotId);
 });
-if (selectedIssueFilter) {
+if (!selectedIssueFilter) {
+
+  affectedSlotsPanel.classList.add('hidden');
+  affectedSlotsList.innerHTML = '';
+
+} else {
 
   const globalIssueTypes = [
     'gpt_script_missing',
