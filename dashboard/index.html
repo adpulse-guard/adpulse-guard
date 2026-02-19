@@ -621,32 +621,24 @@ rows.forEach(r => {
   }
 });
 
-const pageDailyRisk = new Map();
-
-rows.forEach(r => {
-  if (!r || !r.receivedAt || !r.pageUrl) return;
-
-  const dateKey = r.receivedAt.split('T')[0];
-  if (selectedDate && dateKey !== selectedDate) return;
-
-  const revenue = Number(r.estimatedDailyRevenueRisk || 0);
-  const key = `${dateKey}__${r.pageUrl}`;
-
-  pageDailyRisk.set(
-    key,
-    Math.max(pageDailyRisk.get(key) || 0, revenue)
-  );
-});
-
 let dedupedTotalLoss = 0;
 
-pageDailyRisk.forEach((revenue, key) => {
-  dedupedTotalLoss += revenue;
+slotRiskMap.forEach((obj, key) => {
+  dedupedTotalLoss += obj.revenue;
 
   const dateKey = key.split('__')[0];
   if (!dailyTotals[dateKey]) dailyTotals[dateKey] = 0;
-  dailyTotals[dateKey] += revenue;
+  dailyTotals[dateKey] += obj.revenue;
 });
+
+pageMaxRisk.forEach((obj, key) => {
+  dedupedTotalLoss += obj.revenue;
+
+  const dateKey = key.split('__')[0];
+  if (!dailyTotals[dateKey]) dailyTotals[dateKey] = 0;
+  dailyTotals[dateKey] += obj.revenue;
+});
+
 
 const slotPageSet = new Map(); 
 
