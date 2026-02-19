@@ -422,6 +422,12 @@ function renderDashboard(rows, selectedDate = null, selectedClient = '') {
   const isSingleDayView = !!selectedDate;  
   const slotRiskMap = new Map();
   const pageMaxRisk = new Map(); 
+  const ASSUMED_IMPRESSIONS_PER_HOUR = 500;
+  const ASSUMED_RPM = 1;
+  const BASE_HOURLY_RISK =
+  (ASSUMED_IMPRESSIONS_PER_HOUR / 1000) * ASSUMED_RPM;
+  const BASE_DAILY_RISK = BASE_HOURLY_RISK * 24;
+
   
   rows.forEach(r => {
 
@@ -647,41 +653,58 @@ pageDailyRisk.forEach((revenue, key) => {
   dailyTotals[dateKey] += revenue;
 });
 
-slotRiskMap.forEach((value, key) => {
-  const revenue = value.revenue;
+const slotPageSet = new Map(); 
 
-  const parts = key.split('__');
-  const pageUrl = parts[1];
-  const slotId = parts[2];
+rows.forEach(r => {
+  if (!r || !r.slotId || !r.receivedAt) return;
 
-  if (!offenderMap[slotId]) {
-    offenderMap[slotId] = {
-      slotId,
-      issues: new Set(),
-      pages: new Map()
-    };
+  const dateKey = r.receivedAt.split('T')[0];
+  if (selectedDate && dateKey !== selectedDate) return;
+
+  if (SECURITY_ISSUES.includes(r.issueType)) return;
+
+  const severity = (r.severity || '').toUpperCase();
+  if (!['HIGH','MEDIUM'].includes(severity)) return;
+
+  const isGlobalType =
+    r.issueType === 'gpt_script_missing' ||
+    r.issueType === 'gpt_loaded_but_not_initialized' ||
+    r.issueType === 'gpt_no_slot_requests';
+
+  if (isGlobalType) return; 
+
+  if (!slotPageSet.has(r.slotId)) {
+    slotPageSet.set(r.slotId, new Set());
   }
 
-  const existing = offenderMap[slotId].pages.get(pageUrl) || 0;
-
-  offenderMap[slotId].pages.set(
-    pageUrl,
-    Math.max(existing, revenue)
-  );
+  slotPageSet.get(r.slotId).add(r.pageUrl);
 });
   
   let topSlot = null;
   let topLoss = 0;
 
-  Object.values(offenderMap).forEach(o => {
-    const slotLoss = Array.from(o.pages.values())
-  .reduce((a, b) => a + b, 0);
+slotPageSet.forEach((pagesSet, slotId) => {
+  const loss = pagesSet.size * BASE_DAILY_RISK;
 
-if (slotLoss > topLoss) {
-  topLoss = slotLoss;
-  topSlot = o;
-}
-  });
+  if (loss > topLoss) {
+    topLoss = loss;
+
+    const issuesForSlot = new Set(
+      rows
+        .filter(r => r.slotId === slotId)
+        .map(r => r.issueType)
+    );
+
+    topSlot = {
+      slotId,
+      pages: new Map(
+        Array.from(pagesSet).map(p => [p, BASE_DAILY_RISK])
+      ),
+      issues: issuesForSlot
+    };
+  }
+});
+
 document.getElementById('slotCount').textContent = totalImpactedSlots;
 
 const dailyLossEl = document.getElementById('dailyLoss');
