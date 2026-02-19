@@ -681,12 +681,18 @@ let topLoss = 0;
 const slotPageRevenueMap = new Map();
 
 rows.forEach(r => {
-  if (!r.slotId || !r.pageUrl) return;
+  if (!r.slotId || !r.pageUrl || !r.receivedAt) return;
+
+  const dateKey = r.receivedAt.split('T')[0];
+  if (selectedDate && dateKey !== selectedDate) return;
 
   const severity = (r.severity || '').toUpperCase();
   if (!['HIGH','MEDIUM'].includes(severity)) return;
 
-  const key = `${r.slotId}__${r.pageUrl}`;
+  const key = selectedDate
+  ? `${r.slotId}__${r.pageUrl}`
+  : `${r.slotId}__${r.pageUrl}__${dateKey}`;
+
   const revenue = Number(r.estimatedDailyRevenueRisk || 0);
 
   slotPageRevenueMap.set(
@@ -698,7 +704,10 @@ rows.forEach(r => {
 const slotAggregatedMap = new Map();
 
 slotPageRevenueMap.forEach((revenue, key) => {
-  const [slotId, pageUrl] = key.split('__');
+  const parts = key.split('__');
+  const slotId = parts[0];
+  const pageUrl = parts[1];
+
 
   if (!slotAggregatedMap.has(slotId)) {
     slotAggregatedMap.set(slotId, {
@@ -717,6 +726,8 @@ slotPageRevenueMap.forEach((revenue, key) => {
 rows.forEach(r => {
   if (!r.slotId) return;
   if (!slotAggregatedMap.has(r.slotId)) return;
+  const dateKey = r.receivedAt.split('T')[0];
+  if (selectedDate && dateKey !== selectedDate) return;
 
   slotAggregatedMap.get(r.slotId).issues.add(r.issueType);
 });
