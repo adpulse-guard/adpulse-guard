@@ -818,16 +818,13 @@ if (selectedIssueFilter && globalIssueTypes.includes(selectedIssueFilter)) {
   const box = document.getElementById('topOffenderBox');
   box.classList.remove('hidden');
 
-  // Scope
   document.querySelector('#topOffenderBox strong').textContent = 'Scope:';
   document.getElementById('offenderSlot').textContent =
     'Page-level impact (all ad slots)';
 
-  // Estimated Impact (ostavi kako je već izračunat)
   document.getElementById('offenderLoss').textContent =
     `$${dedupedTotalLoss.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 
-  // Unique pages
   const pages = [
     ...new Set(
       effectiveRows
@@ -851,7 +848,6 @@ if (selectedIssueFilter && globalIssueTypes.includes(selectedIssueFilter)) {
     </div>
   `;
 
-  // Incident badge
   document.getElementById('offenderIssue').innerHTML = `
     <span class="inline-flex items-center
            bg-indigo-50 text-indigo-600
@@ -861,8 +857,6 @@ if (selectedIssueFilter && globalIssueTypes.includes(selectedIssueFilter)) {
       ${labelMap[selectedIssueFilter]}
     </span>
   `;
-
-  return; 
 }
   if (topSlot) {
   box.classList.remove('hidden');
