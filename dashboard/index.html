@@ -615,7 +615,30 @@ filteredRows.forEach(r => {
 
   uniqueSlotPageSet.add(`${dateKey}__${r.pageUrl}__${r.slotId}`);
 });
+const securityWidget = document.getElementById('securityWidget');
+const securityList = document.getElementById('securityList');
+const securityCountEl = document.getElementById('securityCount');
 
+const totalSecurity = Object.values(securityCounts)
+  .reduce((a, b) => a + b, 0);
+
+if (totalSecurity > 0) {
+  securityWidget.classList.remove('hidden');
+  securityCountEl.textContent =
+    `${totalSecurity} signal${totalSecurity > 1 ? 's' : ''}`;
+
+  securityList.innerHTML = Object.entries(securityCounts)
+    .map(([label, count]) => `
+      <li class="flex justify-between items-center">
+        <span>${label}</span>
+        <span class="text-gray-500">${count}</span>
+      </li>
+    `)
+    .join('');
+} else {
+  securityWidget.classList.add('hidden');
+  securityList.innerHTML = '';
+} 
 let totalImpactedSlots = uniqueSlotPageSet.size;
 
 const globalSlotsMap = new Map();
@@ -934,33 +957,6 @@ if (issueChart) {
     }
   }
 });
-}
-
-
- const securityWidget = document.getElementById('securityWidget');
-const securityList = document.getElementById('securityList');
-const securityCountEl = document.getElementById('securityCount');
-
-const totalSecurity = Object.values(securityCounts)
-  .reduce((a, b) => a + b, 0);
-
-if (totalSecurity > 0) {
-  securityWidget.classList.remove('hidden');
-  securityCountEl.textContent =
-    `${totalSecurity} signal${totalSecurity > 1 ? 's' : ''}`;
-
-  securityList.innerHTML = Object.entries(securityCounts)
-    .map(([label, count]) => `
-      <li class="flex justify-between items-center">
-        <span>${label}</span>
-        <span class="text-gray-500">${count}</span>
-      </li>
-    `)
-    .join('');
-} else {
-  securityWidget.classList.add('hidden');
-  securityList.innerHTML = '';
-} 
   
 if (severityChart) {
 
