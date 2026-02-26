@@ -22,9 +22,9 @@
   </script>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 
 <body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-white font-sans min-h-screen">
@@ -412,6 +412,7 @@ function getLastIssueTimestamp(rows) {
 }
 
 function renderDashboard(rows, selectedDate = null, selectedClient = '') {
+  document.getElementById('loadingIndicator').style.display = 'none';
   const filteredRows = rows.filter(r => {
   if (!r || !r.issueType || !r.receivedAt) return false;
 
@@ -773,7 +774,11 @@ document.getElementById('offenderIssue').innerHTML =
     box.classList.add('hidden');
   }
   
-const fullLabels = Object.keys(issueTypes);
+const fullEntries = Object.entries(issueTypes);
+const fullLabels = fullEntries.map(e => e[0]);
+const issueKeys = fullEntries.map(e =>
+  Object.keys(labelMap).find(k => labelMap[k] === e[0])
+);
 const labels = fullLabels.map(l => shortLabelMap[l] || l);
 const values = Object.values(issueTypes);
 
@@ -783,6 +788,8 @@ if (issueChart) {
 
   issueChart.data.labels = labels;
   issueChart.data.datasets[0].data = values;
+  issueChart.data.datasets[0].backgroundColor = bgColors;
+  issueChart.data.datasets[0].hoverBackgroundColor = bgColors;
   issueChart.update();
 
 } else {
@@ -806,10 +813,8 @@ if (issueChart) {
   if (!elements.length) return;
 
   const index = elements[0].index;
+  const issueKey = issueKeys[index];
   const fullLabel = fullLabels[index];
-
-  const issueKey = Object.keys(labelMap)
-    .find(k => labelMap[k] === fullLabel);
 
   if (!issueKey) return;
 
@@ -927,6 +932,7 @@ if (severityChart) {
 
   severityChart.data.labels = severityLabels;
   severityChart.data.datasets[0].data = severityData;
+  severityChart.data.datasets[0].backgroundColor = severityColors;
   severityChart.update();
 
 } else {
@@ -1119,8 +1125,6 @@ if (statusEl) {
     statusEl.classList.add('text-gray-400', 'dark:text-gray-500');
   }
 }
-
-document.getElementById('loadingIndicator').style.display = 'none';
 };
 }
 const darkModeBtn = document.getElementById('darkModeBtn');
@@ -1205,7 +1209,9 @@ if (fromParam) {
 window.history.replaceState({}, '', url);
 
   updateViewModeLabel(cameFromReality ? null : '');
+  requestAnimationFrame(() => {
   renderDashboard(allRows, '');
+});
 });
 
   issueFilter.addEventListener('change', () => {
