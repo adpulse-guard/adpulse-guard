@@ -815,7 +815,6 @@ if (isSingleDayView && totalIssues === 0)
 
 if (selectedIssueFilter && globalIssueTypes.includes(selectedIssueFilter)) {
 
-  const box = document.getElementById('topOffenderBox');
   box.classList.remove('hidden');
 
   document.querySelector('#topOffenderBox strong').textContent = 'Scope:';
@@ -827,26 +826,38 @@ if (selectedIssueFilter && globalIssueTypes.includes(selectedIssueFilter)) {
 
   const pages = [
     ...new Set(
-      effectiveRows
-        .filter(r => r.issueType === selectedIssueFilter)
+      filteredRows
+        .filter(r =>
+          r.issueType === selectedIssueFilter &&
+          r.pageUrl
+          )
         .map(r => r.pageUrl)
+        .filter(Boolean)
     )
   ].sort();
 
-  document.getElementById('offenderPage').innerHTML = `
-    <div class="max-h-40 overflow-auto pr-1">
-      <ul class="list-disc list-inside space-y-1 text-xs">
-        ${pages.map(p => `
-          <li>
-            <a href="${p}" target="_blank"
-               class="text-indigo-400 hover:text-indigo-300 break-all">
-              ${p}
-            </a>
-          </li>
-        `).join('')}
-      </ul>
-    </div>
-  `;
+  if (pages.length) {
+    document.getElementById('offenderPage').innerHTML = `
+      <div class="max-h-40 overflow-auto pr-1">
+        <ul class="list-disc list-inside space-y-1 text-xs">
+          ${pages.map(p => `
+            <li>
+              <a href="${p}" target="_blank"
+                 class="text-indigo-400 hover:text-indigo-300 break-all">
+                ${p}
+              </a>
+            </li>
+          `).join('')}
+        </ul>
+      </div>
+    `;
+  } else {
+    document.getElementById('offenderPage').innerHTML = `
+      <span class="text-xs text-gray-400 italic">
+        No page URLs available for this filter
+      </span>
+    `;
+  }
 
   document.getElementById('offenderIssue').innerHTML = `
     <span class="inline-flex items-center
@@ -857,8 +868,8 @@ if (selectedIssueFilter && globalIssueTypes.includes(selectedIssueFilter)) {
       ${labelMap[selectedIssueFilter]}
     </span>
   `;
-}
-  if (topSlot) {
+
+} else if (topSlot) {
   box.classList.remove('hidden');
 
   const offenderSlotEl = document.getElementById('offenderSlot');
