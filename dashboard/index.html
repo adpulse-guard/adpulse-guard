@@ -431,7 +431,6 @@ function renderDashboard(rows, selectedDate = null, selectedClient = '') {
   const isSingleDayView = !!selectedDate;  
   const pageMaxRisk = new Map(); 
 
-  
   filteredRows.forEach(r => {
 
   if (!r || !r.issueType || !r.receivedAt) return;
@@ -470,32 +469,33 @@ const isRevenueEligible =
 
   severities[sev] = (severities[sev] || 0) + 1;
 
-if (isRevenueEligible) {
+  if (isRevenueEligible) {
 
-  const total = Number(r.estimatedDailyRevenueRisk || 0);
-  const slots = Number(r.affectedSlotCount || 0);
+    const total = Number(r.estimatedDailyRevenueRisk || 0);
+    const slots = Number(r.affectedSlotCount || 0);
 
-  let revenue;
+    let revenue;
 
-  if (selectedIssueFilter) {
-    revenue = slots > 0 ? total / slots : 0;
+    if (selectedIssueFilter) {
+      revenue = slots > 0 ? total / slots : 0;
 
-    const key = `${dateKey}__${r.pageUrl}__${r.slotId}`;
+      const key = `${dateKey}__${r.pageUrl}__${r.slotId}`;
 
-    if (!pageMaxRisk.has(key) || revenue > pageMaxRisk.get(key).revenue) {
-      pageMaxRisk.set(key, { revenue });
-    }
+      if (!pageMaxRisk.has(key) || revenue > pageMaxRisk.get(key).revenue) {
+        pageMaxRisk.set(key, { revenue });
+      }
 
-  } else {
-    revenue = total;
+    } else {
+      revenue = total;
 
-    const key = `${dateKey}__${r.pageUrl}`;
+      const key = `${dateKey}__${r.pageUrl}`;
 
-    if (!pageMaxRisk.has(key) || revenue > pageMaxRisk.get(key).revenue) {
-      pageMaxRisk.set(key, { revenue });
+      if (!pageMaxRisk.has(key) || revenue > pageMaxRisk.get(key).revenue) {
+        pageMaxRisk.set(key, { revenue });
+      }
     }
   }
-}
+});
 
 const affectedSlots = new Set();
 
@@ -772,7 +772,6 @@ document.getElementById('offenderIssue').innerHTML =
   } else {
     box.classList.add('hidden');
   }
-  if (issueChart) issueChart.destroy();
   
 const fullLabels = Object.keys(issueTypes);
 const labels = fullLabels.map(l => shortLabelMap[l] || l);
@@ -780,7 +779,15 @@ const values = Object.values(issueTypes);
 
 const bgColors = labels.map(() => APG_BRAND.primary);
 
-issueChart = new Chart(issueChartEl, {
+if (issueChart) {
+
+  issueChart.data.labels = labels;
+  issueChart.data.datasets[0].data = values;
+  issueChart.update();
+
+} else {
+
+  issueChart = new Chart(issueChartEl, {
   type: 'bar',
   data: {
     labels: labels,
@@ -814,7 +821,9 @@ issueChart = new Chart(issueChartEl, {
     `Showing impact related to: ${fullLabel}`;
   issueFilterNote.classList.remove('hidden');
 
+  requestAnimationFrame(() => {
   renderDashboard(allRows, activeDate);
+});
 },
 
     plugins: {
@@ -872,7 +881,7 @@ issueChart = new Chart(issueChartEl, {
     }
   }
 });
-
+}
 const isDark = document.documentElement.classList.contains('dark');
 const severityColorMap = {
   HIGH: isDark ? 'rgba(239,68,68,0.85)' : 'rgba(220,38,38,0.85)',
@@ -914,8 +923,15 @@ if (totalSecurity > 0) {
   securityList.innerHTML = '';
 } 
   
-if (severityChart) severityChart.destroy();
-severityChart = new Chart(severityChartEl, {
+if (severityChart) {
+
+  severityChart.data.labels = severityLabels;
+  severityChart.data.datasets[0].data = severityData;
+  severityChart.update();
+
+} else {
+
+  severityChart = new Chart(severityChartEl, {
   type: 'pie',
   data: {
     labels: severityLabels,
@@ -980,7 +996,7 @@ severityChart = new Chart(severityChartEl, {
 }
   }
 });
-
+}
 if (isSingleDayView) {
   if (lossTrendChart) {
     lossTrendChart.destroy();
@@ -990,9 +1006,17 @@ if (isSingleDayView) {
 } else {
   lossChartWrapper.style.display = 'block';
 
-  if (lossTrendChart) lossTrendChart.destroy();
-
   const sortedDates = Object.keys(dailyTotals).sort();
+
+if (lossTrendChart) {
+
+  lossTrendChart.data.labels = sortedDates;
+  lossTrendChart.data.datasets[0].data =
+    sortedDates.map(d => dailyTotals[d]);
+
+  lossTrendChart.update();
+
+} else {
 
   lossTrendChart = new Chart(lossTrendChartEl, {
     type: 'line',
@@ -1097,7 +1121,7 @@ if (statusEl) {
 }
 
 document.getElementById('loadingIndicator').style.display = 'none';
-});
+};
 }
 const darkModeBtn = document.getElementById('darkModeBtn');
 const modeLabel = document.getElementById('modeLabel');
@@ -1107,7 +1131,10 @@ darkModeBtn.addEventListener('click', () => {
   const isDark = document.documentElement.classList.toggle('dark');
   localStorage.setItem('theme', isDark ? 'dark' : 'light');
   modeLabel.textContent = isDark ? 'Light Mode' : 'Dark Mode';
-  renderDashboard(allRows, activeDate);
+
+  if (issueChart) issueChart.update();
+  if (severityChart) severityChart.update();
+  if (lossTrendChart) lossTrendChart.update();
 });
 
 let renderedFromCache = false;
@@ -1118,7 +1145,9 @@ if (cached && Date.now() - cached.ts < CACHE_TTL) {
 
   if (activeDate) dateInput.value = activeDate;
   updateViewModeLabel(cameFromReality ? null : activeDate);
+  requestAnimationFrame(() => {
   renderDashboard(allRows, activeDate);
+});
 }
 fetch(`${SHEET_URL}?token=${token}`)
   .then(r => r.json())
@@ -1132,7 +1161,9 @@ fetch(`${SHEET_URL}?token=${token}`)
   if (renderedFromCache) return;
   if (activeDate) dateInput.value = activeDate;
     updateViewModeLabel(cameFromReality ? null : activeDate);
+    requestAnimationFrame(() => {
     renderDashboard(allRows, activeDate);
+});
   })
   .catch((error) => {
     console.error('Error fetching data:', error);
@@ -1156,7 +1187,9 @@ if (fromParam) {
 }
   window.history.replaceState({}, '', url);
   updateViewModeLabel(cameFromReality ? null : activeDate);
+  requestAnimationFrame(() => {
   renderDashboard(allRows, activeDate);
+});
 });
 
 clearDate.addEventListener('click', () => {
@@ -1186,7 +1219,9 @@ window.history.replaceState({}, '', url);
     issueFilterNote.classList.add('hidden');
   }
   updateIssueClearVisibility();
+  requestAnimationFrame(() => {
   renderDashboard(allRows, activeDate);
+});
 });
   clearIssueFilterBtn.addEventListener('click', () => {
   selectedIssueFilter = '';
@@ -1194,7 +1229,9 @@ window.history.replaceState({}, '', url);
   issueFilterNote.classList.add('hidden');
   issueFilter.blur();
   updateIssueClearVisibility();
+  requestAnimationFrame(() => {
   renderDashboard(allRows, activeDate);
+});
 });
   updateIssueClearVisibility();
 </script>
