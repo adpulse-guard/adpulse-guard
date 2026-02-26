@@ -93,27 +93,11 @@
     Filter by Incident Type
   </span>
   <select
-    id="issueFilter"
-    class="px-2 py-1 text-sm border rounded dark:bg-darkcard"
-  >
-    <option value="">All Incident Types</option>
-    <option value="gpt_script_missing">GPT script not detected</option>
-    <option value="slot_container_collapsed">Slot container collapsed</option>
-    <option value="gpt_loaded_but_not_initialized">GPT Loaded but not initialized</option>
-    <option value="gpt_no_slot_requests">No GPT slot requests</option>
-    <option value="wrong_network">Incorrect Ad Network ID</option>
-    <option value="slot_not_registered">DOM slot not in GPT</option>
-    <option value="phantom_slot_requested">Phantom slot requested</option>
-    <option value="defined_without_dom_no_request">GPT slot defined without DOM</option>
-    <option value="empty_response">No ad response returned</option>
-    <option value="unexpected_size">Unexpected size</option>
-    <option value="layout_overlap">Layout overlap</option>
-    <option value="ad_visibility_impaired">Ad visibility impaired</option>
-    <option value="token_invalid">Invalid security token</option>
-    <option value="clientId_mismatch">Client ID mismatch</option>
-    <option value="expectedNetworkId_mismatch">Network ID configuration mismatch</option>
-    <option value="unauthorized_domain">Unauthorized domain</option>
-  </select>
+  id="issueFilter"
+  class="px-2 py-1 text-sm border rounded dark:bg-darkcard"
+>
+  <option value="">All Incident Types</option>
+</select>
   <button
   id="clearIssueFilter"
   class="hidden inline-flex items-center justify-center
@@ -326,8 +310,74 @@ const labelMap = {
   'expectedNetworkId_mismatch',
   'unauthorized_domain'
 ];
-    
-    const APG_BRAND = {
+  const ISSUE_GROUPS = {
+  DELIVERY: [
+    'gpt_script_missing',
+    'gpt_loaded_but_not_initialized',
+    'gpt_no_slot_requests',
+    'empty_response',
+    'phantom_slot_requested',
+    'defined_without_dom_no_request',
+    'slot_not_registered',
+    'wrong_network'
+  ],
+  LAYOUT: [
+    'unexpected_size',
+    'layout_overlap',
+    'ad_visibility_impaired',
+    'slot_container_collapsed'
+  ],
+  SECURITY: [
+    'token_invalid',
+    'clientId_mismatch',
+    'expectedNetworkId_mismatch',
+    'unauthorized_domain'
+  ]
+};  
+
+function buildIssueDropdown(issueCounts) {
+  const select = document.getElementById('issueFilter');
+  const currentValue = selectedIssueFilter;
+
+  select.innerHTML = `
+    <option value="">All Incident Types</option>
+  `;
+
+  const groupTitles = {
+    DELIVERY: '— Delivery & Rendering —',
+    LAYOUT: '— Layout & Visibility —',
+    SECURITY: '— Security & Access —'
+  };
+
+  Object.entries(ISSUE_GROUPS).forEach(([groupKey, issues]) => {
+
+    const groupHeader = document.createElement('option');
+    groupHeader.textContent = groupTitles[groupKey];
+    groupHeader.disabled = true;
+    select.appendChild(groupHeader);
+
+    issues.forEach(issueKey => {
+      const label = labelMap[issueKey];
+      if (!label) return;
+
+      const count = issueCounts[label] || 0;
+
+      const option = document.createElement('option');
+      option.value = issueKey;
+      option.textContent = `${label} (${count})`;
+
+      if (count === 0) {
+        option.disabled = true;
+        option.style.color = '#9ca3af';
+      }
+
+      select.appendChild(option);
+    });
+  });
+
+  select.value = currentValue || '';
+}
+  const APG_BRAND = {
   primary: '#6366f1',        
   primarySoft: '#818cf8',
 
@@ -943,7 +993,8 @@ document.getElementById('offenderIssue').innerHTML =
   }
   
 const barEntries = Object.entries(issueTypes);
-
+buildIssueDropdown(issueTypes);
+updateIssueClearVisibility();
 const fullLabels = [];
 const issueKeys = [];
 const values = [];
