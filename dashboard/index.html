@@ -470,17 +470,31 @@ const isRevenueEligible =
 
   severities[sev] = (severities[sev] || 0) + 1;
 
-  if (isRevenueEligible) {
+if (isRevenueEligible) {
 
-  const key = selectedIssueFilter
-  ? `${dateKey}__${r.pageUrl}__${r.issueType}`
-  : `${dateKey}__${r.pageUrl}`;
-  const revenue = Number(r.estimatedDailyRevenueRisk || 0);
-  const ts = new Date(r.receivedAt).getTime();
+  const total = Number(r.estimatedDailyRevenueRisk || 0);
+  const slots = Number(r.affectedSlotCount || 0);
 
-  if (!pageMaxRisk.has(key) || revenue > pageMaxRisk.get(key).revenue) {
-  pageMaxRisk.set(key, { revenue });
-}
+  let revenue;
+
+  if (selectedIssueFilter) {
+    revenue = slots > 0 ? total / slots : 0;
+
+    const key = `${dateKey}__${r.pageUrl}__${r.slotId}`;
+
+    if (!pageMaxRisk.has(key) || revenue > pageMaxRisk.get(key).revenue) {
+      pageMaxRisk.set(key, { revenue });
+    }
+
+  } else {
+    revenue = total;
+
+    const key = `${dateKey}__${r.pageUrl}`;
+
+    if (!pageMaxRisk.has(key) || revenue > pageMaxRisk.get(key).revenue) {
+      pageMaxRisk.set(key, { revenue });
+    }
+  }
 }
 
 const affectedSlots = new Set();
