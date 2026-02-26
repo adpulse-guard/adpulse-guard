@@ -351,29 +351,40 @@ function buildIssueDropdown(issueCounts) {
 
   Object.entries(ISSUE_GROUPS).forEach(([groupKey, issues]) => {
 
-    const groupHeader = document.createElement('option');
-    groupHeader.textContent = groupTitles[groupKey];
-    groupHeader.disabled = true;
-    select.appendChild(groupHeader);
+  const enriched = issues.map(issueKey => {
+    const label = labelMap[issueKey];
+    if (!label) return null;
 
-    issues.forEach(issueKey => {
-      const label = labelMap[issueKey];
-      if (!label) return;
+    return {
+      key: issueKey,
+      label,
+      count: issueCounts[label] || 0
+    };
+  }).filter(Boolean);
 
-      const count = issueCounts[label] || 0;
+  enriched.sort((a, b) => b.count - a.count);
 
-      const option = document.createElement('option');
-      option.value = issueKey;
-      option.textContent = `${label} (${count})`;
+  if (enriched.every(e => e.count === 0)) return;
 
-      if (count === 0) {
-        option.disabled = true;
-        option.style.color = '#9ca3af';
-      }
+  const groupHeader = document.createElement('option');
+  groupHeader.textContent = groupTitles[groupKey];
+  groupHeader.disabled = true;
+  select.appendChild(groupHeader);
 
-      select.appendChild(option);
-    });
+  enriched.forEach(({ key, label, count }) => {
+
+    const option = document.createElement('option');
+    option.value = key;
+    option.textContent = `${label} (${count})`;
+
+    if (count === 0) {
+      option.disabled = true;
+      option.style.color = '#9ca3af';
+    }
+
+    select.appendChild(option);
   });
+});
 
   select.value = currentValue || '';
 }
