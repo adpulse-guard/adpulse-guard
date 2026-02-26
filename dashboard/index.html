@@ -593,41 +593,14 @@ if (!selectedIssueFilter) {
   ];
 
   if (globalIssueTypes.includes(selectedIssueFilter)) {
-
   affectedSlotsPanel.classList.remove('hidden');
-
-  const impactedPages = new Set();
-
-  effectiveRows.forEach(r => {
-    if (
-      r.issueType === selectedIssueFilter &&
-      r.pageUrl
-    ) {
-      impactedPages.add(r.pageUrl);
-    }
-  });
-
-  const pageList = Array.from(impactedPages).sort();
-
   affectedSlotsList.innerHTML = `
-    <li class="text-xs text-gray-600 dark:text-gray-400 italic mb-2">
+    <li class="text-xs text-gray-600 dark:text-gray-400 italic">
       This incident impacts all ad slots on the page.
     </li>
-    ${pageList.map(p => `
-      <li class="font-sans text-xs tracking-tight text-gray-700 dark:text-gray-300 leading-relaxed">
-        <span class="text-gray-400 dark:text-gray-500 mr-1">•</span>
-        <a href="${p}" target="_blank"
-           class="text-indigo-500 hover:underline break-all">
-          ${p}
-        </a>
-      </li>
-    `).join('')}
   `;
-
 } else if (affectedSlots.size) {
-
   affectedSlotsPanel.classList.remove('hidden');
-
   affectedSlotsList.innerHTML = Array.from(affectedSlots)
     .sort()
     .map(s => `
@@ -636,7 +609,6 @@ if (!selectedIssueFilter) {
       </li>
     `)
     .join('');
-
 } else {
   affectedSlotsPanel.classList.add('hidden');
   affectedSlotsList.innerHTML = '';
@@ -855,9 +827,24 @@ if (isSingleDayView && totalIssues === 0)
   document.getElementById('offenderLoss').textContent =
     `$${topLoss.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 
-    const pages = Array.from(topSlot.pages);
+const offenderPagesSet = new Set();
 
-document.getElementById('offenderPage').innerHTML = `
+if (topSlot && topSlot.issues && topSlot.issues.size) {
+  effectiveRows.forEach(r => {
+    if (!r || !r.pageUrl) return;
+
+    if (topSlot.issues.has(r.issueType)) {
+      const sev = (r.severity || '').toUpperCase();
+      if (['HIGH','MEDIUM'].includes(sev)) {
+        offenderPagesSet.add(r.pageUrl);
+      }
+    }
+  });
+}
+
+const pages = Array.from(offenderPagesSet).sort();
+
+  document.getElementById('offenderPage').innerHTML = `
   <div class="max-h-40 overflow-auto pr-1">
     <ul class="list-disc list-inside space-y-1 text-xs">
       ${pages.map(p =>
