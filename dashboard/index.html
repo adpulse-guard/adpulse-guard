@@ -495,13 +495,28 @@ function incidentKey(r) {
   const dateKey = (r.receivedAt || '').split('T')[0] || '';
   const slot = r.slotId || '__global__';
   const page = r.pageUrl || '';
-  // Ako ima pageLoadId — idealno. Ako nema — fallback na (date+page+slot+issue).
   return r.pageLoadId
     ? `${r.pageLoadId}__${r.issueType}__${slot}`
     : `${dateKey}__${page}__${r.issueType}__${slot}`;
 }
-function renderDashboard(rows, selectedDate = null, selectedClient = '') {
+  function renderDashboard(rows, selectedDate = null, selectedClient = '') {
   document.getElementById('loadingIndicator').style.display = 'none';
+  const baseRows = rows.filter(r => {
+  if (!r || !r.issueType || !r.receivedAt) return false;
+
+  const dateKey = r.receivedAt.split('T')[0];
+
+  if (selectedDate && dateKey !== selectedDate) return false;
+
+  return true;
+});
+  const dropdownIssueTypes = {};
+
+baseRows.forEach(r => {
+  const label = labelMap[r.issueType] || r.issueType;
+  dropdownIssueTypes[label] =
+    (dropdownIssueTypes[label] || 0) + 1;
+});
   const filteredRows = rows.filter(r => {
   if (!r || !r.issueType || !r.receivedAt) return false;
 
@@ -1020,7 +1035,7 @@ document.getElementById('offenderIssue').innerHTML =
   }
   
 const barEntries = Object.entries(issueTypes);
-buildIssueDropdown(issueTypes);
+buildIssueDropdown(dropdownIssueTypes);
 updateIssueClearVisibility();
 const fullLabels = [];
 const issueKeys = [];
