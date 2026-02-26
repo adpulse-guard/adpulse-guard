@@ -441,8 +441,36 @@ function renderDashboard(rows, selectedDate = null, selectedClient = '') {
   const pageMaxRisk = new Map();
   const issueDedupeSet = new Set();
   const severityDedupeSet = new Set();
+  const lifecycleMap = new Map();
 
   filteredRows.forEach(r => {
+  if (!r || !r.issueType || !r.receivedAt) return;
+
+  const dateKey = r.receivedAt.split('T')[0];
+  const key = `${dateKey}__${r.pageUrl}__${r.slotId}__${r.issueType}`;
+
+  if (!lifecycleMap.has(key)) {
+    lifecycleMap.set(key, []);
+  }
+
+  lifecycleMap.get(key).push(r);
+});
+
+  const lifecycleFilteredRows = [];
+
+  lifecycleMap.forEach(records => {
+  const finalRecord = records.find(
+  r => (r.phase || '').toLowerCase() === 'final'
+);
+
+  if (finalRecord) {
+    lifecycleFilteredRows.push(finalRecord);
+  } else {
+    lifecycleFilteredRows.push(records[0]);
+  }
+});
+  const effectiveRows = lifecycleFilteredRows;
+  effectiveRows.forEach(r => {
 
   if (!r || !r.issueType || !r.receivedAt) return;
 
@@ -543,7 +571,7 @@ const severityColors = severityLabels.map(
 );
 const affectedSlots = new Set();
 
-filteredRows.forEach(r => {
+effectiveRows.forEach(r => {
   if (!r || !r.slotId || !r.issueType || !r.receivedAt) return;
 
   const dateKey = r.receivedAt.split('T')[0];
@@ -597,7 +625,7 @@ const totalIssues = Object.values(issueTypes)
 
 const uniqueSlotPageSet = new Set();
 
-filteredRows.forEach(r => {
+effectiveRows.forEach(r => {
   if (!r || !r.slotId || !r.receivedAt) return;
 
   const dateKey = r.receivedAt.split('T')[0];
@@ -643,7 +671,7 @@ let totalImpactedSlots = uniqueSlotPageSet.size;
 
 const globalSlotsMap = new Map();
 
-filteredRows.forEach(r => {
+effectiveRows.forEach(r => {
   if (!r || !r.receivedAt || !r.pageUrl) return;
 
   const dateKey = r.receivedAt.split('T')[0];
@@ -688,7 +716,7 @@ pageMaxRisk.forEach((obj, key) => {
 
 const slotPageRevenueMap = new Map();
 
-filteredRows.forEach(r => {
+effectiveRows.forEach(r => {
   if (!r.slotId || !r.pageUrl || !r.receivedAt) return;
 
   const dateKey = r.receivedAt.split('T')[0];
@@ -734,7 +762,7 @@ slotPageRevenueMap.forEach((revenue, key) => {
   slotData.pages.add(pageUrl);
 });
 
-filteredRows.forEach(r => {
+effectiveRows.forEach(r => {
   if (!r.slotId) return;
   if (!slotAggregatedMap.has(r.slotId)) return;
   const dateKey = r.receivedAt.split('T')[0];
@@ -1112,7 +1140,7 @@ if (lossTrendChart) {
   });
 }
 }
-const lastIssueTs = getLastIssueTimestamp(filteredRows);
+const lastIssueTs = getLastIssueTimestamp(effectiveRows);
 
 let minutesAgo = null;
 if (lastIssueTs) {
