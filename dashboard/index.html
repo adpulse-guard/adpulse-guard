@@ -410,7 +410,15 @@ function getLastIssueTimestamp(rows) {
 
   return timestamps.length ? Math.max(...timestamps) : null;
 }
-
+function incidentKey(r) {
+  const dateKey = (r.receivedAt || '').split('T')[0] || '';
+  const slot = r.slotId || '__global__';
+  const page = r.pageUrl || '';
+  // Ako ima pageLoadId — idealno. Ako nema — fallback na (date+page+slot+issue).
+  return r.pageLoadId
+    ? `${r.pageLoadId}__${r.issueType}__${slot}`
+    : `${dateKey}__${page}__${r.issueType}__${slot}`;
+}
 function renderDashboard(rows, selectedDate = null, selectedClient = '') {
   document.getElementById('loadingIndicator').style.display = 'none';
   const filteredRows = rows.filter(r => {
@@ -458,7 +466,7 @@ const isRevenueEligible =
 
   if (isSecurity) {
 
-  const securityKey = `${r.pageLoadId || ''}__${r.issueType}`;
+  const securityKey = incidentKey(r);
 
   if (!issueDedupeSet.has(securityKey)) {
     issueDedupeSet.add(securityKey);
@@ -468,14 +476,13 @@ const isRevenueEligible =
 
 } else {
 
-  const dedupeKey =
-    `${r.pageLoadId || ''}__${r.issueType}__${r.slotId || ''}`;
+  const dedupeKey = incidentKey(r);
 
-  if (!issueDedupeSet.has(dedupeKey)) {
-    issueDedupeSet.add(dedupeKey);
-    issueTypes[typeLabel] =
-      (issueTypes[typeLabel] || 0) + 1;
-  }
+if (!issueDedupeSet.has(dedupeKey)) {
+  issueDedupeSet.add(dedupeKey);
+  issueTypes[typeLabel] =
+    (issueTypes[typeLabel] || 0) + 1;
+}
 
 }
 
@@ -485,10 +492,9 @@ const isRevenueEligible =
       ? rawSev
       : 'INFO';
 
-  const severityKey =
-  `${r.pageLoadId || ''}__${r.issueType}__${r.slotId || ''}`;
+  const severityKey = incidentKey(r);
 
-if (!severityDedupeSet.has(severityKey)) {
+  if (!severityDedupeSet.has(severityKey)) {
   severityDedupeSet.add(severityKey);
   severities[sev] = (severities[sev] || 0) + 1;
 }
@@ -797,35 +803,30 @@ document.getElementById('offenderIssue').innerHTML =
     box.classList.add('hidden');
   }
   
-const fullEntries = Object.entries(issueTypes);
+const barEntries = Object.entries(issueTypes);
 
 const fullLabels = [];
 const issueKeys = [];
 const values = [];
 const labels = [];
 
-fullEntries.forEach(([label, count]) => {
+barEntries.forEach(([label, count]) => {
+
   fullLabels.push(label);
   values.push(count);
   labels.push(shortLabelMap[label] || label);
 
-  const key = Object.keys(labelMap)
-    .find(k => labelMap[k] === label);
+  const issueKey = Object.entries(labelMap)
+    .find(([k, v]) => v === label)?.[0];
 
-  issueKeys.push(key);
+  issueKeys.push(issueKey || '');
 });
 
 const bgColors = labels.map(() => APG_BRAND.primary);
 
 if (issueChart) {
-
-  issueChart.data.labels = labels;
-  issueChart.data.datasets[0].data = values;
-  issueChart.data.datasets[0].backgroundColor = bgColors;
-  issueChart.data.datasets[0].hoverBackgroundColor = bgColors;
-  issueChart.update();
-
-} else {
+  issueChart.destroy();
+}
 
   issueChart = new Chart(issueChartEl, {
   type: 'bar',
