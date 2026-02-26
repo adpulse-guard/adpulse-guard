@@ -430,7 +430,9 @@ function renderDashboard(rows, selectedDate = null, selectedClient = '') {
   const severities = {};
   const dailyTotals = {};
   const isSingleDayView = !!selectedDate;  
-  const pageMaxRisk = new Map(); 
+  const pageMaxRisk = new Map();
+  const issueDedupeSet = new Set();
+  const severityDedupeSet = new Set();
 
   filteredRows.forEach(r => {
 
@@ -455,12 +457,27 @@ const isRevenueEligible =
   const typeLabel = labelMap[r.issueType] || r.issueType;
 
   if (isSecurity) {
+
+  const securityKey = `${r.pageLoadId || ''}__${r.issueType}`;
+
+  if (!issueDedupeSet.has(securityKey)) {
+    issueDedupeSet.add(securityKey);
     securityCounts[typeLabel] =
       (securityCounts[typeLabel] || 0) + 1;
-  } else {
+  }
+
+} else {
+
+  const dedupeKey =
+    `${r.pageLoadId || ''}__${r.issueType}__${r.slotId || ''}`;
+
+  if (!issueDedupeSet.has(dedupeKey)) {
+    issueDedupeSet.add(dedupeKey);
     issueTypes[typeLabel] =
       (issueTypes[typeLabel] || 0) + 1;
   }
+
+}
 
   const rawSev = (r.severity || 'INFO').toUpperCase();
   const sev =
@@ -468,7 +485,13 @@ const isRevenueEligible =
       ? rawSev
       : 'INFO';
 
+  const severityKey =
+  `${r.pageLoadId || ''}__${r.issueType}__${r.slotId || ''}`;
+
+if (!severityDedupeSet.has(severityKey)) {
+  severityDedupeSet.add(severityKey);
   severities[sev] = (severities[sev] || 0) + 1;
+}
 
   if (isRevenueEligible) {
 
@@ -775,12 +798,22 @@ document.getElementById('offenderIssue').innerHTML =
   }
   
 const fullEntries = Object.entries(issueTypes);
-const fullLabels = fullEntries.map(e => e[0]);
-const issueKeys = fullEntries.map(e =>
-  Object.keys(labelMap).find(k => labelMap[k] === e[0])
-);
-const labels = fullLabels.map(l => shortLabelMap[l] || l);
-const values = Object.values(issueTypes);
+
+const fullLabels = [];
+const issueKeys = [];
+const values = [];
+const labels = [];
+
+fullEntries.forEach(([label, count]) => {
+  fullLabels.push(label);
+  values.push(count);
+  labels.push(shortLabelMap[label] || label);
+
+  const key = Object.keys(labelMap)
+    .find(k => labelMap[k] === label);
+
+  issueKeys.push(key);
+});
 
 const bgColors = labels.map(() => APG_BRAND.primary);
 
