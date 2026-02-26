@@ -472,7 +472,9 @@ const isRevenueEligible =
 
   if (isRevenueEligible) {
 
-  const key = `${dateKey}__${r.pageUrl}`;
+  const key = selectedIssueFilter
+  ? `${dateKey}__${r.pageUrl}__${r.issueType}`
+  : `${dateKey}__${r.pageUrl}`;
   const revenue = Number(r.estimatedDailyRevenueRisk || 0);
   const ts = new Date(r.receivedAt).getTime();
 
