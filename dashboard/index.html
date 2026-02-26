@@ -166,7 +166,7 @@
 
   <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center sm:col-span-1 flex flex-col justify-center">
     <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">
-      Slots at Risk
+      Revenue-Impacting Slots
     </div>
     <div id="slotCount" class="text-4xl font-bold">—</div>
   </div>
@@ -594,31 +594,53 @@ if (!selectedIssueFilter) {
 
   if (globalIssueTypes.includes(selectedIssueFilter)) {
 
-    affectedSlotsPanel.classList.remove('hidden');
+  affectedSlotsPanel.classList.remove('hidden');
 
-    affectedSlotsList.innerHTML = `
-      <li class="text-xs text-gray-600 dark:text-gray-400 italic">
-        This incident impacts all ad slots on the page.
+  const impactedPages = new Set();
+
+  effectiveRows.forEach(r => {
+    if (
+      r.issueType === selectedIssueFilter &&
+      r.pageUrl
+    ) {
+      impactedPages.add(r.pageUrl);
+    }
+  });
+
+  const pageList = Array.from(impactedPages).sort();
+
+  affectedSlotsList.innerHTML = `
+    <li class="text-xs text-gray-600 dark:text-gray-400 italic mb-2">
+      This incident impacts all ad slots on the page.
+    </li>
+    ${pageList.map(p => `
+      <li class="font-sans text-xs tracking-tight text-gray-700 dark:text-gray-300 leading-relaxed">
+        <span class="text-gray-400 dark:text-gray-500 mr-1">•</span>
+        <a href="${p}" target="_blank"
+           class="text-indigo-500 hover:underline break-all">
+          ${p}
+        </a>
       </li>
-    `;
+    `).join('')}
+  `;
 
-  } else if (affectedSlots.size) {
+} else if (affectedSlots.size) {
 
-    affectedSlotsPanel.classList.remove('hidden');
+  affectedSlotsPanel.classList.remove('hidden');
 
-    affectedSlotsList.innerHTML = Array.from(affectedSlots)
-      .sort()
-      .map(s => `
-        <li class="font-sans text-xs tracking-tight text-gray-700 dark:text-gray-300 leading-relaxed">
-          <span class="text-gray-400 dark:text-gray-500 mr-1">•</span>${s}
-        </li>
-      `)
-      .join('');
+  affectedSlotsList.innerHTML = Array.from(affectedSlots)
+    .sort()
+    .map(s => `
+      <li class="font-sans text-xs tracking-tight text-gray-700 dark:text-gray-300 leading-relaxed">
+        <span class="text-gray-400 dark:text-gray-500 mr-1">•</span>${s}
+      </li>
+    `)
+    .join('');
 
-  } else {
-    affectedSlotsPanel.classList.add('hidden');
-    affectedSlotsList.innerHTML = '';
-  }
+} else {
+  affectedSlotsPanel.classList.add('hidden');
+  affectedSlotsList.innerHTML = '';
+}
 }
 const totalIssues = Object.values(issueTypes)
   .reduce((a, b) => a + b, 0);
