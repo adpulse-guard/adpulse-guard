@@ -805,7 +805,63 @@ if (isSingleDayView && totalIssues === 0)
   });
 }
   const box = document.getElementById('topOffenderBox');
+  const globalIssueTypes = [
+  'gpt_script_missing',
+  'gpt_loaded_but_not_initialized',
+  'gpt_no_slot_requests'
+];
 
+if (selectedIssueFilter && globalIssueTypes.includes(selectedIssueFilter)) {
+
+  const box = document.getElementById('topOffenderBox');
+  box.classList.remove('hidden');
+
+  // Scope
+  document.querySelector('#topOffenderBox strong').textContent = 'Scope:';
+  document.getElementById('offenderSlot').textContent =
+    'Page-level impact (all ad slots)';
+
+  // Estimated Impact (ostavi kako je već izračunat)
+  document.getElementById('offenderLoss').textContent =
+    `$${dedupedTotalLoss.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+
+  // Unique pages
+  const pages = [
+    ...new Set(
+      effectiveRows
+        .filter(r => r.issueType === selectedIssueFilter)
+        .map(r => r.pageUrl)
+    )
+  ].sort();
+
+  document.getElementById('offenderPage').innerHTML = `
+    <div class="max-h-40 overflow-auto pr-1">
+      <ul class="list-disc list-inside space-y-1 text-xs">
+        ${pages.map(p => `
+          <li>
+            <a href="${p}" target="_blank"
+               class="text-indigo-400 hover:text-indigo-300 break-all">
+              ${p}
+            </a>
+          </li>
+        `).join('')}
+      </ul>
+    </div>
+  `;
+
+  // Incident badge
+  document.getElementById('offenderIssue').innerHTML = `
+    <span class="inline-flex items-center
+           bg-indigo-50 text-indigo-600
+           dark:bg-indigo-900/30 dark:text-indigo-300
+           text-xs px-2 py-0.5 rounded
+           font-medium tracking-tight">
+      ${labelMap[selectedIssueFilter]}
+    </span>
+  `;
+
+  return; 
+}
   if (topSlot) {
   box.classList.remove('hidden');
 
