@@ -526,7 +526,21 @@ if (!issueDedupeSet.has(dedupeKey)) {
     }
   }
 });
+const isDark = document.documentElement.classList.contains('dark');
+const severityColorMap = {
+  HIGH: isDark ? 'rgba(239,68,68,0.85)' : 'rgba(220,38,38,0.85)',
+  MEDIUM: APG_BRAND.warning,
+  LOW: APG_BRAND.primarySoft,
+  INFO: isDark
+  ? '#6b7280'     
+  : '#9ca3af'     
+};
 
+const severityLabels = Object.keys(severities);
+const severityData = Object.values(severities);
+const severityColors = severityLabels.map(
+  s => severityColorMap[s] || '#9ca3af'
+);
 const affectedSlots = new Set();
 
 filteredRows.forEach(r => {
@@ -921,21 +935,7 @@ if (issueChart) {
   }
 });
 }
-const isDark = document.documentElement.classList.contains('dark');
-const severityColorMap = {
-  HIGH: isDark ? 'rgba(239,68,68,0.85)' : 'rgba(220,38,38,0.85)',
-  MEDIUM: APG_BRAND.warning,
-  LOW: APG_BRAND.primarySoft,
-  INFO: isDark
-  ? '#6b7280'     
-  : '#9ca3af'     
-};
 
-const severityLabels = Object.keys(severities);
-const severityData = Object.values(severities);
-const severityColors = severityLabels.map(
-  s => severityColorMap[s] || '#9ca3af'
-);
 
  const securityWidget = document.getElementById('securityWidget');
 const securityList = document.getElementById('securityList');
