@@ -369,7 +369,23 @@ function buildIssueDropdown(issueCounts) {
   const groupHeader = document.createElement('option');
   groupHeader.textContent = groupTitles[groupKey];
   groupHeader.disabled = true;
-  select.appendChild(groupHeader);
+
+if (groupKey === 'DELIVERY') {
+  groupHeader.style.color = '#6366f1'; 
+  groupHeader.style.fontWeight = '600';
+}
+
+if (groupKey === 'LAYOUT') {
+  groupHeader.style.color = '#d97706'; 
+  groupHeader.style.fontWeight = '600';
+}
+
+if (groupKey === 'SECURITY') {
+  groupHeader.style.color = '#64748b'; 
+  groupHeader.style.fontWeight = '600';
+}
+
+select.appendChild(groupHeader);
 
   enriched.forEach(({ key, label, count }) => {
 
