@@ -255,6 +255,7 @@ const params = new URLSearchParams(window.location.search);
 const fromParam = params.get('from');
 const token = params.get('token');
 let activeDate = params.get('date') || '';
+let selectedIssueFilter = params.get('issue') || '';
 const cameFromReality = fromParam === 'reality';
 const affectedSlotsPanel = document.getElementById('affectedSlotsPanel');
 const affectedSlotsList = document.getElementById('affectedSlotsList');
@@ -354,8 +355,9 @@ const issueFilter = document.getElementById('issueFilter');
 const issueFilterNote = document.getElementById('issueFilterNote');
 const clearIssueFilterBtn = document.getElementById('clearIssueFilter');
 const lossChartWrapper = document.getElementById('lossChartWrapper');
-
-let selectedIssueFilter = '';
+if (selectedIssueFilter) {
+  issueFilter.value = selectedIssueFilter;
+}
 function updateIssueClearVisibility() {
   if (selectedIssueFilter) {
     clearIssueFilterBtn.classList.remove('hidden');
@@ -1341,6 +1343,15 @@ window.history.replaceState({}, '', url);
 
   issueFilter.addEventListener('change', () => {
   selectedIssueFilter = issueFilter.value;
+  const url = new URL(window.location);
+
+if (selectedIssueFilter) {
+  url.searchParams.set('issue', selectedIssueFilter);
+} else {
+  url.searchParams.delete('issue');
+}
+
+window.history.replaceState({}, '', url);
 
   if (selectedIssueFilter) {
     const label = labelMap[selectedIssueFilter] || selectedIssueFilter;
@@ -1355,6 +1366,9 @@ window.history.replaceState({}, '', url);
 });
 });
   clearIssueFilterBtn.addEventListener('click', () => {
+  const url = new URL(window.location);
+  url.searchParams.delete('issue');
+  window.history.replaceState({}, '', url);
   selectedIssueFilter = '';
   issueFilter.value = '';
   issueFilterNote.classList.add('hidden');
