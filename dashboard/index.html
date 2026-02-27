@@ -566,6 +566,19 @@ baseRows.forEach(r => {
   }
 });
   const effectiveRows = lifecycleFilteredRows;
+  const GLOBAL_TYPES = [
+  'gpt_script_missing',
+  'gpt_loaded_but_not_initialized',
+  'gpt_no_slot_requests'
+];
+
+const globalRow = effectiveRows.find(r =>
+  GLOBAL_TYPES.includes(r.issueType) &&
+  ['HIGH','MEDIUM'].includes((r.severity || '').toUpperCase())
+);
+
+const hasGlobal = !!globalRow;
+
   effectiveRows.forEach(r => {
 
   if (!r || !r.issueType || !r.receivedAt) return;
@@ -574,10 +587,7 @@ baseRows.forEach(r => {
 
   const isSecurity = SECURITY_ISSUES.includes(r.issueType);
 
-  const isGlobalType =
-  r.issueType === 'gpt_script_missing' ||
-  r.issueType === 'gpt_loaded_but_not_initialized' ||
-  r.issueType === 'gpt_no_slot_requests';
+  const isGlobalType = GLOBAL_TYPES.includes(r.issueType);
 
   const severity = (r.severity || '').toUpperCase();
 
@@ -624,14 +634,12 @@ if (!issueDedupeSet.has(dedupeKey)) {
 }
 
   if (isRevenueEligible) {
-
+    const isGlobalType = GLOBAL_TYPES.includes(r.issueType);
+    if (hasGlobal && !isGlobalType) {
+    return;
+  }
     const total = Number(r.estimatedDailyRevenueRisk || 0);
     const slots = Number(r.affectedSlotCount || 0);
-
-    const isGlobalType =
-    r.issueType === 'gpt_script_missing' ||
-    r.issueType === 'gpt_loaded_but_not_initialized' ||
-    r.issueType === 'gpt_no_slot_requests';
 
     let revenue;
 
@@ -741,10 +749,7 @@ effectiveRows.forEach(r => {
   const severity = (r.severity || '').toUpperCase();
   if (!['HIGH','MEDIUM'].includes(severity)) return;
 
-  const isGlobalType =
-    r.issueType === 'gpt_script_missing' ||
-    r.issueType === 'gpt_loaded_but_not_initialized' ||
-    r.issueType === 'gpt_no_slot_requests';
+  const isGlobalType = GLOBAL_TYPES.includes(r.issueType);
 
   if (isGlobalType) return;
 
@@ -774,23 +779,13 @@ if (totalSecurity > 0) {
   securityWidget.classList.add('hidden');
   securityList.innerHTML = '';
 } 
-let totalImpactedSlots = uniqueSlotPageSet.size;
-
 const globalSlotsMap = new Map();
 
 effectiveRows.forEach(r => {
-  if (!r || !r.receivedAt || !r.pageUrl) return;
+  if (!GLOBAL_TYPES.includes(r.issueType)) return;
+  if (!['HIGH','MEDIUM'].includes((r.severity || '').toUpperCase())) return;
 
-  const dateKey = r.receivedAt.split('T')[0];
-
-  const isGlobalType =
-    r.issueType === 'gpt_script_missing' ||
-    r.issueType === 'gpt_loaded_but_not_initialized' ||
-    r.issueType === 'gpt_no_slot_requests';
-
-  if (!isGlobalType) return;
-
-  const key = `${dateKey}__${r.pageUrl}`;
+  const key = `${r.receivedAt.split('T')[0]}__${r.pageUrl}`;
   const slots = Number(r.affectedSlotCount || 0);
 
   if (!globalSlotsMap.has(key)) {
@@ -806,7 +801,13 @@ effectiveRows.forEach(r => {
 const globalSlotsTotal = Array.from(globalSlotsMap.values())
   .reduce((a,b)=>a+b,0);
 
-totalImpactedSlots += globalSlotsTotal;
+let totalImpactedSlots;
+
+if (hasGlobal) {
+  totalImpactedSlots = globalSlotsTotal;
+} else {
+  totalImpactedSlots = uniqueSlotPageSet.size;
+}
 
 let dedupedTotalLoss = 0;
 
@@ -817,16 +818,6 @@ pageMaxRisk.forEach((obj, key) => {
   if (!dailyTotals[dateKey]) dailyTotals[dateKey] = 0;
   dailyTotals[dateKey] += obj.revenue;
 });
-  const GLOBAL_TYPES = [
-  'gpt_script_missing',
-  'gpt_loaded_but_not_initialized',
-  'gpt_no_slot_requests'
-];
-
-const globalRow = effectiveRows.find(r =>
-  GLOBAL_TYPES.includes(r.issueType)
-  && ['HIGH','MEDIUM'].includes((r.severity || '').toUpperCase())
-);
 
 let topSlot = null;
 let topLoss = 0;
@@ -1027,33 +1018,22 @@ if (selectedIssueFilter && globalIssueTypes.includes(selectedIssueFilter)) {
   document.getElementById('offenderLoss').textContent =
     `$${topLoss.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 
-let pages = [];
+const offenderPagesSet = new Set();
 
-if (isGlobalSlot) {
+if (topSlot && topSlot.issues && topSlot.issues.size) {
+  effectiveRows.forEach(r => {
+    if (!r || !r.pageUrl) return;
 
-  pages = Array.from(topSlot.pages || [])
-    .filter(Boolean)
-    .sort();
-
-} else {
-
-  const offenderPagesSet = new Set();
-
-  if (topSlot && topSlot.issues && topSlot.issues.size) {
-    effectiveRows.forEach(r => {
-      if (!r || !r.pageUrl) return;
-
-      if (topSlot.issues.has(r.issueType)) {
-        const sev = (r.severity || '').toUpperCase();
-        if (['HIGH','MEDIUM'].includes(sev)) {
-          offenderPagesSet.add(r.pageUrl);
-        }
+    if (topSlot.issues.has(r.issueType)) {
+      const sev = (r.severity || '').toUpperCase();
+      if (['HIGH','MEDIUM'].includes(sev)) {
+        offenderPagesSet.add(r.pageUrl);
       }
-    });
-  }
-
-  pages = Array.from(offenderPagesSet).sort();
+    }
+  });
 }
+
+const pages = Array.from(offenderPagesSet).sort();
 
   document.getElementById('offenderPage').innerHTML = `
   <div class="max-h-40 overflow-auto pr-1">
