@@ -87,6 +87,8 @@ a.dashboard-link:hover {
   font-family: monospace;
   letter-spacing: 2px;
   font-size:14px;
+  margin-top:4px;
+  display:block;
 }
 
 @keyframes pulseBlink {
@@ -109,34 +111,35 @@ animation:scan 2s infinite;
   animation: pulseBlink 1s infinite;
 }
 .heartbeat {
-  display:flex;
-  align-items:center;
-  gap:2px;
-  margin-top:6px;
-  height:14px;
+  margin-top:12px;
 }
 
-.heartbeat span {
-  width:3px;
-  height:6px;
-  background:#22c55e;
-  border-radius:2px;
-  opacity:0.8;
-  animation:beat 1.2s infinite ease-in-out;
+.heartbeat svg {
+  width:220px;
+  height:40px;
 }
 
-@keyframes beat {
-  0%   { transform:scaleY(0.4); opacity:0.3 }
-  40%  { transform:scaleY(1.2); opacity:1 }
-  80%  { transform:scaleY(0.5); opacity:0.4 }
-  100% { transform:scaleY(0.4); opacity:0.3 }
+.heartbeat path {
+  fill:none;
+  stroke-width:2;
+  stroke-linejoin:round;
+  stroke-linecap:round;
+  stroke-dasharray:260;
+  stroke-dashoffset:260;
+  animation:heartbeatMove 2.4s linear infinite;
 }
-.heartbeat.stable span { background:#22c55e; }
-.heartbeat.irregular span { background:#84cc16; }
-.heartbeat.unstable span { background:#eab308; }
-.heartbeat.weak span { background:#f97316; }
-.heartbeat.critical span { background:#ef4444; }
-.heartbeat.critical span {box-shadow:0 0 6px #ef4444;}
+
+@keyframes heartbeatMove {
+  to {
+    stroke-dashoffset:0;
+  }
+}
+
+.heartbeat.stable path { stroke:#22c55e; }
+.heartbeat.irregular path { stroke:#84cc16; }
+.heartbeat.unstable path { stroke:#eab308; }
+.heartbeat.weak path { stroke:#f97316; }
+.heartbeat.critical path { stroke:#ef4444; }
   </style>
 </head>
 <body>
@@ -582,7 +585,7 @@ animation:scan 2s infinite;
 
   el.details.innerHTML = `
 <p>
-🫀 Pulse status: <span class="highlight">stable</span><br>
+📈 Pulse status: <span class="highlight">stable</span><br>
 Pulse score: <span class="highlight" id="pulseScoreValue">0%</span> · <span class="${barClass}">${meterBar(98)}</span>
 
 ${heartbeatBar("stable")}
@@ -725,13 +728,28 @@ return bar;
 
 }
 function heartbeatBar(label){
-  const bars = 24;
-  let html = `<div class="heartbeat ${label}">`;
-  for(let i=0;i<bars;i++){
-    html += `<span style="animation-delay:${i*0.05}s"></span>`;
-  }
-  html += `</div>`;
-  return html;
+  return `
+  <div class="heartbeat ${label}">
+    <svg viewBox="0 0 220 40" preserveAspectRatio="none">
+      <path d="
+        M0 20
+        L20 20
+        L30 10
+        L40 30
+        L50 20
+        L80 20
+        L90 10
+        L100 30
+        L110 20
+        L140 20
+        L150 10
+        L160 30
+        L170 20
+        L220 20
+      "/>
+    </svg>
+  </div>
+  `;
 }
 
 function animatePulseScore(score){
@@ -740,6 +758,7 @@ function animatePulseScore(score){
   if(!elScore) return;
 
   let current = 0;
+  elScore.textContent = score + "%"; 
 
   const interval = setInterval(()=>{
 
@@ -781,8 +800,13 @@ const pulseMeta = pulseLabel(pulseScore);
     const details = [];
 const barClass = pulseScore < 30 ? "pulse-bar critical" : "pulse-bar";
 let pulseMessage = `
-${pulseMeta.emoji} Pulse status: <span class="highlight">${pulseMeta.label}</span><br>
-Pulse score: <span class="highlight" id="pulseScoreValue">0%</span> · <span class="${barClass}">${meterBar(pulseScore)}</span>
+${pulseMeta.emoji} Pulse status: <span class="highlight">${pulseMeta.label}</span>
+<br><br>
+Pulse score: <span class="highlight" id="pulseScoreValue">0%</span>
+<br>
+<span class="${barClass}">
+${meterBar(pulseScore)}
+</span>
 
 ${heartbeatBar(pulseMeta.label)}
 <br>
@@ -806,7 +830,7 @@ details.push(`<div style="margin-bottom:12px">${pulseMessage}</div>`);
     if (gptNoSlotRequests > 0) details.push(`🧠 ${gptNoSlotRequests} No GPT slot requests. ${pick(detailsMessages.gptNoSlotRequests)}`);
     if (domFail > 0) details.push(`🕳️ ${domFail} DOM slots not registered in GPT. ${pick(detailsMessages.domFail)}`);
     if (phantom > 0) details.push(`👻 ${phantom} Phantom slot requests. ${pick(detailsMessages.phantom)}`);
-    if (noDomNoRequest > 0) details.push(`🫥 ${noDomNoRequest} GPT slots had no matching DOM (no request). ${pick(detailsMessages.noDomNoRequest)}`);
+    if (noDomNoRequest > 0) details.push(`🧩 ${noDomNoRequest} GPT slots had no matching DOM (no request). ${pick(detailsMessages.noDomNoRequest)}`);
     if (wrongNetwork > 0) details.push(`🔌 ${wrongNetwork} Wrong network IDs. ${pick(detailsMessages.wrongNetwork)}`);
     if (emptyResponse > 0) details.push(`📭 ${emptyResponse} Empty ad responses. ${pick(detailsMessages.emptyResponse)}`);
     if (unexpectedSize > 0) details.push(`📏 ${unexpectedSize} Unexpected creative sizes. ${pick(detailsMessages.unexpectedSize)}`);
