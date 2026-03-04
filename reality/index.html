@@ -86,6 +86,7 @@ a.dashboard-link:hover {
 .pulse-bar {
   font-family: monospace;
   letter-spacing: 2px;
+  font-size:14px;
 }
 
 @keyframes pulseBlink {
@@ -118,7 +119,7 @@ a.dashboard-link:hover {
   background:rgba(255,255,255,0.03);
 ">
     <img
-      src="Logo Shield.png"
+      src="./Logo-Shield.png"
       alt="AdPulse Guard"
       style="
         width:30px;
@@ -165,6 +166,18 @@ a.dashboard-link:hover {
 </div>
 
   <script>
+    'use strict';
+    const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+    const el = {
+      title: document.getElementById("title"),
+      summary: document.getElementById("summary"),
+      details: document.getElementById("details"),
+      quote: document.getElementById("quote"),
+      dashboardLink: document.getElementById("dashboardLink"),
+      copyBtn: document.getElementById("copyBtn"),
+      copyStatus: document.getElementById("copyStatus")
+};
+    (function () {
     const titles = [
   "This is why we can't have nice things.",
   "This deployment had confidence.",
@@ -539,8 +552,11 @@ a.dashboard-link:hover {
     };
 
     const urlParams = new URLSearchParams(window.location.search);
-    const slots = parseInt(urlParams.get('slots') || '0');
-    const issues = parseInt(urlParams.get('issues') || '0');
+    const param = k => urlParams.get(k);
+    const float = k => parseFloat(param(k) || "0");
+    const num = k => parseInt(param(k) || "0");
+    const slots = num("slots");
+    const issues = num("issues");
     if (issues === 0) {
 
   const calmLines = [
@@ -564,15 +580,15 @@ a.dashboard-link:hover {
     "Enjoy the quiet while it lasts."
   ];
 
-  document.getElementById("title").innerHTML =
+  el.title.innerHTML =
     "Reality Mode™: Suspiciously calm";
 
-  document.getElementById("summary").innerHTML =
+  el.summary.innerHTML =
     pick(calmLines);
 
   const barClass = "pulse-bar";
 
-  document.getElementById("details").innerHTML = `
+  el.details.innerHTML = `
 <p>
 🫀 Pulse status: <span class="highlight">stable</span><br>
 Pulse score: <span class="highlight">98%</span> · <span class="${barClass}">${meterBar(98)}</span><br>
@@ -580,7 +596,7 @@ Estimated time until next alert: unpredictable.
 </p>
 `;
 
-  document.getElementById("quote").innerText =
+  el.quote.innerText =
     pick(calmQuotes);
 
   return;
@@ -599,22 +615,21 @@ Estimated time until next alert: unpredictable.
     const grievanceWord = pluralize(issues, "grievance", "grievances");
     const problemWord = pluralize(issues, "problem", "problems");
     const timeWord = pluralize(issues, "time", "times");
-    const loss = parseFloat(urlParams.get('loss') || '0');
-    const gptScriptMissing = parseInt(urlParams.get('gptScriptMissing') || '0');
-    const gptNotInitialized = parseInt(urlParams.get('gptNotInitialized') || '0');
-    const gptNoSlotRequests = parseInt(urlParams.get('gptNoSlotRequests') || '0');
-    const domFail = parseInt(urlParams.get('domFail') || '0');
-    const phantom = parseInt(urlParams.get('phantom') || '0');
-    const noDomNoRequest = parseInt(urlParams.get('noDomNoRequest') || '0');
-    const wrongNetwork = parseInt(urlParams.get('wrongNetwork') || '0');
-    const emptyResponse = parseInt(urlParams.get('emptyResponse') || '0');
-    const unexpectedSize = parseInt(urlParams.get('unexpectedSize') || '0');
-    const neverRequested = parseInt(urlParams.get('neverRequested') || '0');
-    const containerCollapsed = parseInt(urlParams.get('containerCollapsed') || '0');
-    const layoutOverlap = parseInt(urlParams.get('layoutOverlap') || '0');
-    const visibilityImpaired = parseInt(urlParams.get('visibilityImpaired') || '0');
+    const loss = float("loss");
+    const gptScriptMissing = num("gptScriptMissing");
+    const gptNotInitialized = num("gptNotInitialized");
+    const gptNoSlotRequests = num("gptNoSlotRequests");
+    const domFail = num("domFail");
+    const phantom = num("phantom");
+    const noDomNoRequest = num("noDomNoRequest");
+    const wrongNetwork = num("wrongNetwork");
+    const emptyResponse = num("emptyResponse");
+    const unexpectedSize = num("unexpectedSize");
+    const neverRequested = num("neverRequested");
+    const containerCollapsed = num("containerCollapsed");
+    const layoutOverlap = num("layoutOverlap");
+    const visibilityImpaired = num("visibilityImpaired");
 
-    const pick = arr => arr[Math.floor(Math.random() * arr.length)];
     function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
 
 function computePulseScore() {
@@ -655,27 +670,29 @@ function pulseLabel(score) {
 function meterBar(score) {
 
 const blocks = 10;
-const filled = Math.round((score / 100) * blocks);
+const filled = score / 10 | 0;
 
-let color;
+const colors = [
+  "#ef4444",
+  "#f97316",
+  "#eab308",
+  "#84cc16",
+  "#22c55e"
+];
 
-if (score >= 85) color = "#22c55e";      // green
-else if (score >= 70) color = "#84cc16"; // lime
-else if (score >= 50) color = "#eab308"; // yellow
-else if (score >= 30) color = "#f97316"; // orange
-else color = "#ef4444";                  // red
+const color =
+score >= 85 ? colors[4] :
+score >= 70 ? colors[3] :
+score >= 50 ? colors[2] :
+score >= 30 ? colors[1] :
+colors[0];
 
 let bar = "";
 
 for (let i = 0; i < blocks; i++) {
-
-if (i < filled) {
-bar += `<span style="color:${color}">▓</span>`;
-}
-else {
-bar += `<span style="opacity:0.25">▓</span>`;
-}
-
+bar += i < filled
+? `<span style="color:${color}">▓</span>`
+: `<span style="opacity:0.25">▓</span>`;
 }
 
 return bar;
@@ -685,41 +702,25 @@ return bar;
 const pulseScore = computePulseScore();
 const pulseMeta = pulseLabel(pulseScore);
 
-    function generateVerdict() {
-  const suspects = [];
+    function generateVerdict(){
+  const map = [
+    [gptScriptMissing,"JavaScript race condition"],
+    [gptNotInitialized,"GPT script never initialized"],
+    [phantom,"DOM rendered before GPT"],
+    [wrongNetwork,"Wrong network ID"],
+    [neverRequested,"display() never executed"],
+    [layoutOverlap,"CSS overlap"]
+  ];
 
-  if (gptScriptMissing > 0)
-    suspects.push("JavaScript race condition");
+  const suspects = map.filter(x=>x[0]>0).map(x=>x[1]);
 
-  if (gptNotInitialized > 0)
-    suspects.push("Someone forgot the GPT script");
-
-  if (gptNotInitialized > 0)
-    suspects.push("googletag.cmd.push() never executed");
-
-  if (phantom > 0)
-    suspects.push("DOM rendered before GPT finished");
-
-  if (wrongNetwork > 0)
-    suspects.push("Someone edited the network ID");
-
-  if (neverRequested > 0)
-    suspects.push("display() never fired");
-
-  if (layoutOverlap > 0)
-    suspects.push("CSS doing whatever it wants");
-
-  if (emptyResponse > 0)
-    suspects.push("Demand said no");
-
-  if (!suspects.length)
-    suspects.push("A developer with confidence");
+  if(!suspects.length) suspects.push("A developer with confidence");
 
   return suspects;
 }
 
-    document.getElementById("title").innerHTML = pick(titles);
-    document.getElementById("summary").innerHTML = `${pick(issueLines)(issues)} ${pick(slotLines)(slots)}`;
+    el.title.innerHTML = pick(titles);
+    el.summary.innerHTML = `${pick(issueLines)(issues)} ${pick(slotLines)(slots)}`;
 
     const details = [];
 const barClass = pulseScore < 30 ? "pulse-bar critical" : "pulse-bar";
@@ -752,7 +753,7 @@ details.push(`<div style="margin-bottom:12px">${pulseMessage}</div>`);
     if (Math.random() < 0.1) {
   details.push("Reality Mode™ does not exaggerate.");
 }
-    document.getElementById("details").innerHTML =
+    el.details.innerHTML =
     details.map(d => `<p>${d}</p>`).join('');
     const suspects = generateVerdict();
     const verdictHTML = `
@@ -762,7 +763,7 @@ details.push(`<div style="margin-bottom:12px">${pulseMessage}</div>`);
       Confidence: ${Math.floor(Math.random()*40+60)}%
       </p>
 `;
-    document.getElementById("details").innerHTML += verdictHTML;
+    el.details.innerHTML += verdictHTML;
     function buildTimeline(){
 
 const timeline = [];
@@ -807,7 +808,7 @@ return timeline;
 
 }
 const timeline = buildTimeline();
-document.getElementById("details").innerHTML += `
+el.details.innerHTML += `
 <p style="margin-top:22px">
 <strong>🧬 What probably happened</strong><br>
 ${timeline.map((t,i)=>`${i+1}. ${t}`).join("<br>")}
@@ -823,7 +824,7 @@ ${timeline.map((t,i)=>`${i+1}. ${t}`).join("<br>")}
   "QA status: theoretical"
 ];
 
-document.getElementById("details").innerHTML += `
+el.details.innerHTML += `
 <p style="opacity:0.85">
 📊 ${pick(devConfidence)}
 </p>
@@ -849,9 +850,9 @@ document.getElementById("details").innerHTML += `
   "consider basic QA"
 ];
 
-const fix = fixes[Math.floor(Math.random()*fixes.length)];
+const fix = pick(fixes);
 
-document.getElementById("details").innerHTML += `
+el.details.innerHTML += `
 <p style="margin-top:18px">
 <strong>🧾 Incident report</strong><br>
 Recommended fix:<br>
@@ -870,18 +871,18 @@ const moods = [
   "experiencing trust issues"
 ];
 
-document.getElementById("details").innerHTML += `
+el.details.innerHTML += `
 <p style="opacity:0.85">
 Ad stack mood today: ${pick(moods)}
 </p>
 `;
 
-const extra = chaosLines[Math.floor(Math.random()*chaosLines.length)];
+const extra = pick(chaosLines);
 
-document.getElementById("details").innerHTML += `
+el.details.innerHTML += `
 <p style="opacity:0.85">Also involved: ${extra}</p>
 `;
-    document.getElementById("quote").innerText = pick(quotes);
+    el.quote.innerText = pick(quotes);
     
     const futurePredictions = [
   "Estimated time until next alert: unpredictable.",
@@ -895,22 +896,16 @@ document.getElementById("details").innerHTML += `
   "Estimated time until next alert: sooner than management expects."
 ];
 
-document.getElementById("quote").innerText +=
+el.quote.innerText +=
 "\n\n" + pick(futurePredictions);
-    const dashboardUrl = urlParams.get('dash');
+    const dashboardUrl = param("dash");
 if (dashboardUrl) {
   const decodedUrl = decodeURIComponent(dashboardUrl);
   const cta = pick(dashboardCTAs).replace('{url}', decodedUrl);
-  document.getElementById('dashboardLink').innerHTML = cta;
+  el.dashboardLink.innerHTML = cta;
 
-  function toPlainText(html) {
-  const tmp = document.createElement("div");
-  tmp.innerHTML = html;
-  return tmp.textContent || tmp.innerText || "";
-}
-
-const copyBtn = document.getElementById("copyBtn");
-const copyStatus = document.getElementById("copyStatus");
+const copyBtn = el.copyBtn;
+const copyStatus = el.copyStatus;
 
 if (copyBtn) {
   copyBtn.onclick = async () => {
@@ -936,6 +931,7 @@ Estimated time until next alert: unpredictable.`;
     try {
       await navigator.clipboard.writeText(text);
       copyStatus.textContent = "Copied ✅";
+      copyBtn.blur();
       setTimeout(()=>copyStatus.textContent="", 1600);
     } catch (e) {
       copyStatus.textContent = "Copy failed ❌";
@@ -944,6 +940,8 @@ Estimated time until next alert: unpredictable.`;
   };
 }
 }
+console.debug("Reality Mode initialized");
+})();
   </script>
 </body>
 </html>
