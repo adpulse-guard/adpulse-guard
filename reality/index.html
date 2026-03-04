@@ -257,41 +257,6 @@ animation:scan 2s infinite;
   "I told you yesterday. You didn’t listen."
 ];
 
-    const issueLines = [
-      issues => `Your page has <span class="highlight">${issues}</span> ${complaintWord} from the ad gods,`,
-      issues => `The ad gods have filed <span class="highlight">${issues}</span> formal ${complaintWord},`,
-      issues => `<span class="highlight">${issues}</span> ways you've disappointed the algorithm today,`,
-      issues => `Page karma: <span class="highlight">${issues}</span> ${violationWord},`,
-      issues => `This page annoyed the ad gods <span class="highlight">${issues}</span> ${timeWord},`,
-      issues => `<span class="highlight">${issues}</span> ${violationWord} detected,`,
-      issues => `Your ad setup triggered <span class="highlight">${issues}</span> ${alertWord},`,
-      issues => `<span class="highlight">${issues}</span> ${reminderWord} that testing exists,`,
-      issues => `Your page collected <span class="highlight">${issues}</span> ${mistakeWord} today,`,
-      issues => `<span class="highlight">${issues}</span> ways this page chose violence,`,
-      issues => `<span class="highlight">${issues}</span> ${betrayalWord} detected,`,
-      issues => `The ad stack filed <span class="highlight">${issues}</span> ${issues === 1 ? "grievance" : "grievances"},`,
-      issues => `<span class="highlight">${issues}</span> things that absolutely did not need to break,`,
-      issues => `<span class="highlight">${issues}</span> opportunities to not ship this,`,
-      issues => `<span class="highlight">${issues}</span> ${problemWord} walked into this page. None were invited.`
-];
-
-
-    const slotLines = [
-      slots => `spread across <span class="highlight">${slots}</span> innocent ${slotWord}.`,
-      slots => `<span class="highlight">${slots}</span> ${slotWord} ${slots === 1 ? "is" : "are"} now emotionally unavailable.`,
-      slots => `affecting <span class="highlight">${slots}</span> ${slotWord} just trying to exist.`,
-      slots => `<span class="highlight">${slots}</span> ${slotWord} ${slots === 1 ? "is" : "are"} somewhere crying in binary.`,
-      slots => `spread across <span class="highlight">${slots}</span> unsuspecting ${slotWord}.`,
-      slots => `<span class="highlight">${slots}</span> ${slotWord} ${slots === 1 ? "is" : "are"} reconsidering ${slots === 1 ? "its" : "their"} career choices.`,
-      slots => `<span class="highlight">${slots}</span> ${slotWord} ${slots === 1 ? "is" : "are"} now spiritually exhausted.`,
-      slots => `impacting <span class="highlight">${slots}</span> tiny monetization ${slotWord} just trying to get paid.`,
-      slots => `<span class="highlight">${slots}</span> ${slotWord} tried. The page did not.`,
-      slots => `<span class="highlight">${slots}</span> ${slotWord} walked in hopeful. ${slots === 1 ? "It left confused." : "They left confused."}`,
-      slots => `<span class="highlight">${slots}</span> ${slotWord} ${slots === 1 ? "is" : "are"} currently filing for emotional support.`,
-      slots => `disrupting <span class="highlight">${slots}</span> little ad ${slotWord}.`
-];
-
-
     const quotes = [
       "Enough to hurt, not enough to cry over. Yet.",
       "Monitoring is cheaper than regret.",
@@ -659,6 +624,38 @@ Estimated time until next alert: unpredictable.
     const layoutOverlap = num("layoutOverlap");
     const visibilityImpaired = num("visibilityImpaired");
 
+    const issueLines = [
+      issues => `Your page has <span class="highlight">${issues}</span> ${complaintWord} from the ad gods,`,
+      issues => `The ad gods have filed <span class="highlight">${issues}</span> formal ${complaintWord},`,
+      issues => `<span class="highlight">${issues}</span> ways you've disappointed the algorithm today,`,
+      issues => `Page karma: <span class="highlight">${issues}</span> ${violationWord},`,
+      issues => `This page annoyed the ad gods <span class="highlight">${issues}</span> ${timeWord},`,
+      issues => `<span class="highlight">${issues}</span> ${violationWord} detected,`,
+      issues => `Your ad setup triggered <span class="highlight">${issues}</span> ${alertWord},`,
+      issues => `<span class="highlight">${issues}</span> ${reminderWord} that testing exists,`,
+      issues => `Your page collected <span class="highlight">${issues}</span> ${mistakeWord} today,`,
+      issues => `<span class="highlight">${issues}</span> ways this page chose violence,`,
+      issues => `<span class="highlight">${issues}</span> ${betrayalWord} detected,`,
+      issues => `The ad stack filed <span class="highlight">${issues}</span> ${issues === 1 ? "grievance" : "grievances"},`,
+      issues => `<span class="highlight">${issues}</span> things that absolutely did not need to break,`,
+      issues => `<span class="highlight">${issues}</span> opportunities to not ship this,`,
+      issues => `<span class="highlight">${issues}</span> ${problemWord} walked into this page. None were invited.`
+];
+    const slotLines = [
+      slots => `spread across <span class="highlight">${slots}</span> innocent ${slotWord}.`,
+      slots => `<span class="highlight">${slots}</span> ${slotWord} ${slots === 1 ? "is" : "are"} now emotionally unavailable.`,
+      slots => `affecting <span class="highlight">${slots}</span> ${slotWord} just trying to exist.`,
+      slots => `<span class="highlight">${slots}</span> ${slotWord} ${slots === 1 ? "is" : "are"} somewhere crying in binary.`,
+      slots => `spread across <span class="highlight">${slots}</span> unsuspecting ${slotWord}.`,
+      slots => `<span class="highlight">${slots}</span> ${slotWord} ${slots === 1 ? "is" : "are"} reconsidering ${slots === 1 ? "its" : "their"} career choices.`,
+      slots => `<span class="highlight">${slots}</span> ${slotWord} ${slots === 1 ? "is" : "are"} now spiritually exhausted.`,
+      slots => `impacting <span class="highlight">${slots}</span> tiny monetization ${slotWord} just trying to get paid.`,
+      slots => `<span class="highlight">${slots}</span> ${slotWord} tried. The page did not.`,
+      slots => `<span class="highlight">${slots}</span> ${slotWord} walked in hopeful. ${slots === 1 ? "It left confused." : "They left confused."}`,
+      slots => `<span class="highlight">${slots}</span> ${slotWord} ${slots === 1 ? "is" : "are"} currently filing for emotional support.`,
+      slots => `disrupting <span class="highlight">${slots}</span> little ad ${slotWord}.`
+];
+
     function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
 
 function computePulseScore() {
@@ -872,7 +869,6 @@ if (dashboardUrl) {
   el.dashboardLink.innerHTML = cta;
 }
 }
-animatePulseScore(pulseScore);
 console.debug("APG Reality Mode loaded");
 })();
   </script>
