@@ -70,6 +70,7 @@ h1 {
   stroke-dasharray:260;
   stroke-dashoffset:260;
   animation:heartbeatMove 2.4s linear infinite;
+  filter: drop-shadow(0 0 4px rgba(239,68,68,0.45));
 }
 
 p {
@@ -131,24 +132,6 @@ animation:scan 2s infinite;
 
 .critical {
   animation: pulseBlink 1s infinite;
-}
-.heartbeat {
-  margin-top:12px;
-}
-
-.heartbeat svg {
-  width:220px;
-  height:40px;
-}
-
-.heartbeat path {
-  fill:none;
-  stroke-width:2;
-  stroke-linejoin:round;
-  stroke-linecap:round;
-  stroke-dasharray:260;
-  stroke-dashoffset:260;
-  animation:heartbeatMove 2.4s linear infinite;
 }
 
 @keyframes heartbeatMove {
@@ -851,8 +834,6 @@ Pulse score: <span class="highlight" id="pulseScoreValue">0%</span>
 <span class="${barClass}">
 ${meterBar(pulseScore)}
 </span>
-
-${heartbeatBar(pulseMeta.label)}
 <br>
 `;
 
@@ -906,6 +887,7 @@ const moods = [
 ];
 el.details.innerHTML =
 details.map(d => `<p>${d}</p>`).join('');
+animatePulseScore(pulseScore);
 
 el.details.innerHTML += `
 <p style="opacity:0.85">
