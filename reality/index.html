@@ -72,7 +72,6 @@ p {
   color: var(--apg-muted);
 }
 
-/* Dashboard CTA */
 a.dashboard-link {
   color: var(--apg-primary-soft);
   text-decoration: none;
@@ -82,6 +81,21 @@ a.dashboard-link {
 a.dashboard-link:hover {
   color: #c7d2fe;
   border-bottom-color: #c7d2fe;
+}
+
+.pulse-bar {
+  font-family: monospace;
+  letter-spacing: 2px;
+}
+
+@keyframes pulseBlink {
+  0% { opacity:1 }
+  50% { opacity:0.4 }
+  100% { opacity:1 }
+}
+
+.critical {
+  animation: pulseBlink 1s infinite;
 }
   </style>
 </head>
@@ -93,7 +107,6 @@ a.dashboard-link:hover {
   margin-bottom:20px;
   padding:0 4px;
 ">
-  <!-- LEFT: brand -->
   
   <div style="
   display:flex;
@@ -128,9 +141,27 @@ a.dashboard-link:hover {
   <p id="summary">Just a sec…</p>
 
   <div id="details"></div>
+  <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+  <button id="copyBtn" style="
+    background:rgba(99,102,241,0.15);
+    border:1px solid rgba(99,102,241,0.35);
+    color:#c7d2fe;
+    padding:10px 12px;
+    border-radius:10px;
+    cursor:pointer;
+    font-size:13px;">
+    📋 Copy incident text
+  </button>
+
+  <span id="copyStatus" class="fade" style="align-self:center;"></span>
+</div>
 
   <p class="quote" id="quote"></p>
   <p class="fade" id="dashboardLink" style="margin-top:24px;"></p>
+  <div style="margin-top:28px; opacity:0.6; text-align:center;">
+<hr style="border:none;border-top:1px solid rgba(255,255,255,0.08);margin-bottom:14px;">
+<span class="fade">Never Miss a Beat.</span>
+</div>
 </div>
 
   <script>
@@ -246,6 +277,7 @@ a.dashboard-link:hover {
       "Restart browser. Pray to ad gods. Repeat.",
       "Reboot your hope. It might help.",
       "Clear cookies. Clean conscience.",
+      "Production is the new staging.",
       "Ignore it and see if it fixes itself. Spoiler alert, it doesn’t.",
       "Refresh the page. That’s the extent of our support.",
       "Blame it on the intern. Works every time.",
@@ -447,12 +479,112 @@ a.dashboard-link:hover {
         "This slot is living in configuration purgatory.",
         "Someone typed defineSlot and walked away.",
         "GPT slots with abandonment issues."
-]
+],
+      neverRequested: [
+        "Defined slot. Zero requests. Inspirational laziness.",
+        "GPT defined it. Nobody asked for it.",
+        "This slot is waiting for a request that never came.",
+        "A slot was configured. Execution stayed optional.",
+        "DefineSlot without display(). A classic tragedy.",
+        "The slot exists. The request does not.",
+        "Configuration: yes. Action: no.",
+        "Defined beautifully. Never actually used.",
+        "Someone forgot the final step.",
+        "The slot was invited to the party. Nobody opened the door."
+],
+      containerCollapsed: [
+        "Your layout compressed this slot into a philosophical concept.",
+        "Rendered. Then immediately crushed by CSS.",
+        "The slot exists but has no physical form.",
+        "Height: 0px. Expectations: high.",
+        "Layout shift turned this slot into vapor.",
+        "A perfectly rendered ad inside a perfectly invisible container.",
+        "CSS won this round.",
+        "The slot rendered. Gravity disagreed.",
+        "Display: block. Height: existential."
+    ],
+      layoutOverlap: [
+        "This slot is being bullied by its neighbors.",
+        "Something is sitting on top of the ad. Rude.",
+        "Another element decided it deserved the spotlight.",
+        "The ad is there. You just can’t see it.",
+        "Other content is stealing the spotlight. Literally.",
+        "Your layout has territorial disputes.",
+        "Ads are being visually mugged by the page.",
+        "The ad is trying to be seen. The layout says no.",
+        "Overlapping elements are the new ad blockers.",
+        "The slot rendered but got visually silenced.",
+        "The slot is technically visible. Just… covered.",
+        "Layering issues detected. CSS is feeling spicy.",
+        "The ad is there, but it’s playing peekaboo with users.", 
+        "Visual obstruction: now featuring your layout.",
+        "The ad is trying to shine. The layout is throwing shade.",
+    ],
+      visibilityImpaired: [
+        "The ad rendered. Humans cannot see it.",
+        "Rendered in a corner where no one looks.",
+        "Your layout is playing hide and seek with ads.",
+        "Visibility technically optional today.",
+        "Maybe the ad is shy.",
+        "The ad is present. The page disagrees.",
+        "Obstructed view. Monetization not amused.",
+        "Ad is in the room, but it’s hiding in the closet.",
+        "Content politely stepped in front of the ad.",
+        "An ad rendered somewhere behind the scenery.",
+        "The slot exists. It’s just hiding.",
+        "Visibility score: questionable.",
+        "The ad exists, but it’s not really part of the page experience.",
+        "Creative delivered into a visual blackout."
+    ]
     };
 
     const urlParams = new URLSearchParams(window.location.search);
     const slots = parseInt(urlParams.get('slots') || '0');
     const issues = parseInt(urlParams.get('issues') || '0');
+    if (issues === 0) {
+
+  const calmLines = [
+    "Everything appears to be working. Suspicious.",
+    "No issues detected. Either things are fine or nobody looked closely.",
+    "The ad stack is calm. For now.",
+    "Monitoring continues. The silence is unsettling.",
+    "No incidents detected. Enjoy the temporary peace.",
+    "Reality Mode found nothing. This is rare.",
+    "Your ads are behaving today. Don't get used to it.",
+    "The system reports stability. I'm watching closely.",
+    "No issues detected. Revenue might actually be flowing.",
+    "This page escaped judgment today."
+  ];
+
+  const calmQuotes = [
+    "Even chaos needs a day off.",
+    "Silence from the logs is suspicious.",
+    "Peace is temporary.",
+    "Monitoring never sleeps.",
+    "Enjoy the quiet while it lasts."
+  ];
+
+  document.getElementById("title").innerHTML =
+    "Reality Mode™: Suspiciously calm";
+
+  document.getElementById("summary").innerHTML =
+    pick(calmLines);
+
+  const barClass = "pulse-bar";
+
+  document.getElementById("details").innerHTML = `
+<p>
+🫀 Pulse status: <span class="highlight">stable</span><br>
+Pulse score: <span class="highlight">98%</span> · <span class="${barClass}">${meterBar(98)}</span><br>
+Estimated time until next alert: unpredictable.
+</p>
+`;
+
+  document.getElementById("quote").innerText =
+    pick(calmQuotes);
+
+  return;
+}
     const pluralize = (count, singular, plural) =>
      count === 1 ? singular : plural;
 
@@ -477,35 +609,137 @@ a.dashboard-link:hover {
     const wrongNetwork = parseInt(urlParams.get('wrongNetwork') || '0');
     const emptyResponse = parseInt(urlParams.get('emptyResponse') || '0');
     const unexpectedSize = parseInt(urlParams.get('unexpectedSize') || '0');
+    const neverRequested = parseInt(urlParams.get('neverRequested') || '0');
+    const containerCollapsed = parseInt(urlParams.get('containerCollapsed') || '0');
+    const layoutOverlap = parseInt(urlParams.get('layoutOverlap') || '0');
+    const visibilityImpaired = parseInt(urlParams.get('visibilityImpaired') || '0');
 
     const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+    function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+
+function computePulseScore() {
+  let score = 100;
+
+  score -= issues * 6;
+  score -= slots * 2;
+
+  if (gptScriptMissing > 0) score -= 40;
+  if (gptNotInitialized > 0) score -= 30;
+  if (gptNoSlotRequests > 0) score -= 35;
+
+  score -= phantom * 10;
+  score -= noDomNoRequest * 8;
+  score -= domFail * 8;
+  score -= wrongNetwork * 12;
+  score -= emptyResponse * 6;
+  score -= unexpectedSize * 5;
+  score -= neverRequested * 7;
+
+  score -= containerCollapsed * 8;
+  score -= layoutOverlap * 10;
+  score -= visibilityImpaired * 10;
+
+  if (loss > 0) score -= Math.min(25, Math.floor(loss / 20));
+
+  return clamp(Math.round(score), 0, 100);
+}
+
+function pulseLabel(score) {
+  if (score >= 85) return { label: "stable", emoji: "🫀" };
+  if (score >= 70) return { label: "irregular", emoji: "🫀" };
+  if (score >= 50) return { label: "unstable", emoji: "🫀" };
+  if (score >= 30) return { label: "weak", emoji: "🫀" };
+  return { label: "critical", emoji: "🩸" };
+}
+
+function meterBar(score) {
+
+const blocks = 10;
+const filled = Math.round((score / 100) * blocks);
+
+let color;
+
+if (score >= 85) color = "#22c55e";      // green
+else if (score >= 70) color = "#84cc16"; // lime
+else if (score >= 50) color = "#eab308"; // yellow
+else if (score >= 30) color = "#f97316"; // orange
+else color = "#ef4444";                  // red
+
+let bar = "";
+
+for (let i = 0; i < blocks; i++) {
+
+if (i < filled) {
+bar += `<span style="color:${color}">▓</span>`;
+}
+else {
+bar += `<span style="opacity:0.25">▓</span>`;
+}
+
+}
+
+return bar;
+
+}
+
+const pulseScore = computePulseScore();
+const pulseMeta = pulseLabel(pulseScore);
+
+    function generateVerdict() {
+  const suspects = [];
+
+  if (gptScriptMissing > 0)
+    suspects.push("JavaScript race condition");
+
+  if (gptNotInitialized > 0)
+    suspects.push("Someone forgot the GPT script");
+
+  if (gptNotInitialized > 0)
+    suspects.push("googletag.cmd.push() never executed");
+
+  if (phantom > 0)
+    suspects.push("DOM rendered before GPT finished");
+
+  if (wrongNetwork > 0)
+    suspects.push("Someone edited the network ID");
+
+  if (neverRequested > 0)
+    suspects.push("display() never fired");
+
+  if (layoutOverlap > 0)
+    suspects.push("CSS doing whatever it wants");
+
+  if (emptyResponse > 0)
+    suspects.push("Demand said no");
+
+  if (!suspects.length)
+    suspects.push("A developer with confidence");
+
+  return suspects;
+}
 
     document.getElementById("title").innerHTML = pick(titles);
     document.getElementById("summary").innerHTML = `${pick(issueLines)(issues)} ${pick(slotLines)(slots)}`;
 
     const details = [];
-    if (loss > 0) {
+const barClass = pulseScore < 30 ? "pulse-bar critical" : "pulse-bar";
+let pulseMessage = `${pulseMeta.emoji} Pulse status: <span class="highlight">${pulseMeta.label}</span><br>
+Pulse score: <span class="highlight">${pulseScore}%</span> · <span class="${barClass}">${meterBar(pulseScore)}</span><br>
+Ad stack heartbeat monitor`;
 
-  const pulseLossLines = [
-    loss => `🩸 Your revenue has a pulse. It’s weakening — <span class="highlight">$${loss}</span> daily.`,
-    loss => `🩸 The monetization pulse is slipping — <span class="highlight">$${loss}</span> exposed.`,
-    loss => `🩸 Pulse detected. Stability questionable. <span class="highlight">$${loss}</span> daily.`,
-    loss => `🩸 Revenue heartbeat faltering — impact: <span class="highlight">$${loss}</span>.`,
-    loss => `🩸 Circulatory stress in your ad stack — <span class="highlight">$${loss}</span> per day.`,
-    loss => `🩸 Your pulse is still there. Barely. <span class="highlight">$${loss}</span> daily.`,
-    loss => `🩸 That’s not fluctuation. That’s pulse decay — <span class="highlight">$${loss}</span>.`
-  ];
+if (loss > 0) {
+  pulseMessage += `<br>Revenue exposure: <span class="highlight">$${loss}</span> daily (estimated)`;
+} else if (issues > 0) {
+  pulseMessage += `<br>Revenue exposure: <span class="highlight">unknown</span> (impact not modeled)`;
+} else {
+  pulseMessage += `<br>Revenue exposure: <span class="highlight">none detected</span>`;
+}
 
-  const severePulseLine =
-    `🩸 Severe pulse disruption — <span class="highlight">$${loss}</span> bleeding daily.`;
-
-  const lossLine =
-    loss > 300
-      ? severePulseLine
-      : pick(pulseLossLines)(loss);
-
-  details.push(lossLine);
-      
+details.push(`<div style="margin-bottom:12px">${pulseMessage}</div>`);
+    if (neverRequested > 0) details.push(`🛑 ${neverRequested} Slots defined but never requested. ${pick(detailsMessages.neverRequested)}`);
+    if (containerCollapsed > 0) details.push(`📉 ${containerCollapsed} Collapsed slot containers. ${pick(detailsMessages.containerCollapsed)}`);
+    if (layoutOverlap > 0) details.push(`🧱 ${layoutOverlap} Ads overlapped by page elements. ${pick(detailsMessages.layoutOverlap)}`);
+    if (visibilityImpaired > 0) details.push(`👁️ ${visibilityImpaired} Ads visually obstructed. ${pick(detailsMessages.visibilityImpaired)}`);  
     if (gptScriptMissing > 0) details.push(`🧠 ${gptScriptMissing} GPT script missing. ${pick(detailsMessages.gptScriptMissing)}`);
     if (gptNotInitialized > 0) details.push(`🧠 ${gptNotInitialized} GPT not initialized. ${pick(detailsMessages.gptNotInitialized)}`);
     if (gptNoSlotRequests > 0) details.push(`🧠 ${gptNoSlotRequests} No GPT slot requests. ${pick(detailsMessages.gptNoSlotRequests)}`);
@@ -520,14 +754,196 @@ a.dashboard-link:hover {
 }
     document.getElementById("details").innerHTML =
     details.map(d => `<p>${d}</p>`).join('');
+    const suspects = generateVerdict();
+    const verdictHTML = `
+      <p style="margin-top:26px;">
+      <strong>🕵️ Forensic verdict</strong><br>
+      Primary suspect: <span class="highlight">${suspects[0]}</span><br>
+      Confidence: ${Math.floor(Math.random()*40+60)}%
+      </p>
+`;
+    document.getElementById("details").innerHTML += verdictHTML;
+    function buildTimeline(){
+
+const timeline = [];
+
+timeline.push("Page started loading");
+
+if (gptScriptMissing > 0 || gptNotInitialized > 0) {
+
+timeline.push("GPT failed to initialize");
+timeline.push("Slot requests never executed");
+timeline.push("Ads never had a chance to load");
+
+}
+
+else if (phantom > 0 || noDomNoRequest > 0) {
+
+timeline.push("Slot requests fired before DOM containers existed");
+timeline.push("Ad server delivered requests to nowhere");
+timeline.push("Phantom requests created");
+
+}
+
+else if (layoutOverlap > 0 || visibilityImpaired > 0) {
+
+timeline.push("Ads rendered successfully");
+timeline.push("Page layout visually covered them");
+timeline.push("Viewability silently collapsed");
+
+}
+
+else if (emptyResponse > 0) {
+
+timeline.push("Ad server received slot requests");
+timeline.push("Demand returned empty responses");
+timeline.push("Inventory remained unsold");
+
+}
+
+timeline.push("Revenue impact followed");
+
+return timeline;
+
+}
+const timeline = buildTimeline();
+document.getElementById("details").innerHTML += `
+<p style="margin-top:22px">
+<strong>🧬 What probably happened</strong><br>
+${timeline.map((t,i)=>`${i+1}. ${t}`).join("<br>")}
+</p>
+`;
+
+    const devConfidence = [
+  "Developer confidence during deploy: 100%",
+  "Testing performed before deploy: unclear",
+  "Confidence level: extremely high",
+  "Actual verification: none detected",
+  "Deployment strategy: vibes",
+  "QA status: theoretical"
+];
+
+document.getElementById("details").innerHTML += `
+<p style="opacity:0.85">
+📊 ${pick(devConfidence)}
+</p>
+`;
+    const chaosLines = [
+  "Someone deployed on Friday.",
+  "Someone skipped QA.",
+  "Someone said 'it's probably fine.'",
+  "Someone trusted the CMS.",
+  "Someone hotfixed production.",
+  "Someone edited GPT in the template.",
+  "Someone forgot cache exists.",
+  "Someone assumed it would just work."
+];
+
+    const fixes = [
+  "stop deploying on Fridays",
+  "test before shipping",
+  "verify GPT initialization",
+  "check display() execution",
+  "stop editing tags in production",
+  "confirm slot containers exist",
+  "consider basic QA"
+];
+
+const fix = fixes[Math.floor(Math.random()*fixes.length)];
+
+document.getElementById("details").innerHTML += `
+<p style="margin-top:18px">
+<strong>🧾 Incident report</strong><br>
+Recommended fix:<br>
+• ${fix}<br>
+• maybe test things next time
+</p>
+`;
+
+const moods = [
+  "disappointed",
+  "barely functional",
+  "emotionally exhausted",
+  "questioning your deployment process",
+  "holding on by a thread",
+  "confused but operational",
+  "experiencing trust issues"
+];
+
+document.getElementById("details").innerHTML += `
+<p style="opacity:0.85">
+Ad stack mood today: ${pick(moods)}
+</p>
+`;
+
+const extra = chaosLines[Math.floor(Math.random()*chaosLines.length)];
+
+document.getElementById("details").innerHTML += `
+<p style="opacity:0.85">Also involved: ${extra}</p>
+`;
     document.getElementById("quote").innerText = pick(quotes);
+    
+    const futurePredictions = [
+  "Estimated time until next alert: unpredictable.",
+  "Estimated time until next alert: probably soon.",
+  "Estimated time until next alert: depends who deploys next.",
+  "Estimated time until next alert: sometime after the next commit.",
+  "Estimated time until next alert: after someone says 'ship it'.",
+  "Estimated time until next alert: Friday evening.",
+  "Estimated time until next alert: when someone edits the template.",
+  "Estimated time until next alert: statistically inevitable.",
+  "Estimated time until next alert: sooner than management expects."
+];
+
+document.getElementById("quote").innerText +=
+"\n\n" + pick(futurePredictions);
     const dashboardUrl = urlParams.get('dash');
 if (dashboardUrl) {
   const decodedUrl = decodeURIComponent(dashboardUrl);
   const cta = pick(dashboardCTAs).replace('{url}', decodedUrl);
   document.getElementById('dashboardLink').innerHTML = cta;
+
+  function toPlainText(html) {
+  const tmp = document.createElement("div");
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || "";
 }
-      }
+
+const copyBtn = document.getElementById("copyBtn");
+const copyStatus = document.getElementById("copyStatus");
+
+if (copyBtn) {
+  copyBtn.onclick = async () => {
+    const page = urlParams.get('page') || '';
+    const headline = `AdPulse Guard · Reality Mode™`;
+    const pulseLine = `Pulse: ${pulseMeta.label.toUpperCase()} (${pulseScore}%)`;
+    const lossLine = loss > 0 ? `Daily exposure: $${loss}` : `Daily exposure: unknown`;
+    const verdictLine = `Primary suspect: ${generateVerdict()[0]}`;
+    const tl = buildTimeline().map((x,i)=>`${i+1}. ${x}`).join("\n");
+
+    const text =
+`${headline}
+${pulseLine}
+${lossLine}
+Issues: ${issues} · Slots: ${slots}
+${verdictLine}
+
+What probably happened:
+${tl}
+
+Estimated time until next alert: unpredictable.`;
+
+    try {
+      await navigator.clipboard.writeText(text);
+      copyStatus.textContent = "Copied ✅";
+      setTimeout(()=>copyStatus.textContent="", 1600);
+    } catch (e) {
+      copyStatus.textContent = "Copy failed ❌";
+      setTimeout(()=>copyStatus.textContent="", 1600);
+    }
+  };
+}
+}
   </script>
 </body>
 </html>
