@@ -50,6 +50,28 @@ h1 {
   letter-spacing: -0.01em;
 }
 
+.title-row{
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+
+.title-row svg{
+  width:140px;
+  height:28px;
+}
+
+.title-row path{
+  fill:none;
+  stroke:#ef4444;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  stroke-dasharray:260;
+  stroke-dashoffset:260;
+  animation:heartbeatMove 2.4s linear infinite;
+}
+
 p {
   margin-bottom: 10px;
   line-height: 1.65;
@@ -135,11 +157,10 @@ animation:scan 2s infinite;
   }
 }
 
-.heartbeat.stable path { stroke:#22c55e; }
-.heartbeat.irregular path { stroke:#84cc16; }
-.heartbeat.unstable path { stroke:#eab308; }
-.heartbeat.weak path { stroke:#f97316; }
-.heartbeat.critical path { stroke:#ef4444; }
+.heartbeat path {
+  stroke:#ef4444;
+  filter: drop-shadow(0 0 4px rgba(239,68,68,0.4));
+}
   </style>
 </head>
 <body>
@@ -180,9 +201,10 @@ animation:scan 2s infinite;
   </div>
 </div>
   <div class="box">
+  <div class="title-row">
   <h1 id="title">Reality check loading…</h1>
-  <p id="summary">Just a sec…</p>
-
+  <div id="titleEkg"></div>
+</div>
   <div id="details"></div>
 </div>
 
@@ -585,8 +607,8 @@ animation:scan 2s infinite;
 
   el.details.innerHTML = `
 <p>
-📈 Pulse status: <span class="highlight">stable</span><br>
-Pulse score: <span class="highlight" id="pulseScoreValue">0%</span> · <span class="${barClass}">${meterBar(98)}</span>
+📡 Pulse status: <span class="highlight">stable</span><br>
+Pulse score: <span class="highlight" id="pulseScoreValue">${pulseScore}%</span> · <span class="${barClass}">${meterBar(98)}</span>
 
 ${heartbeatBar("stable")}
 
@@ -689,11 +711,11 @@ function computePulseScore() {
 }
 
 function pulseLabel(score) {
-  if (score >= 85) return { label: "stable", emoji: "🫀" };
-  if (score >= 70) return { label: "irregular", emoji: "🫀" };
-  if (score >= 50) return { label: "unstable", emoji: "🫀" };
-  if (score >= 30) return { label: "weak", emoji: "🫀" };
-  return { label: "critical", emoji: "🩸" };
+  if (score >= 85) return { label: "stable", emoji: "📡" };
+  if (score >= 70) return { label: "irregular", emoji: "📡" };
+  if (score >= 50) return { label: "unstable", emoji: "📡" };
+  if (score >= 30) return { label: "weak", emoji: "📡" };
+  return { label: "critical", emoji: "📡" };
 }
 
 function meterBar(score) {
@@ -758,7 +780,6 @@ function animatePulseScore(score){
   if(!elScore) return;
 
   let current = 0;
-  elScore.textContent = score + "%"; 
 
   const interval = setInterval(()=>{
 
@@ -772,6 +793,7 @@ function animatePulseScore(score){
     elScore.textContent = current + "%";
 
   },20);
+
 }
 
 const pulseScore = computePulseScore();
@@ -795,6 +817,26 @@ const pulseMeta = pulseLabel(pulseScore);
 }
 
     el.title.innerHTML = pick(titles);
+    document.getElementById("titleEkg").innerHTML = `
+<svg viewBox="0 0 220 40" preserveAspectRatio="none">
+<path d="
+M0 20
+L20 20
+L30 10
+L40 30
+L50 20
+L80 20
+L90 10
+L100 30
+L110 20
+L140 20
+L150 10
+L160 30
+L170 20
+L220 20
+"/>
+</svg>
+`;
     el.summary.innerHTML = `${pick(issueLines)(issues)} ${pick(slotLines)(slots)}`;
 
     const details = [];
@@ -853,7 +895,6 @@ const moods = [
   "ready to throw a monitor",
   "pretending everything is fine",
   "QA is a myth, right?",
-  "wondering if this is all a dream",
   "just hoping it’s not Friday",
   "feeling like a detective in a noir film",
   "wondering if this is all a dream",
