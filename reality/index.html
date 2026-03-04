@@ -98,6 +98,35 @@ a.dashboard-link:hover {
 .critical {
   animation: pulseBlink 1s infinite;
 }
+.heartbeat {
+  display:flex;
+  align-items:center;
+  gap:2px;
+  margin-top:6px;
+  height:14px;
+}
+
+.heartbeat span {
+  width:3px;
+  height:6px;
+  background:#22c55e;
+  border-radius:2px;
+  opacity:0.8;
+  animation:beat 1.2s infinite ease-in-out;
+}
+
+@keyframes beat {
+  0%   { transform:scaleY(0.4); opacity:0.3 }
+  40%  { transform:scaleY(1.2); opacity:1 }
+  80%  { transform:scaleY(0.5); opacity:0.4 }
+  100% { transform:scaleY(0.4); opacity:0.3 }
+}
+.heartbeat.stable span { background:#22c55e; }
+.heartbeat.irregular span { background:#84cc16; }
+.heartbeat.unstable span { background:#eab308; }
+.heartbeat.weak span { background:#f97316; }
+.heartbeat.critical span { background:#ef4444; }
+.heartbeat.critical span {box-shadow:0 0 6px #ef4444;}
   </style>
 </head>
 <body>
@@ -119,7 +148,7 @@ a.dashboard-link:hover {
   background:rgba(255,255,255,0.03);
 ">
     <img
-      src="./Logo-Shield.png"
+      src="Logo-Shield.png"
       alt="AdPulse Guard"
       style="
         width:30px;
@@ -591,13 +620,18 @@ a.dashboard-link:hover {
   el.details.innerHTML = `
 <p>
 🫀 Pulse status: <span class="highlight">stable</span><br>
-Pulse score: <span class="highlight">98%</span> · <span class="${barClass}">${meterBar(98)}</span><br>
+Pulse score: <span class="highlight" id="pulseScoreValue">0%</span> · <span class="${barClass}">${meterBar(98)}</span>
+
+${heartbeatBar("stable")}
+
 Estimated time until next alert: unpredictable.
 </p>
 `;
 
   el.quote.innerText =
     pick(calmQuotes);
+
+  animatePulseScore(98);
 
   return;
 }
@@ -698,6 +732,36 @@ bar += i < filled
 return bar;
 
 }
+function heartbeatBar(label){
+  const bars = 24;
+  let html = `<div class="heartbeat ${label}">`;
+  for(let i=0;i<bars;i++){
+    html += `<span style="animation-delay:${i*0.05}s"></span>`;
+  }
+  html += `</div>`;
+  return html;
+}
+
+function animatePulseScore(score){
+
+  const elScore = document.querySelector("#pulseScoreValue");
+  if(!elScore) return;
+
+  let current = 0;
+
+  const interval = setInterval(()=>{
+
+    current += 2;
+
+    if(current >= score){
+      current = score;
+      clearInterval(interval);
+    }
+
+    elScore.textContent = current + "%";
+
+  },20);
+}
 
 const pulseScore = computePulseScore();
 const pulseMeta = pulseLabel(pulseScore);
@@ -724,9 +788,14 @@ const pulseMeta = pulseLabel(pulseScore);
 
     const details = [];
 const barClass = pulseScore < 30 ? "pulse-bar critical" : "pulse-bar";
-let pulseMessage = `${pulseMeta.emoji} Pulse status: <span class="highlight">${pulseMeta.label}</span><br>
-Pulse score: <span class="highlight">${pulseScore}%</span> · <span class="${barClass}">${meterBar(pulseScore)}</span><br>
-Ad stack heartbeat monitor`;
+let pulseMessage = `
+${pulseMeta.emoji} Pulse status: <span class="highlight">${pulseMeta.label}</span><br>
+Pulse score: <span class="highlight" id="pulseScoreValue">0%</span> · <span class="${barClass}">${meterBar(pulseScore)}</span>
+
+${heartbeatBar(pulseMeta.label)}
+
+Ad stack heartbeat monitor
+`;
 
 if (loss > 0) {
   pulseMessage += `<br>Revenue exposure: <span class="highlight">$${loss}</span> daily (estimated)`;
@@ -940,6 +1009,7 @@ Estimated time until next alert: unpredictable.`;
   };
 }
 }
+animatePulseScore(pulseScore);
 console.debug("Reality Mode initialized");
 })();
   </script>
