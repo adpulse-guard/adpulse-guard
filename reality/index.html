@@ -69,7 +69,7 @@ h1 {
   stroke-linejoin:round;
   stroke-dasharray:260;
   stroke-dashoffset:260;
-  animation:heartbeatMove 2.4s linear infinite;
+  animation:heartbeatMove 2.1s linear infinite;
   filter: drop-shadow(0 0 4px rgba(239,68,68,0.45));
 }
 
@@ -110,7 +110,7 @@ a.dashboard-link:hover {
   font-family: monospace;
   letter-spacing: 2px;
   font-size:14px;
-  margin-top:4px;
+  margin:6px 0 14px 0;
   display:block;
 }
 
@@ -554,8 +554,8 @@ animation:scan 2s infinite;
 
     const urlParams = new URLSearchParams(window.location.search);
     const param = k => urlParams.get(k);
-    const float = k => parseFloat(param(k) || "0");
-    const num = k => parseInt(param(k) || "0");
+    const float = k => Number(param(k)) || 0;
+    const num = k => Number(param(k)) || 0;
     const slots = num("slots");
     const issues = num("issues");
     if (issues === 0) {
@@ -632,6 +632,8 @@ Estimated time until next alert: unpredictable.
     const containerCollapsed = num("containerCollapsed");
     const layoutOverlap = num("layoutOverlap");
     const visibilityImpaired = num("visibilityImpaired");
+    const pulseScore = computePulseScore();
+    const pulseMeta = pulseLabel(pulseScore);
 
     const issueLines = [
       issues => `Your page has <span class="highlight">${issues}</span> ${complaintWord} from the ad gods,`,
@@ -739,19 +741,26 @@ function heartbeatBar(label){
     <svg viewBox="0 0 220 40" preserveAspectRatio="none">
       <path d="
         M0 20
-        L20 20
-        L30 10
-        L40 30
-        L50 20
-        L80 20
-        L90 10
-        L100 30
-        L110 20
-        L140 20
-        L150 10
-        L160 30
-        L170 20
-        L220 20
+        L10 20
+        L16 28
+        L22 8
+        L28 34
+        L34 20
+        L48 20
+        L55 26
+        L63 12
+        L70 32
+        L84 18
+        L100 20
+        L108 30
+        L116 10
+        L124 28
+        L132 20
+        L150 20
+        L162 26
+        L170 14
+        L178 30
+        L200 20
       "/>
     </svg>
   </div>
@@ -779,9 +788,6 @@ function animatePulseScore(score){
   },20);
 
 }
-
-const pulseScore = computePulseScore();
-const pulseMeta = pulseLabel(pulseScore);
 
     function generateVerdict(){
   const map = [
@@ -829,8 +835,9 @@ const barClass = pulseScore < 30 ? "pulse-bar critical" : "pulse-bar";
 let pulseMessage = `
 ${pulseMeta.emoji} Pulse status: <span class="highlight">${pulseMeta.label}</span>
 <br><br>
-Pulse score: <span class="highlight" id="pulseScoreValue">0%</span>
-<br>
+Pulse score:
+<span class="highlight" id="pulseScoreValue">0%</span>
+
 <span class="${barClass}">
 ${meterBar(pulseScore)}
 </span>
