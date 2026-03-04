@@ -205,6 +205,7 @@ animation:scan 2s infinite;
   <h1 id="title">Reality check loading…</h1>
   <div id="titleEkg"></div>
 </div>
+  <p id="summary"></p>
   <div id="details"></div>
 </div>
 
@@ -817,7 +818,8 @@ const pulseMeta = pulseLabel(pulseScore);
 }
 
     el.title.innerHTML = pick(titles);
-    document.getElementById("titleEkg").innerHTML = `
+    const ekg = document.getElementById("titleEkg");
+if (ekg) ekg.innerHTML = `
 <svg viewBox="0 0 220 40" preserveAspectRatio="none">
 <path d="
 M0 20
