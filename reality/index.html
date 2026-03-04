@@ -95,6 +95,16 @@ a.dashboard-link:hover {
   100% { opacity:1 }
 }
 
+@keyframes scan {
+0% { opacity:0.4 }
+50% { opacity:1 }
+100% { opacity:0.4 }
+}
+
+#pulseScoreValue {
+animation:scan 2s infinite;
+}
+
 .critical {
   animation: pulseBlink 1s infinite;
 }
@@ -171,19 +181,6 @@ a.dashboard-link:hover {
   <p id="summary">Just a sec…</p>
 
   <div id="details"></div>
-  <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
-  <button id="copyBtn" style="
-    background:rgba(99,102,241,0.15);
-    border:1px solid rgba(99,102,241,0.35);
-    color:#c7d2fe;
-    padding:10px 12px;
-    border-radius:10px;
-    cursor:pointer;
-    font-size:13px;">
-    📋 Copy incident text
-  </button>
-
-  <span id="copyStatus" class="fade" style="align-self:center;"></span>
 </div>
 
   <p class="quote" id="quote"></p>
@@ -191,7 +188,6 @@ a.dashboard-link:hover {
   <div style="margin-top:28px; opacity:0.6; text-align:center;">
 <hr style="border:none;border-top:1px solid rgba(255,255,255,0.08);margin-bottom:14px;">
 <span class="fade">Never Miss a Beat.</span>
-</div>
 </div>
 
   <script>
@@ -208,7 +204,7 @@ a.dashboard-link:hover {
 };
     (function () {
     const titles = [
-  "This is why we can't have nice things.",
+  "This is why we can't have nice things. Or stable revenue.",
   "This deployment had confidence.",
   "Somewhere, QA just looked away.",
   "Minimal testing. Maximum consequences.",
@@ -330,7 +326,9 @@ a.dashboard-link:hover {
       "Sometimes, the fix is emotional detachment.",
       "Check if the WiFi light is blinking. Always helps.",
       "Drink water. Fix ads. In that order.",
-      "Have you sacrificed an ad slot to the algorithm lately?"
+      "Have you sacrificed an ad slot to the algorithm lately?",
+      "Suspected cause: Friday deployment.",
+      "Maybe it’s the alignment of the stars. Or just bad code.",
 ];
     const dashboardCTAs = [
   "Want receipts? <a class='dashboard-link' href='{url}'>Open the dashboard.</a>",
@@ -632,9 +630,7 @@ Estimated time until next alert: unpredictable.
     pick(calmQuotes);
 
   animatePulseScore(98);
-
-  return;
-}
+    } else {
     const pluralize = (count, singular, plural) =>
      count === 1 ? singular : plural;
 
@@ -793,8 +789,7 @@ ${pulseMeta.emoji} Pulse status: <span class="highlight">${pulseMeta.label}</spa
 Pulse score: <span class="highlight" id="pulseScoreValue">0%</span> · <span class="${barClass}">${meterBar(pulseScore)}</span>
 
 ${heartbeatBar(pulseMeta.label)}
-
-Ad stack heartbeat monitor
+<br>
 `;
 
 if (loss > 0) {
@@ -822,113 +817,7 @@ details.push(`<div style="margin-bottom:12px">${pulseMessage}</div>`);
     if (Math.random() < 0.1) {
   details.push("Reality Mode™ does not exaggerate.");
 }
-    el.details.innerHTML =
-    details.map(d => `<p>${d}</p>`).join('');
-    const suspects = generateVerdict();
-    const verdictHTML = `
-      <p style="margin-top:26px;">
-      <strong>🕵️ Forensic verdict</strong><br>
-      Primary suspect: <span class="highlight">${suspects[0]}</span><br>
-      Confidence: ${Math.floor(Math.random()*40+60)}%
-      </p>
-`;
-    el.details.innerHTML += verdictHTML;
-    function buildTimeline(){
 
-const timeline = [];
-
-timeline.push("Page started loading");
-
-if (gptScriptMissing > 0 || gptNotInitialized > 0) {
-
-timeline.push("GPT failed to initialize");
-timeline.push("Slot requests never executed");
-timeline.push("Ads never had a chance to load");
-
-}
-
-else if (phantom > 0 || noDomNoRequest > 0) {
-
-timeline.push("Slot requests fired before DOM containers existed");
-timeline.push("Ad server delivered requests to nowhere");
-timeline.push("Phantom requests created");
-
-}
-
-else if (layoutOverlap > 0 || visibilityImpaired > 0) {
-
-timeline.push("Ads rendered successfully");
-timeline.push("Page layout visually covered them");
-timeline.push("Viewability silently collapsed");
-
-}
-
-else if (emptyResponse > 0) {
-
-timeline.push("Ad server received slot requests");
-timeline.push("Demand returned empty responses");
-timeline.push("Inventory remained unsold");
-
-}
-
-timeline.push("Revenue impact followed");
-
-return timeline;
-
-}
-const timeline = buildTimeline();
-el.details.innerHTML += `
-<p style="margin-top:22px">
-<strong>🧬 What probably happened</strong><br>
-${timeline.map((t,i)=>`${i+1}. ${t}`).join("<br>")}
-</p>
-`;
-
-    const devConfidence = [
-  "Developer confidence during deploy: 100%",
-  "Testing performed before deploy: unclear",
-  "Confidence level: extremely high",
-  "Actual verification: none detected",
-  "Deployment strategy: vibes",
-  "QA status: theoretical"
-];
-
-el.details.innerHTML += `
-<p style="opacity:0.85">
-📊 ${pick(devConfidence)}
-</p>
-`;
-    const chaosLines = [
-  "Someone deployed on Friday.",
-  "Someone skipped QA.",
-  "Someone said 'it's probably fine.'",
-  "Someone trusted the CMS.",
-  "Someone hotfixed production.",
-  "Someone edited GPT in the template.",
-  "Someone forgot cache exists.",
-  "Someone assumed it would just work."
-];
-
-    const fixes = [
-  "stop deploying on Fridays",
-  "test before shipping",
-  "verify GPT initialization",
-  "check display() execution",
-  "stop editing tags in production",
-  "confirm slot containers exist",
-  "consider basic QA"
-];
-
-const fix = pick(fixes);
-
-el.details.innerHTML += `
-<p style="margin-top:18px">
-<strong>🧾 Incident report</strong><br>
-Recommended fix:<br>
-• ${fix}<br>
-• maybe test things next time
-</p>
-`;
 
 const moods = [
   "disappointed",
@@ -937,8 +826,23 @@ const moods = [
   "questioning your deployment process",
   "holding on by a thread",
   "confused but operational",
-  "experiencing trust issues"
+  "experiencing trust issues",
+  "in need of a hug",
+  "wondering if it’s worth it",
+  "existential crisis",
+  "ready to throw a monitor",
+  "pretending everything is fine",
+  "QA is a myth, right?",
+  "wondering if this is all a dream",
+  "just hoping it’s not Friday",
+  "feeling like a detective in a noir film",
+  "wondering if this is all a dream",
+  "pretending this is staging",
+  "running purely on hope",
+  "feeling overwhelmed"
 ];
+el.details.innerHTML =
+details.map(d => `<p>${d}</p>`).join('');
 
 el.details.innerHTML += `
 <p style="opacity:0.85">
@@ -946,11 +850,6 @@ Ad stack mood today: ${pick(moods)}
 </p>
 `;
 
-const extra = pick(chaosLines);
-
-el.details.innerHTML += `
-<p style="opacity:0.85">Also involved: ${extra}</p>
-`;
     el.quote.innerText = pick(quotes);
     
     const futurePredictions = [
@@ -972,45 +871,10 @@ if (dashboardUrl) {
   const decodedUrl = decodeURIComponent(dashboardUrl);
   const cta = pick(dashboardCTAs).replace('{url}', decodedUrl);
   el.dashboardLink.innerHTML = cta;
-
-const copyBtn = el.copyBtn;
-const copyStatus = el.copyStatus;
-
-if (copyBtn) {
-  copyBtn.onclick = async () => {
-    const page = urlParams.get('page') || '';
-    const headline = `AdPulse Guard · Reality Mode™`;
-    const pulseLine = `Pulse: ${pulseMeta.label.toUpperCase()} (${pulseScore}%)`;
-    const lossLine = loss > 0 ? `Daily exposure: $${loss}` : `Daily exposure: unknown`;
-    const verdictLine = `Primary suspect: ${generateVerdict()[0]}`;
-    const tl = buildTimeline().map((x,i)=>`${i+1}. ${x}`).join("\n");
-
-    const text =
-`${headline}
-${pulseLine}
-${lossLine}
-Issues: ${issues} · Slots: ${slots}
-${verdictLine}
-
-What probably happened:
-${tl}
-
-Estimated time until next alert: unpredictable.`;
-
-    try {
-      await navigator.clipboard.writeText(text);
-      copyStatus.textContent = "Copied ✅";
-      copyBtn.blur();
-      setTimeout(()=>copyStatus.textContent="", 1600);
-    } catch (e) {
-      copyStatus.textContent = "Copy failed ❌";
-      setTimeout(()=>copyStatus.textContent="", 1600);
-    }
-  };
 }
 }
 animatePulseScore(pulseScore);
-console.debug("Reality Mode initialized");
+console.debug("APG Reality Mode loaded");
 })();
   </script>
 </body>
