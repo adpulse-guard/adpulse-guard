@@ -592,7 +592,7 @@ animation:scan 2s infinite;
   el.details.innerHTML = `
 <p>
 📡 Pulse status: <span class="highlight">stable</span><br>
-Pulse score: <span class="highlight" id="pulseScoreValue">${pulseScore}%</span> · <span class="${barClass}">${meterBar(98)}</span>
+Pulse score: <span class="highlight" id="pulseScoreValue">98%</span> · <span class="${barClass}">${meterBar(98)}</span>
 
 ${heartbeatBar("stable")}
 
@@ -707,7 +707,7 @@ function pulseLabel(score) {
 function meterBar(score) {
 
 const blocks = 10;
-const filled = score / 10 | 0;
+const filled = Math.floor(score / 10);
 
 const colors = [
   "#ef4444",
@@ -836,7 +836,7 @@ let pulseMessage = `
 ${pulseMeta.emoji} Pulse status: <span class="highlight">${pulseMeta.label}</span>
 <br><br>
 Pulse score:
-<span class="highlight" id="pulseScoreValue">0%</span>
+<span class="highlight" id="pulseScoreValue">${pulseScore}%</span>
 
 <span class="${barClass}">
 ${meterBar(pulseScore)}
