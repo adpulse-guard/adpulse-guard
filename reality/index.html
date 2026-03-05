@@ -58,19 +58,27 @@ h1 {
 }
 
 .title-row svg{
-  width:140px;
+  width:180px;
   height:28px;
+  overflow: visible;
+
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 10%,
+    black 90%,
+    transparent
+  );
 }
 
 .title-row path{
   fill:none;
   stroke:#ef4444;
-  stroke-width:2;
+  stroke-width:2.2;
   stroke-linecap:round;
   stroke-linejoin:round;
-  stroke-dasharray:260;
-  stroke-dashoffset:260;
-  animation:heartbeatMove 2.1s linear infinite;
+  stroke-dasharray:8 6;
+  animation:heartbeatMove 2.4s linear infinite;
   filter: drop-shadow(0 0 4px rgba(239,68,68,0.45));
 }
 
@@ -109,8 +117,8 @@ a.dashboard-link:hover {
 
 .pulse-bar {
   font-family: monospace;
-  letter-spacing:1px;
-  font-size:12px;
+  letter-spacing:2px;
+  font-size:14px;
   margin-left:6px;
   display:inline;
   vertical-align:middle;
@@ -141,9 +149,8 @@ animation:scan 2s infinite;
 }
 
 @keyframes heartbeatMove {
-  to {
-    stroke-dashoffset:0;
-  }
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -60; }
 }
 
 .heartbeat path {
@@ -161,6 +168,14 @@ animation:scan 2s infinite;
   color:#f87171;
   font-weight:600;
   margin-top:6px;
+}
+
+.section-title{
+  font-size:11px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:var(--apg-muted);
+  margin-bottom:6px;
 }
 
 .section-divider{
@@ -733,37 +748,23 @@ function pulseLabel(score) {
   return { label: "critical", emoji: "📡" };
 }
 
-function meterBar(score) {
+function meterBar(score){
 
 const blocks = 10;
 const filled = Math.floor(score / 10);
-
-const colors = [
-  "#f87171",   
-  "#fb923c",   
-  "#facc15",   
-  "#a3e635",   
-  "#4ade80"  
-];
-
-const color =
-score >= 85 ? colors[4] :
-score >= 70 ? colors[3] :
-score >= 50 ? colors[2] :
-score >= 30 ? colors[1] :
-colors[0];
 
 let bar = "";
 
 for (let i = 0; i < blocks; i++) {
 bar += i < filled
-? `<span style="color:${color}">▓</span>`
-: `<span style="opacity:0.25">▓</span>`;
+? `<span>●</span>`
+: `<span style="opacity:0.25">○</span>`;
 }
 
 return bar;
 
 }
+
 function heartbeatBar(label){
   return `
   <div class="heartbeat ${label}">
@@ -816,23 +817,6 @@ function animatePulseScore(score){
 
   },20);
 
-}
-
-    function generateVerdict(){
-  const map = [
-    [gptScriptMissing,"JavaScript race condition"],
-    [gptNotInitialized,"GPT script never initialized"],
-    [phantom,"DOM rendered before GPT"],
-    [wrongNetwork,"Wrong network ID"],
-    [neverRequested,"display() never executed"],
-    [layoutOverlap,"CSS overlap"]
-  ];
-
-  const suspects = map.filter(x=>x[0]>0).map(x=>x[1]);
-
-  if(!suspects.length) suspects.push("A developer with confidence");
-
-  return suspects;
 }
 
     el.title.innerHTML = pick(titles);
@@ -890,9 +874,13 @@ Revenue exposure $${loss}/day
 
 
 details.push(`
+<div class="section-title">System vitals</div>
 <div style="margin-bottom:12px">${pulseMessage}</div>
 <div class="section-divider"></div>
 `);
+
+details.push(`<div class="section-title">Incident details</div>`);
+
     if (neverRequested > 0) details.push(`🛑 ${neverRequested} Slots defined but never requested. ${pick(detailsMessages.neverRequested)}`);
     if (containerCollapsed > 0) details.push(`📉 ${containerCollapsed} Collapsed slot containers. ${pick(detailsMessages.containerCollapsed)}`);
     if (layoutOverlap > 0) details.push(`🧱 ${layoutOverlap} Ads overlapped by page elements. ${pick(detailsMessages.layoutOverlap)}`);
@@ -906,9 +894,6 @@ details.push(`
     if (wrongNetwork > 0) details.push(`🔌 ${wrongNetwork} Wrong network IDs. ${pick(detailsMessages.wrongNetwork)}`);
     if (emptyResponse > 0) details.push(`📭 ${emptyResponse} Empty ad responses. ${pick(detailsMessages.emptyResponse)}`);
     if (unexpectedSize > 0) details.push(`📏 ${unexpectedSize} Unexpected creative sizes. ${pick(detailsMessages.unexpectedSize)}`);
-    if (Math.random() < 0.1) {
-  details.push("Reality Mode™ does not exaggerate.");
-}
 
 
 const moods = [
@@ -973,7 +958,7 @@ if (dashboardUrl) {
 }
 }
 console.debug("APG Reality Mode loaded");
-})();
+    })();
   </script>
 </body>
 </html>
