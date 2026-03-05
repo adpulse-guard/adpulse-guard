@@ -29,9 +29,10 @@ body {
 }
 
 .box {
+  backdrop-filter: blur(6px);
   background: linear-gradient(
     180deg,
-    rgba(255,255,255,0.03),
+    rgba(255,255,255,0.05),
     rgba(255,255,255,0)
   );
   background-color: var(--apg-card);
@@ -108,10 +109,15 @@ a.dashboard-link:hover {
 
 .pulse-bar {
   font-family: monospace;
-  letter-spacing: 2px;
-  font-size:14px;
-  margin:6px 0 14px 0;
-  display:block;
+  letter-spacing:1px;
+  font-size:12px;
+  margin-left:6px;
+  display:inline;
+  vertical-align:middle;
+}
+
+.pulse-bar span {
+  transition: opacity 0.3s;
 }
 
 @keyframes pulseBlink {
@@ -143,6 +149,29 @@ animation:scan 2s infinite;
 .heartbeat path {
   stroke:#ef4444;
   filter: drop-shadow(0 0 4px rgba(239,68,68,0.4));
+  animation: heartbeatMove 2.3s linear infinite,
+             pulseGlow 2s ease-in-out infinite;
+}
+
+.revenue-badge{
+  display:inline-block;
+  padding:6px 10px;
+  border-radius:8px;
+  background:rgba(239,68,68,0.15);
+  color:#f87171;
+  font-weight:600;
+  margin-top:6px;
+}
+
+.section-divider{
+  border-top:1px solid rgba(255,255,255,0.08);
+  margin:16px 0;
+}
+
+@keyframes pulseGlow {
+  0% { filter: drop-shadow(0 0 3px rgba(239,68,68,0.3)); }
+  50% { filter: drop-shadow(0 0 8px rgba(239,68,68,0.6)); }
+  100% { filter: drop-shadow(0 0 3px rgba(239,68,68,0.3)); }
 }
   </style>
 </head>
@@ -710,11 +739,11 @@ const blocks = 10;
 const filled = Math.floor(score / 10);
 
 const colors = [
-  "#ef4444",
-  "#f97316",
-  "#eab308",
-  "#84cc16",
-  "#22c55e"
+  "#f87171",   
+  "#fb923c",   
+  "#facc15",   
+  "#a3e635",   
+  "#4ade80"  
 ];
 
 const color =
@@ -741,26 +770,26 @@ function heartbeatBar(label){
     <svg viewBox="0 0 220 40" preserveAspectRatio="none">
       <path d="
         M0 20
-        L10 20
-        L16 28
-        L22 8
-        L28 34
-        L34 20
-        L48 20
-        L55 26
-        L63 12
-        L70 32
-        L84 18
-        L100 20
-        L108 30
-        L116 10
-        L124 28
-        L132 20
-        L150 20
-        L162 26
-        L170 14
-        L178 30
-        L200 20
+L14 20
+L22 32
+L30 6
+L38 28
+L46 20
+L60 20
+L68 34
+L76 10
+L84 26
+L96 20
+L112 20
+L120 30
+L128 12
+L136 24
+L150 20
+L170 20
+L182 33
+L192 14
+L202 27
+L220 20
       "/>
     </svg>
   </div>
@@ -811,20 +840,27 @@ function animatePulseScore(score){
 if (ekg) ekg.innerHTML = `
 <svg viewBox="0 0 220 40" preserveAspectRatio="none">
 <path d="
-M0 20
-L20 20
-L30 10
-L40 30
-L50 20
-L80 20
-L90 10
-L100 30
-L110 20
-L140 20
-L150 10
-L160 30
-L170 20
-L220 20
+        M0 20
+        L14 20
+        L22 32
+        L30 6
+        L38 28
+        L46 20
+        L60 20
+        L68 34
+        L76 10
+        L84 26
+        L96 20
+        L112 20
+        L120 30
+        L128 12
+        L136 24
+        L150 20
+        L170 20
+        L182 33
+        L192 14
+        L202 27
+        L220 20
 "/>
 </svg>
 `;
@@ -833,9 +869,9 @@ L220 20
     const details = [];
 const barClass = pulseScore < 30 ? "pulse-bar critical" : "pulse-bar";
 let pulseMessage = `
-${pulseMeta.emoji} Pulse status: <span class="highlight">${pulseMeta.label}</span>
-<br><br>
-Pulse score:
+${pulseMeta.emoji} Pulse status: 
+<span class="highlight">${pulseMeta.label}</span>
+ · Score 
 <span class="highlight" id="pulseScoreValue">${pulseScore}%</span>
 
 <span class="${barClass}">
@@ -845,14 +881,18 @@ ${meterBar(pulseScore)}
 `;
 
 if (loss > 0) {
-  pulseMessage += `<br>Revenue exposure: <span class="highlight">$${loss}</span> daily (estimated)`;
-} else if (issues > 0) {
-  pulseMessage += `<br>Revenue exposure: <span class="highlight">unknown</span> (impact not modeled)`;
-} else {
-  pulseMessage += `<br>Revenue exposure: <span class="highlight">none detected</span>`;
+  pulseMessage += `
+<div class="revenue-badge">
+Revenue exposure $${loss}/day
+</div>
+`;
 }
 
-details.push(`<div style="margin-bottom:12px">${pulseMessage}</div>`);
+
+details.push(`
+<div style="margin-bottom:12px">${pulseMessage}</div>
+<div class="section-divider"></div>
+`);
     if (neverRequested > 0) details.push(`🛑 ${neverRequested} Slots defined but never requested. ${pick(detailsMessages.neverRequested)}`);
     if (containerCollapsed > 0) details.push(`📉 ${containerCollapsed} Collapsed slot containers. ${pick(detailsMessages.containerCollapsed)}`);
     if (layoutOverlap > 0) details.push(`🧱 ${layoutOverlap} Ads overlapped by page elements. ${pick(detailsMessages.layoutOverlap)}`);
@@ -897,8 +937,9 @@ details.map(d => `<p>${d}</p>`).join('');
 animatePulseScore(pulseScore);
 
 el.details.innerHTML += `
+<div class="section-divider"></div>
 <p style="opacity:0.85">
-Ad stack mood today: ${pick(moods)}
+AdPulse mood today: ${pick(moods)}
 </p>
 `;
 
@@ -915,7 +956,6 @@ Ad stack mood today: ${pick(moods)}
   "Estimated time until next alert: statistically inevitable.",
   "Estimated time until next alert: sooner than management expects."
 ];
-
 el.quote.innerText +=
 "\n\n" + pick(futurePredictions);
     const dashboardUrl = param("dash");
