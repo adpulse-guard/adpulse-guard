@@ -69,6 +69,8 @@ h1 {
     black 90%,
     transparent
   );
+
+  animation: ekgScroll 3s linear infinite;
 }
 
 .title-row path{
@@ -77,8 +79,8 @@ h1 {
   stroke-width:1.8;
   stroke-linecap:round;
   stroke-linejoin:round;
-  animation:heartbeatMove 2.4s linear infinite;
-            pulseGlow 2.2s ease-in-out infinite;
+  stroke-dasharray:200 200;
+  animation: ekgMove 2.6s linear infinite;
   filter:
     drop-shadow(0 0 3px rgba(239,68,68,0.5))
     drop-shadow(0 0 8px rgba(239,68,68,0.35))
@@ -151,9 +153,14 @@ animation:scan 2s infinite;
   animation: pulseBlink 1s infinite;
 }
 
+@keyframes ekgScroll{
+0% { transform: translateX(40px); }
+100% { transform: translateX(0); }
+}
+
 @keyframes heartbeatMove {
   from { stroke-dashoffset: 0; }
-  to { stroke-dashoffset: -60; }
+  to { stroke-dashoffset: 200; }
 }
 
 .heartbeat path {
@@ -900,7 +907,7 @@ Revenue exposure $${loss}/day
 
 details.push(`
 <div class="section-divider"></div>
-<div class="section-title">System vitals</div> <br>
+<div class="section-title">System vitals</div>
 <div style="margin-bottom:12px">${pulseMessage}</div>
 <div class="section-divider"></div>
 `);
