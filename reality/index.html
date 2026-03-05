@@ -52,15 +52,26 @@ h1 {
 }
 
 .title-row{
-  display:flex;
-  align-items:center;
-  gap:16px;
+  position:relative;
+}
+
+.title-row::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(
+      rgba(255,255,255,0.05) 1px,
+      transparent 1px
+    );
+  background-size:100% 6px;
+  pointer-events:none;
 }
 
 .title-row svg{
   width:180px;
   height:28px;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .title-row path{
@@ -69,8 +80,11 @@ h1 {
   stroke-width:1.8;
   stroke-linecap:round;
   stroke-linejoin:round;
-  stroke-dasharray:220;
-  animation: ekgMove 2.4s linear infinite;
+  stroke-dasharray: 400;
+  stroke-dashoffset: 0;
+  animation:
+    ekgFlow 3s linear infinite,
+    pulseGlow 2s ease-in-out infinite;
   filter:
     drop-shadow(0 0 3px rgba(239,68,68,0.5))
     drop-shadow(0 0 8px rgba(239,68,68,0.35))
@@ -143,9 +157,9 @@ animation:scan 2s infinite;
   animation: pulseBlink 1s infinite;
 }
 
-@keyframes ekgMove{
-  from { stroke-dashoffset: 220; }
-  to { stroke-dashoffset: 0; }
+@keyframes ekgFlow{
+  from { transform: translateX(0); }
+  to { transform: translateX(220px); }
 }
 
 .revenue-badge{
@@ -804,6 +818,18 @@ L182 33
 L192 14
 L202 27
 L220 20
+L240 20
+L254 20
+L262 32
+L270 6
+L278 28
+L286 20
+L300 20
+L308 34
+L316 10
+L324 26
+L336 20
+L352 20
       "/>
     </svg>
   </div>
