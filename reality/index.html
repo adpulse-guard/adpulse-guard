@@ -61,16 +61,6 @@ h1 {
   width:180px;
   height:28px;
   overflow: visible;
-
-  mask-image: linear-gradient(
-    to right,
-    transparent,
-    black 10%,
-    black 90%,
-    transparent
-  );
-
-  animation: ekgScroll 3s linear infinite;
 }
 
 .title-row path{
@@ -79,8 +69,8 @@ h1 {
   stroke-width:1.8;
   stroke-linecap:round;
   stroke-linejoin:round;
-  stroke-dasharray:200 200;
-  animation: ekgMove 2.6s linear infinite;
+  stroke-dasharray:220;
+  animation: ekgMove 2.4s linear infinite;
   filter:
     drop-shadow(0 0 3px rgba(239,68,68,0.5))
     drop-shadow(0 0 8px rgba(239,68,68,0.35))
@@ -153,21 +143,9 @@ animation:scan 2s infinite;
   animation: pulseBlink 1s infinite;
 }
 
-@keyframes ekgScroll{
-0% { transform: translateX(40px); }
-100% { transform: translateX(0); }
-}
-
-@keyframes heartbeatMove {
-  from { stroke-dashoffset: 0; }
-  to { stroke-dashoffset: 200; }
-}
-
-.heartbeat path {
-  stroke:#ef4444;
-  filter: drop-shadow(0 0 4px rgba(239,68,68,0.4));
-  animation: heartbeatMove 2.3s linear infinite,
-             pulseGlow 2s ease-in-out infinite;
+@keyframes ekgMove{
+  from { stroke-dashoffset: 220; }
+  to { stroke-dashoffset: 0; }
 }
 
 .revenue-badge{
