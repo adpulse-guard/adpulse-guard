@@ -945,19 +945,26 @@ AdPulse mood today: ${pick(moods)}
 
     el.quote.innerText = pick(quotes);
     
-    const futurePredictions = [
-  "Estimated time until next alert: unpredictable.",
-  "Estimated time until next alert: probably soon.",
-  "Estimated time until next alert: depends who deploys next.",
-  "Estimated time until next alert: sometime after the next commit.",
-  "Estimated time until next alert: after someone says 'ship it'.",
-  "Estimated time until next alert: Friday evening.",
-  "Estimated time until next alert: when someone edits the template.",
-  "Estimated time until next alert: statistically inevitable.",
-  "Estimated time until next alert: sooner than management expects."
+    const blameSuggestions = [
+  "Suspected cause: someone deployed on Friday.",
+  "Likely culprit: a confident developer.",
+  "Probable cause: 'it worked on my machine'.",
+  "Main suspect: whoever last touched the template.",
+  "Root cause analysis: vibes.",
+  "Primary suspect: a last-minute commit.",
+  "Most likely scenario: a 'quick fix' that wasn’t.",
+  "Most likely explanation: nobody tested this.",
+  "Blame candidate: the intern. Probably unfair, but still.",
+  "Technical diagnosis: overconfidence.",
+  "Suspected cause: a deploy that 'should be fine'.",
+  "Probable culprit: the 'it’s probably fine' mindset.",
+  "Primary suspect: someone who said 'ship it'.",
+  "Root cause: a developer with trust issues.",
+  "Prime suspect: Friday deployment.",
 ];
+
 el.quote.innerText +=
-"\n\n" + pick(futurePredictions);
+"\n\n" + pick(blameSuggestions);
     const dashboardUrl = param("dash");
 if (dashboardUrl) {
   const decodedUrl = decodeURIComponent(dashboardUrl);
