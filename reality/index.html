@@ -74,12 +74,15 @@ h1 {
 .title-row path{
   fill:none;
   stroke:#ef4444;
-  stroke-width:2.2;
+  stroke-width:1.8;
   stroke-linecap:round;
   stroke-linejoin:round;
-  stroke-dasharray:8 6;
   animation:heartbeatMove 2.4s linear infinite;
-  filter: drop-shadow(0 0 4px rgba(239,68,68,0.45));
+            pulseGlow 2.2s ease-in-out infinite;
+  filter:
+    drop-shadow(0 0 3px rgba(239,68,68,0.5))
+    drop-shadow(0 0 8px rgba(239,68,68,0.35))
+    drop-shadow(0 0 16px rgba(239,68,68,0.15));
 }
 
 p {
@@ -168,6 +171,26 @@ animation:scan 2s infinite;
   color:#f87171;
   font-weight:600;
   margin-top:6px;
+}
+
+.score-good{
+color:#4ade80;
+font-weight:600;
+}
+
+.score-mid{
+color:#facc15;
+font-weight:600;
+}
+
+.score-bad{
+color:#fb923c;
+font-weight:600;
+}
+
+.score-critical{
+color:#f87171;
+font-weight:700;
 }
 
 .section-title{
@@ -678,6 +701,11 @@ Estimated time until next alert: unpredictable.
     const visibilityImpaired = num("visibilityImpaired");
     const pulseScore = computePulseScore();
     const pulseMeta = pulseLabel(pulseScore);
+    let scoreClass = "score-good";
+
+      if(pulseScore < 85) scoreClass = "score-mid";
+      if(pulseScore < 60) scoreClass = "score-bad";
+      if(pulseScore < 35) scoreClass = "score-critical";
 
     const issueLines = [
       issues => `Your page has <span class="highlight">${issues}</span> ${complaintWord} from the ad gods,`,
@@ -855,12 +883,9 @@ const barClass = pulseScore < 30 ? "pulse-bar critical" : "pulse-bar";
 let pulseMessage = `
 ${pulseMeta.emoji} Pulse status: 
 <span class="highlight">${pulseMeta.label}</span>
- · Score 
-<span class="highlight" id="pulseScoreValue">${pulseScore}%</span>
-
-<span class="${barClass}">
-${meterBar(pulseScore)}
-</span>
+<br>
+Score: 
+<span id="pulseScoreValue" class="${scoreClass}">${pulseScore}%</span>
 <br>
 `;
 
@@ -874,7 +899,8 @@ Revenue exposure $${loss}/day
 
 
 details.push(`
-<div class="section-title">System vitals</div>
+<div class="section-divider"></div>
+<div class="section-title">System vitals</div> <br>
 <div style="margin-bottom:12px">${pulseMessage}</div>
 <div class="section-divider"></div>
 `);
