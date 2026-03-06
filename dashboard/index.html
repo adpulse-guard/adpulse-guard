@@ -943,14 +943,30 @@ if (!topSlot) {
 
 }
 document.getElementById('slotCount').textContent = totalImpactedSlots;
-let expectedSlotsTotal = 0;
+const pageExpectedMap = new Map();
 
 effectiveRows.forEach(r => {
+  if (!r.pageUrl || !r.receivedAt) return;
+  if (hasGlobal && !GLOBAL_TYPES.includes(r.issueType)) return;
+
+  const dateKey = r.receivedAt.split('T')[0];
+  const key = `${dateKey}__${r.pageUrl}`;
+
   const expected = Number(r.expectedSlotCount || 0);
-  if (expected > expectedSlotsTotal) {
-    expectedSlotsTotal = expected;
+
+  if (!pageExpectedMap.has(key)) {
+    pageExpectedMap.set(key, expected);
+  } else {
+    pageExpectedMap.set(
+      key,
+      Math.max(pageExpectedMap.get(key), expected)
+    );
   }
 });
+
+const expectedSlotsTotal =
+  Array.from(pageExpectedMap.values())
+    .reduce((a, b) => a + b, 0);
 
 let reliability = 100;
 
