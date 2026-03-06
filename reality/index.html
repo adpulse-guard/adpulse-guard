@@ -255,22 +255,11 @@ copySlotsBtn.addEventListener('click', () => {
 });
 function animateCurrency(el, target, duration = 1200) {
 
-  const previous = parseFloat(el.dataset.value || 0);
-  el.dataset.value = target;
-
-  if (previous === target) {
-    el.textContent =
-      `$${target.toLocaleString(undefined,{
-        minimumFractionDigits:2,
-        maximumFractionDigits:2
-      })}`;
-    return;
-  }
-
   if (el._animationFrame) {
     cancelAnimationFrame(el._animationFrame);
   }
 
+  const start = 0;
   const startTime = performance.now();
 
   function frame(now) {
@@ -278,7 +267,7 @@ function animateCurrency(el, target, duration = 1200) {
     const progress = Math.min((now - startTime) / duration, 1);
     const eased = 1 - Math.pow(1 - progress, 4);
 
-    const value = previous + (target - previous) * eased;
+    const value = start + (target - start) * eased;
 
     el.textContent =
       `$${value.toLocaleString(undefined,{
@@ -953,7 +942,7 @@ setTimeout(() => {
   dailyLossEl.style.transform = "scale(1)";
 }, 250);
 
-animateCurrency(dailyLossEl, dedupedTotalLoss);
+animateCurrency(dailyLossEl, dedupedTotalLoss, 1800);
 
 if (dedupedTotalLoss === 0) {
   dailyLossEl.classList.remove(
