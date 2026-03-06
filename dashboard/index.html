@@ -159,9 +159,8 @@
     Ad Delivery Health
   </div>
   <div id="reliabilityScore" class="text-4xl font-bold">—</div>
-  <div class="text-xs text-gray-400 mt-1">
-    % of slots delivering correctly
-  </div>
+  <div id="reliabilityDetails" class="text-xs text-gray-400 mt-1">
+</div>
 </div>
   <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center border-l-4 border-red-300 dark:border-red-600">
     <div class="text-xs uppercase tracking-wide text-gray-500 mb-1 whitespace-nowrap">
@@ -980,6 +979,8 @@ reliability = Math.max(0, Math.round(reliability));
 const reliabilityEl = document.getElementById('reliabilityScore');
 
 reliabilityEl.textContent = reliability + '%';
+document.getElementById('reliabilityDetails').textContent =
+  `${expectedSlotsTotal - totalImpactedSlots} / ${expectedSlotsTotal} slots delivering`;
 
 reliabilityEl.classList.remove(
   'text-green-600',
