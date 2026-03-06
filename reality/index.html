@@ -253,25 +253,32 @@ copySlotsBtn.addEventListener('click', () => {
 
   navigator.clipboard.writeText(text);
 });
-function animateCurrency(el, target, duration = 900) {
+function animateCurrency(el, target, duration = 1200) {
+
+  const previous = parseFloat(el.dataset.value || 0);
+  el.dataset.value = target;
+
+  if (previous === target) {
+    el.textContent =
+      `$${target.toLocaleString(undefined,{
+        minimumFractionDigits:2,
+        maximumFractionDigits:2
+      })}`;
+    return;
+  }
 
   if (el._animationFrame) {
     cancelAnimationFrame(el._animationFrame);
   }
 
-  const current = parseFloat(
-    (el.textContent || '0').replace(/[^0-9.-]+/g, '')
-  ) || 0;
-
-  const start = current;
   const startTime = performance.now();
 
   function frame(now) {
 
     const progress = Math.min((now - startTime) / duration, 1);
-    const eased = 1 - Math.pow(1 - progress, 3);
+    const eased = 1 - Math.pow(1 - progress, 4);
 
-    const value = start + (target - start) * eased;
+    const value = previous + (target - previous) * eased;
 
     el.textContent =
       `$${value.toLocaleString(undefined,{
@@ -939,9 +946,12 @@ document.getElementById('slotCount').textContent = totalImpactedSlots;
 
 const dailyLossEl = document.getElementById('dailyLoss');
 
-dailyLossEl.style.transition = "transform 0.2s";
-dailyLossEl.style.transform = "scale(1.05)";
-setTimeout(()=>dailyLossEl.style.transform="scale(1)",200);
+dailyLossEl.style.transform = "scale(1.08)";
+dailyLossEl.style.transition = "transform 0.25s ease";
+
+setTimeout(() => {
+  dailyLossEl.style.transform = "scale(1)";
+}, 250);
 
 animateCurrency(dailyLossEl, dedupedTotalLoss);
 
