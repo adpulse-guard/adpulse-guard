@@ -987,13 +987,13 @@ document.getElementById('reliabilityDetails').textContent =
   `${expectedSlotsTotal - totalImpactedSlots} / ${expectedSlotsTotal} slots delivering`;
 
 reliabilityEl.classList.remove(
-  'text-green-700',
+  'text-green-600',
   'text-orange-600',
   'text-red-600'
 );
 
 if (reliability >= 90) {
-  reliabilityEl.classList.add('text-green-700');
+  reliabilityEl.classList.add('text-green-600');
 } else if (reliability >= 50) {
   reliabilityEl.classList.add('text-orange-600');
 } else {
