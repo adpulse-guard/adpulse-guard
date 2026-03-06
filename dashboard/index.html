@@ -253,7 +253,35 @@ copySlotsBtn.addEventListener('click', () => {
 
   navigator.clipboard.writeText(text);
 });
+function animateCurrency(el, target, duration = 1200) {
 
+  if (el._animationFrame) {
+    cancelAnimationFrame(el._animationFrame);
+  }
+
+  const start = 0;
+  const startTime = performance.now();
+
+  function frame(now) {
+
+    const progress = Math.min((now - startTime) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 4);
+
+    const value = start + (target - start) * eased;
+
+    el.textContent =
+      `$${value.toLocaleString(undefined,{
+        minimumFractionDigits:2,
+        maximumFractionDigits:2
+      })}`;
+
+    if (progress < 1) {
+      el._animationFrame = requestAnimationFrame(frame);
+    }
+  }
+
+  el._animationFrame = requestAnimationFrame(frame);
+}
 if (!token) {
   document.body.innerHTML = `
     <div style="padding:40px;font-family:Inter,sans-serif">
@@ -282,6 +310,7 @@ const labelMap = {
   phantom_slot_requested: 'Phantom slot requested',
   unexpected_size: 'Unexpected size',
   empty_response: 'No ad response returned',
+  slot_never_requested: 'Slot visible but no ad request sent',
   layout_overlap: 'Layout overlap',
   ad_visibility_impaired: 'Ad visibility impaired',
   slot_container_collapsed: 'Slot container collapsed',
@@ -298,6 +327,7 @@ const labelMap = {
   'DOM slot not in GPT': 'Not in GPT',
   'GPT slot defined without DOM': 'No DOM',
   'Phantom slot requested': 'Phantom',
+  'Slot visible but no ad request sent': 'Never requested',
   'Unexpected size': 'Size',
   'No ad response returned': 'Empty',
   'Layout overlap': 'Overlap',
@@ -319,6 +349,7 @@ const labelMap = {
     'phantom_slot_requested',
     'defined_without_dom_no_request',
     'slot_not_registered',
+    'slot_never_requested',
     'wrong_network'
   ],
   LAYOUT: [
@@ -907,8 +938,14 @@ document.getElementById('slotCount').textContent = totalImpactedSlots;
 
 const dailyLossEl = document.getElementById('dailyLoss');
 
-dailyLossEl.textContent =
-  `$${dedupedTotalLoss.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+dailyLossEl.style.transform = "scale(1.08)";
+dailyLossEl.style.transition = "transform 0.25s ease";
+
+setTimeout(() => {
+  dailyLossEl.style.transform = "scale(1)";
+}, 250);
+
+animateCurrency(dailyLossEl, dedupedTotalLoss, 1800);
 
 if (dedupedTotalLoss === 0) {
   dailyLossEl.classList.remove(
