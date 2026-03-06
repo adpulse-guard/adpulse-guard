@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Reality Mode™</title>
   <style>
-    :root {
+    :root { 
   --apg-bg: #1e1e2f;
   --apg-card: #2a2a3b;
   --apg-primary: #6366f1;
@@ -69,8 +69,8 @@ h1 {
 }
 
 .title-row svg{
-  width:180px;
-  height:28px;
+  width:100%;
+  height:32px;
   overflow: hidden;
 }
 
@@ -80,8 +80,8 @@ h1 {
   stroke-width:1.8;
   stroke-linecap:round;
   stroke-linejoin:round;
-  stroke-dasharray:400;
-  stroke-dashoffset:400;
+  stroke-dasharray:800;
+  stroke-dashoffset:800;
   animation: ekgDraw 2.4s linear infinite;
   filter:
     drop-shadow(0 0 3px rgba(239,68,68,0.5))
@@ -156,7 +156,7 @@ animation:scan 2s infinite;
 }
 
 @keyframes ekgDraw{
-  from { stroke-dashoffset:400; }
+  from { stroke-dashoffset:800; }
   to { stroke-dashoffset:0; }
 }
 
@@ -655,7 +655,7 @@ font-weight:700;
 
   el.details.innerHTML = `
 <p>
-📡 Pulse status: <span class="highlight">stable</span><br>
+Pulse status: <span class="highlight">stable</span><br>
 Pulse score: <span class="highlight" id="pulseScoreValue">98%</span> · <span class="${barClass}">${meterBar(98)}</span>
 
 ${heartbeatBar("stable")}
@@ -793,41 +793,55 @@ return bar;
 function heartbeatBar(label){
   return `
   <div class="heartbeat ${label}">
-    <svg viewBox="0 0 220 40" preserveAspectRatio="none">
+    <svg viewBox="0 0 800 40" preserveAspectRatio="none">
       <path d="
-        M0 20
-L14 20
-L22 32
-L30 6
-L38 28
-L46 20
-L60 20
-L68 34
-L76 10
-L84 26
-L96 20
-L112 20
-L120 30
-L128 12
-L136 24
-L150 20
+M0 20
+L40 20
+L50 30
+L60 6
+L70 28
+L90 20
+L120 20
+L130 32
+L140 10
+L150 26
 L170 20
-L182 33
-L192 14
-L202 27
-L220 20
-L240 20
-L254 20
-L262 32
-L270 6
-L278 28
-L286 20
+L210 20
+L220 34
+L230 12
+L240 28
+L260 20
 L300 20
-L308 34
-L316 10
-L324 26
-L336 20
-L352 20
+L310 36
+L320 8
+L330 26
+L350 20
+L380 20
+L390 32
+L400 10
+L410 26
+L430 20
+L470 20
+L480 34
+L490 12
+L500 28
+L520 20
+L560 20
+L570 30
+L580 8
+L590 24
+L610 20
+L650 20
+L660 32
+L670 12
+L680 26
+L700 20
+L740 20
+L750 30
+L760 10
+L770 26
+L800 20
+"/>
       "/>
     </svg>
   </div>
@@ -893,7 +907,7 @@ let pulseMessage = `
 ${pulseMeta.emoji} Pulse status: 
 <span class="highlight">${pulseMeta.label}</span>
 <br>
-Score: 
+Pulse Score: 
 <span id="pulseScoreValue" class="${scoreClass}">${pulseScore}%</span>
 <br>
 `;
