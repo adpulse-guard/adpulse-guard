@@ -118,6 +118,40 @@
   ></span>
 </div>
 
+<div class="bg-gray-100 dark:bg-[#232334] 
+            rounded-2xl p-6 mb-10 
+            grid grid-cols-1 sm:grid-cols-3 gap-6">
+  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center flex flex-col justify-center">
+  <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">
+    Ad Delivery Health
+  </div>
+  <div id="reliabilityScore" class="text-4xl font-bold">—</div>
+  <div id="reliabilityDetails" class="text-xs text-gray-400 mt-1">
+</div>
+</div>
+  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center flex flex-col justify-center">
+    <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">
+      Revenue-Impacting Slots
+    </div>
+    <div id="slotCount" class="text-4xl font-bold">—</div>
+    <div class="text-xs text-gray-400 mt-1">
+  Slots with delivery issues
+</div>
+  </div>
+  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center border-l-4 border-red-300 dark:border-red-600">
+    <div class="text-xs uppercase tracking-wide text-gray-500 mb-1 whitespace-nowrap">
+  Revenue at Risk
+    </div>
+    <div id="dailyLoss" 
+     class="text-4xl font-bold text-red-600 whitespace-nowrap">
+  $—
+</div>
+    <div class="text-xs text-gray-400 mt-1">
+  Calculated based on impacted slots
+</div>
+  </div>
+</div>
+
 <div
   id="affectedSlotsPanel"
   class="hidden bg-white dark:bg-darkcard rounded-xl shadow p-4 mb-6"
@@ -144,40 +178,7 @@
     Showing slots impacted by selected incident type
   </p>
 </div>
-<div class="bg-gray-100 dark:bg-[#232334] 
-            rounded-2xl p-6 mb-10 
-            grid grid-cols-1 sm:grid-cols-3 gap-6">
 
-  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center flex flex-col justify-center">
-    <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">
-      Revenue-Impacting Slots
-    </div>
-    <div id="slotCount" class="text-4xl font-bold">—</div>
-    <div class="text-xs text-gray-400 mt-1">
-  Slots with delivery issues
-</div>
-  </div>
-  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center flex flex-col justify-center">
-  <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">
-    Ad Delivery Health
-  </div>
-  <div id="reliabilityScore" class="text-4xl font-bold">—</div>
-  <div id="reliabilityDetails" class="text-xs text-gray-400 mt-1">
-</div>
-</div>
-  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center border-l-4 border-red-300 dark:border-red-600">
-    <div class="text-xs uppercase tracking-wide text-gray-500 mb-1 whitespace-nowrap">
-  Revenue at Risk
-    </div>
-    <div id="dailyLoss" 
-     class="text-4xl font-bold text-red-600 whitespace-nowrap">
-  $—
-</div>
-    <div class="text-xs text-gray-400 mt-1">
-  Calculated based on impacted slots
-</div>
-  </div>
-</div>
   <div id="topOffenderBox"
      class="hidden bg-white dark:bg-darkcard
             rounded-xl shadow p-5 mb-6
@@ -986,8 +987,8 @@ document.getElementById('reliabilityDetails').textContent =
   `${expectedSlotsTotal - totalImpactedSlots} / ${expectedSlotsTotal} slots delivering`;
 
 reliabilityEl.classList.remove(
-  'text-green-600',
-  'text-yellow-500',
+  'text-green-700',
+  'text-orange-600',
   'text-red-600'
 );
 
