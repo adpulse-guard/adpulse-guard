@@ -148,14 +148,22 @@
             rounded-2xl p-6 mb-10 
             grid grid-cols-1 sm:grid-cols-3 gap-6">
 
-  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center sm:col-span-1 flex flex-col justify-center">
+  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center flex flex-col justify-center">
     <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">
       Revenue-Impacting Slots
     </div>
     <div id="slotCount" class="text-4xl font-bold">—</div>
   </div>
-
-  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center sm:col-span-2 border-l-4 border-red-300 dark:border-red-600">
+  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center flex flex-col justify-center">
+  <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">
+    Ad Delivery Health
+  </div>
+  <div id="reliabilityScore" class="text-4xl font-bold">—</div>
+  <div class="text-xs text-gray-400 mt-1">
+    % of slots delivering correctly
+  </div>
+</div>
+  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center border-l-4 border-red-300 dark:border-red-600">
     <div class="text-xs uppercase tracking-wide text-gray-500 mb-1 whitespace-nowrap">
   Revenue at Risk
     </div>
@@ -935,6 +943,41 @@ if (!topSlot) {
 
 }
 document.getElementById('slotCount').textContent = totalImpactedSlots;
+let expectedSlotsTotal = 0;
+
+effectiveRows.forEach(r => {
+  const expected = Number(r.expectedSlotCount || 0);
+  if (expected > expectedSlotsTotal) {
+    expectedSlotsTotal = expected;
+  }
+});
+
+let reliability = 100;
+
+if (expectedSlotsTotal > 0) {
+  reliability =
+    100 - (totalImpactedSlots / expectedSlotsTotal) * 100;
+}
+
+reliability = Math.max(0, Math.round(reliability));
+
+const reliabilityEl = document.getElementById('reliabilityScore');
+
+reliabilityEl.textContent = reliability + '%';
+
+reliabilityEl.classList.remove(
+  'text-green-600',
+  'text-yellow-500',
+  'text-red-600'
+);
+
+if (reliability >= 95) {
+  reliabilityEl.classList.add('text-green-600');
+} else if (reliability >= 80) {
+  reliabilityEl.classList.add('text-yellow-500');
+} else {
+  reliabilityEl.classList.add('text-red-600');
+}
 
 const dailyLossEl = document.getElementById('dailyLoss');
 
