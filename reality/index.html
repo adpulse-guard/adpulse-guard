@@ -80,9 +80,9 @@ h1 {
   stroke-width:1.8;
   stroke-linecap:round;
   stroke-linejoin:round;
-  stroke-dasharray:800;
-  stroke-dashoffset:800;
-  animation: ekgDraw 5s ease-in-out infinite;
+  stroke-dasharray:900;
+  stroke-dashoffset:900;
+  animation: ekgDraw 5s linear infinite;
   filter:
     drop-shadow(0 0 3px rgba(239,68,68,0.5))
     drop-shadow(0 0 8px rgba(239,68,68,0.35))
@@ -156,7 +156,7 @@ animation:scan 2s infinite;
 }
 
 @keyframes ekgDraw{
-  from { stroke-dashoffset:800; }
+  from { stroke-dashoffset:900; }
   to { stroke-dashoffset:0; }
 }
 
@@ -269,7 +269,9 @@ font-weight:700;
     const ekgPatterns = {
 
 good: [
-`M0 20
+`M-40 20
+L0 20
+L20 20
 L60 20
 L70 30
 L80 10
@@ -302,11 +304,18 @@ L690 24
 L720 20
 L780 20
 L790 30
-L800 20`
+L800 20
+L820 20
+L840 20
+L860 20
+L880 20
+L900 20`
 ],
 
 mid: [
-`M0 20
+`M-40 20
+L0 20
+L20 20
 L40 20
 L50 32
 L60 8
@@ -351,11 +360,18 @@ L740 20
 L750 30
 L760 10
 L770 26
-L800 20`
+L800 20
+L820 20
+L840 20
+L860 20
+L880 20
+L900 20`
 ],
 
 bad: [
-`M0 20
+`M-40 20
+L0 20
+L20 20
 L30 20
 L40 36
 L50 6
@@ -400,11 +416,18 @@ L740 20
 L750 34
 L760 8
 L770 28
-L800 20`
+L800 20
+L820 20
+L840 20
+L860 20
+L880 20
+L900 20`
 ],
 
 critical: [
-`M0 20
+`M-40 20
+L0 20
+L20 20
 L20 20
 L30 40
 L40 2
@@ -451,7 +474,12 @@ L720 4
 L730 34
 L750 20
 L790 20
-L800 20`
+L800 20
+L820 20
+L840 20
+L860 20
+L880 20
+L900 20`
 ]
 
 };
@@ -1009,7 +1037,7 @@ function animatePulseScore(score){
 
     const ekgPath = pick(ekgSet);
       if (ekg) ekg.innerHTML = `
-<svg viewBox="0 0 800 40" preserveAspectRatio="none">
+<svg viewBox="0 0 900 40" preserveAspectRatio="none">
 <path d="${ekgPath}"/>
 </svg>
 `;
