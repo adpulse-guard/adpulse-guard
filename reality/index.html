@@ -975,11 +975,11 @@ function computePulseScore() {
 }
 
 function pulseLabel(score) {
-  if (score >= 85) return { label: "stable", emoji: "📡" };
-  if (score >= 70) return { label: "irregular", emoji: "📡" };
-  if (score >= 50) return { label: "unstable", emoji: "📡" };
-  if (score >= 30) return { label: "weak", emoji: "📡" };
-  return { label: "critical", emoji: "📡" };
+  if (score >= 85) return { label: "Stable"};
+  if (score >= 70) return { label: "Irregular"};
+  if (score >= 50) return { label: "Unstable"};
+  if (score >= 30) return { label: "Weak"};
+  return { label: "Critical"};
 }
 
 function meterBar(score){
