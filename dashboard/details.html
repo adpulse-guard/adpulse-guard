@@ -393,14 +393,10 @@ function renderGrouped(rows) {
   // 🎨 RENDER
   container.innerHTML = sortedPages.map(([page, data]) => {
 
-    const shortPage = page
+    const displayPage = page
   .replace(/^https?:\/\/(www\.)?/, '')
-  .replace(/\/$/, '');
-
-  const displayPage =
-  shortPage.length > 60
-    ? shortPage.slice(0, 60) + '…'
-    : shortPage;
+  .replace(/\/$/, '')
+  .slice(0, 60);
 
     return `
       <div class="bg-white dark:bg-darkcard rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
@@ -451,17 +447,22 @@ function renderGrouped(rows) {
     issueMap.get(issue).slots.add(r.slotId);
     issueMap.get(issue).total += Number(r.estimatedDailyRevenueRisk || 0);
   });
-
+  
   return Array.from(issueMap.entries())
     .sort((a,b) => b[1].total - a[1].total)
     .map(([issue, obj]) => {
 
+      const groupColor =
+        ISSUE_GROUPS.DELIVERY.includes(issue) ? 'text-red-600' :
+        ISSUE_GROUPS.LAYOUT.includes(issue) ? 'text-orange-500' :
+        'text-gray-500';
+        
       return `
   <div class="p-4 space-y-2">
 
     <!-- ISSUE HEADER -->
     <div class="flex justify-between items-center">
-      <div class="font-medium text-red-600">
+      <div class="font-medium ${groupColor}">
         ${labelMap[issue] || issue}
       </div>
 
