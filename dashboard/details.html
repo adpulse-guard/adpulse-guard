@@ -213,6 +213,63 @@ const ISSUE_GROUPS = {
     'slot_container_collapsed'
   ]
 };
+const SUGGESTED_CHECKS = {
+    slot_not_registered: [
+      'Verify that the ad slot is registered in GPT',
+      'Check that the slot DOM ID exists on the page',
+      'Confirm the slot is initialized after GPT loads'
+    ],
+    phantom_slot_requested: [
+    'Verify that the slot container exists in the DOM',
+    'Check breakpoint and layout conditions',
+    'Confirm slot ID consistency between GPT and DOM'
+    ],
+    defined_without_dom_no_request: [
+    'Check if the slot is breakpoint-specific',
+    'Verify conditional display() execution',
+    'Confirm that refresh() is triggered when expected'
+    ],
+    wrong_network: [
+      'Verify the network code used for this ad request',
+      'Check for conflicting GPT initializations on the page'
+    ],
+    unexpected_size: [
+      'Verify the slot sizes defined in GPT',
+      'Check that the slot renders at the expected size',
+      'Confirm line item eligibility for this slot size'
+    ],
+    empty_response: [
+      'Check line item targeting and pacing',
+      'Verify that the ad unit is active and eligible for delivery',
+      'Review frequency caps or delivery limits on active campaigns'
+    ],
+    gpt_script_missing: [
+    'Verify that the GPT script is included on the page',
+    'Check for script blocking by CSP or consent tools',
+    'Confirm no JS errors are preventing GPT load'
+  ],
+    gpt_loaded_but_not_initialized: [
+    'Verify that googletag.cmd.push() executes correctly',
+    'Check for JS errors before GPT initialization',
+    'Confirm consent or CMP does not block GPT activation'
+  ],
+    gpt_no_slot_requests: [
+    'Verify that display() or refresh() is executed',
+    'Check conditional slot rendering logic',
+    'Confirm slots are not blocked by breakpoint conditions'
+  ],
+  slot_container_collapsed: [
+    'Verify CSS rules affecting slot container height',
+    'Check for layout shifts collapsing the ad div',
+    'Confirm slot is not hidden by conditional styling'
+  ],
+  slot_never_requested: [
+  'Verify that googletag.display() is executed for this slot',
+  'Check lazy loading or scroll trigger logic',
+  'Confirm that no JS errors prevent slot request'
+],
+  };
+
 
 function buildIssueDropdown(issueCounts) {
 
@@ -455,9 +512,15 @@ if (!pageMap.get(page).totalSet) {
 
   const issueMap = new Map();
 
-const pageRevenue = Number(data.incidents[0]?.estimatedDailyRevenueRisk || 0);
+const pageRevenue = Math.max(
+  ...data.incidents.map(r => Number(r.estimatedDailyRevenueRisk || 0))
+);
 
-const uniqueSlots = new Set(data.incidents.map(r => r.slotId));
+const uniqueSlots = new Set(
+  data.incidents
+    .map(r => r.slotId)
+    .filter(Boolean)
+);
 const slotCount = uniqueSlots.size || 1;
 
 const valuePerSlot = pageRevenue / slotCount;
@@ -489,41 +552,85 @@ data.incidents.forEach(r => {
         'text-gray-500';
 
       return `
-  <div class="p-4 space-y-2">
+  <div class="p-4 border-l-4 ${
+    ISSUE_GROUPS.DELIVERY.includes(issue)
+      ? 'border-red-500'
+      : 'border-orange-400'
+  } bg-gray-50 dark:bg-gray-800/40 rounded-r-lg space-y-3">
 
-    <!-- ISSUE HEADER -->
-    <div class="flex justify-between items-center">
-      <div class="font-medium ${groupColor}">
-        ${labelMap[issue] || issue}
-      </div>
-
-      <div class="text-gray-700 dark:text-gray-200 text-sm font-medium">
-        $${obj.total.toFixed(2)}
-      </div>
+    <!-- ISSUE TITLE -->
+    <div class="font-semibold ${
+      ISSUE_GROUPS.DELIVERY.includes(issue)
+        ? 'text-red-600'
+        : 'text-orange-500'
+    }">
+      ${labelMap[issue] || issue}
     </div>
 
-    <!-- SLOTS (BADGES) -->
-    <div class="flex flex-wrap gap-1">
-      ${Array.from(obj.slots).map(slot => `
-        <span class="px-2 py-1 text-[11px] bg-gray-100 dark:bg-gray-700 rounded">
-          ${slot}
-        </span>
-      `).join('')}
+    <!-- AFFECTED SLOTS -->
+    <div class="text-sm">
+      <div class="text-gray-500 dark:text-gray-400 text-xs mb-1">
+        Affected Slots:
+      </div>
+      <ul class="list-disc ml-4 space-y-0.5">
+        ${Array.from(obj.slots).map(slot => `
+          <li>${slot}</li>
+        `).join('')}
+      </ul>
+    </div>
+
+    <!-- AD UNIT PATH -->
+      ${(() => {
+  const paths = [...new Set(
+    data.incidents
+      .filter(r => r.issueType === issue)
+      .map(r => r.path)
+      .filter(Boolean)
+  )];
+
+  if (!paths.length) return '';
+
+  return `
+    <div class="text-sm">
+      <div class="text-gray-500 dark:text-gray-400 text-xs mb-1">
+        Ad unit path:
+      </div>
+      <ul class="list-disc ml-4 space-y-0.5">
+        ${paths.map(p => `<li>${p}</li>`).join('')}
+      </ul>
+    </div>
+  `;
+})()}
+    </div>
+
+    <!-- SUGGESTED CHECKS -->
+    <div class="text-sm">
+      <div class="text-gray-500 dark:text-gray-400 text-xs mb-1">
+        Suggested checks:
+      </div>
+      <ul class="list-disc ml-4 space-y-0.5">
+        ${
+          (SUGGESTED_CHECKS[issue] || []).map(c => `<li>${c}</li>`).join('')
+        }
+      </ul>
+    </div>
+
+    <!-- REVENUE -->
+    <div class="text-sm font-medium text-gray-700 dark:text-gray-200">
+      Impact: $${obj.total.toFixed(2)}
     </div>
 
   </div>
 `;
     }).join('');
-
 })()}
 
         </div>
-
       </div>
     `;
   }).join('');
-}
 
+}
 
 document.getElementById('incidentList').innerHTML =
   `<div class="text-sm text-gray-400 dark:text-gray-400">Loading...</div>`;
