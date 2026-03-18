@@ -68,9 +68,9 @@
 const params = new URLSearchParams(window.location.search);
 const token = params.get('token');
 
-if (!token) {
-  document.body.innerHTML = `Access denied`;
-  throw new Error('Missing token');
+if (!token || token === 'undefined') {
+  document.body.innerHTML = 'Access denied';
+  throw new Error('Invalid token');
 }
 
 const overviewLink = document.getElementById('overviewLink');
@@ -88,20 +88,11 @@ if (overviewLink) {
   overviewLink.href = url;
 }
 
-if (!token) {
-  document.body.innerHTML = `
-    <div style="padding:40px;font-family:Inter,sans-serif">
-      <h2>Access denied</h2>
-      <p>Missing dashboard token</p>
-    </div>
-  `;
-  throw new Error('Missing token');
-}
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxAD4aNij0ApHx21r68hq5TLx2k2r3VT9_obEe7I-EX_l3JGDQSnrY84LcA4QG8Ldf2ig/exec';
 
 let allRows = [];
-let activeDate = '';
-let selectedIssue = '';
+let activeDate = params.get('date') || '';
+let selectedIssue = params.get('issue') || '';
 
 const labelMap = {
   gpt_script_missing: 'GPT script missing',
@@ -229,10 +220,21 @@ document.getElementById('issueFilter')
 fetch(`${SHEET_URL}?token=${token}`)
   .then(r => r.json())
   .then(j => {
-    allRows = j.data || [];
-    populateIssueFilter(allRows);
-    renderList(allRows);
-  });
+  console.log('API RESPONSE:', j);
+
+  allRows = j.data || [];
+
+  populateIssueFilter(allRows);
+  if (activeDate) {
+      document.getElementById('dateFilter').value = activeDate;
+    }
+
+    if (selectedIssue) {
+      document.getElementById('issueFilter').value = selectedIssue;
+    }
+
+  applyFilters();
+});
 
 </script>
 
