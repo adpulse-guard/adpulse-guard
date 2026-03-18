@@ -1666,8 +1666,13 @@ window.history.replaceState({}, '', url);
   updateIssueClearVisibility();
 const explorerLink = document.getElementById('explorerLink');
 
-if (explorerLink && token) {
-  let url = `details.html?token=${token}`;
+if (explorerLink) {
+
+  const safeToken = token || new URLSearchParams(window.location.search).get('token');
+
+  if (!safeToken) return;
+
+  let url = `details.html?token=${safeToken}`;
 
   if (activeDate) url += `&date=${activeDate}`;
   if (selectedIssueFilter) url += `&issue=${selectedIssueFilter}`;
