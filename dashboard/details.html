@@ -211,12 +211,6 @@ const ISSUE_GROUPS = {
     'layout_overlap',
     'ad_visibility_impaired',
     'slot_container_collapsed'
-  ],
-  SECURITY: [
-    'token_invalid',
-    'clientId_mismatch',
-    'expectedNetworkId_mismatch',
-    'unauthorized_domain'
   ]
 };
 
@@ -230,8 +224,7 @@ function buildIssueDropdown(issueCounts) {
     const groupHeader = document.createElement('option');
     const groupTitles = {
   DELIVERY: '— Delivery & Rendering —',
-  LAYOUT: '— Layout & Visibility —',
-  SECURITY: '— Security & Access —'
+  LAYOUT: '— Layout & Visibility —'
 };
 
 groupHeader.textContent = groupTitles[groupKey];
@@ -243,11 +236,6 @@ groupHeader.textContent = groupTitles[groupKey];
 
 if (groupKey === 'LAYOUT') {
   groupHeader.style.color = '#d97706';
-  groupHeader.style.fontWeight = '600';
-}
-
-if (groupKey === 'SECURITY') {
-  groupHeader.style.color = '#64748b';
   groupHeader.style.fontWeight = '600';
 }
 
@@ -344,11 +332,40 @@ function applyFilters() {
     );
   }
 
+  // ✅ COUNT IZ NEFILTRIRANIH (po issue)
+  const issueCounts = {};
+  const uniqueIssues = new Set();
+
+  rows.forEach(r => {
+    if (!r.issueType) return;
+
+    const key = `${r.pageUrl}__${r.issueType}`;
+
+    if (!uniqueIssues.has(key)) {
+      uniqueIssues.add(key);
+
+      issueCounts[r.issueType] =
+        (issueCounts[r.issueType] || 0) + 1;
+    }
+  });
+
+  // 👉 sad filtriraš po issue
   if (selectedIssue) {
     rows = rows.filter(r =>
       r.issueType === selectedIssue
     );
   }
+
+  buildIssueDropdown(issueCounts);
+  if (selectedIssue && !issueCounts[selectedIssue]) {
+  selectedIssue = '';
+}
+  if (selectedIssue) {
+    document.getElementById('issueFilter').value = selectedIssue;
+  }
+
+  document.getElementById('issueFilter').disabled =
+    Object.keys(issueCounts).length === 0;
 
   renderGrouped(rows);
 }
@@ -456,7 +473,7 @@ function renderGrouped(rows) {
         ISSUE_GROUPS.DELIVERY.includes(issue) ? 'text-red-600' :
         ISSUE_GROUPS.LAYOUT.includes(issue) ? 'text-orange-500' :
         'text-gray-500';
-        
+
       return `
   <div class="p-4 space-y-2">
 
@@ -561,15 +578,7 @@ fetch(`${SHEET_URL}?token=${token}`)
 
   allRows = j.data || [];
 
-  const issueCounts = {};
 
-allRows.forEach(r => {
-  if (!r.issueType) return;
-  issueCounts[r.issueType] =
-    (issueCounts[r.issueType] || 0) + 1;
-});
-
-buildIssueDropdown(issueCounts);
 if (activeDate) {
   document.getElementById('dateFilter').value = activeDate;
 }
