@@ -26,7 +26,9 @@
 
       <!-- NAV -->
       <nav class="flex gap-4 text-sm">
-        <a href="index.html" class="text-gray-500 hover:text-indigo-600">
+        <a id="overviewLink"
+           href="index.html"
+           class="text-gray-500 hover:text-indigo-600">
           Overview
         </a>
 
@@ -63,7 +65,32 @@
 </div>
 
 <script>
+const overviewLink = document.getElementById('overviewLink');
 
+if (overviewLink && token) {
+  overviewLink.href = `index.html?token=${token}`;
+}
+const date = params.get('date');
+const issue = params.get('issue');
+
+let url = `index.html?token=${token}`;
+
+if (date) url += `&date=${date}`;
+if (issue) url += `&issue=${issue}`;
+
+overviewLink.href = url;
+const params = new URLSearchParams(window.location.search);
+const token = params.get('token');
+
+if (!token) {
+  document.body.innerHTML = `
+    <div style="padding:40px;font-family:Inter,sans-serif">
+      <h2>Access denied</h2>
+      <p>Missing dashboard token</p>
+    </div>
+  `;
+  throw new Error('Missing token');
+}
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxAD4aNij0ApHx21r68hq5TLx2k2r3VT9_obEe7I-EX_l3JGDQSnrY84LcA4QG8Ldf2ig/exec';
 
 let allRows = [];
@@ -72,9 +99,38 @@ let selectedIssue = '';
 
 const labelMap = {
   gpt_script_missing: 'GPT script missing',
-  empty_response: 'No ad response',
-  wrong_network: 'Wrong network',
+  gpt_loaded_but_not_initialized: 'GPT loaded but not initialized',
+  gpt_no_slot_requests: 'No GPT slot requests',
+  wrong_network: 'Incorrect ad network ID',
+  slot_not_registered: 'DOM slot not in GPT',
+  defined_without_dom_no_request: 'GPT slot defined without DOM',
+  phantom_slot_requested: 'Phantom slot requested',
+  unexpected_size: 'Unexpected size',
+  empty_response: 'No ad response returned',
+  slot_never_requested: 'Slot visible but no ad request sent',
+  layout_overlap: 'Layout overlap',
+  ad_visibility_impaired: 'Ad visibility impaired',
+  slot_container_collapsed: 'Slot container collapsed',
+  token_invalid: 'Invalid security token',
+  clientId_mismatch: 'Client ID mismatch',
+  expectedNetworkId_mismatch: 'Network configuration mismatch',
+  unauthorized_domain: 'Unauthorized domain access'
 };
+  function populateIssueFilter(rows) {
+
+  const select = document.getElementById('issueFilter');
+
+  const unique = new Set(
+    rows.map(r => r.issueType).filter(Boolean)
+  );
+
+  unique.forEach(type => {
+    const option = document.createElement('option');
+    option.value = type;
+    option.textContent = labelMap[type] || type;
+    select.appendChild(option);
+  });
+}
 
 function renderList(rows) {
 
@@ -164,11 +220,11 @@ document.getElementById('issueFilter')
     applyFilters();
   });
 
-fetch(SHEET_URL)
+fetch(`${SHEET_URL}?token=${token}`)
   .then(r => r.json())
   .then(j => {
     allRows = j.data || [];
-
+    populateIssueFilter(allRows);
     renderList(allRows);
   });
 
