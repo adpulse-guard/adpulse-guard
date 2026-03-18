@@ -1,6 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        fontFamily: { sans: ['Inter', 'sans-serif'] },
+        colors: { 
+          darkcard: '#2a2a3b',
+          darkbg: '#1e1e2f'
+        }
+      }
+    }
+  };
+</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Incident Explorer</title>
@@ -10,32 +24,80 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
 </head>
 
-<body class="bg-gray-50 text-gray-900 font-sans min-h-screen">
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-white font-sans min-h-screen">
 
 <!-- HEADER -->
-<header class="bg-white shadow-sm">
+<header class="bg-white dark:bg-darkcard shadow-sm">
   <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-
+    
+    <!-- LEFT SIDE -->
     <div class="flex items-center gap-8">
 
       <!-- BRAND -->
       <div class="flex items-center gap-2">
         <img src="Logo Shield.png" class="h-7 w-7" />
-        <span class="text-sm font-semibold">AdPulse Guard</span>
+        <span class="text-sm font-semibold tracking-wide">
+          AdPulse Guard
+        </span>
       </div>
 
       <!-- NAV -->
-      <nav class="flex gap-4 text-sm">
+      <nav class="flex items-center gap-4 text-sm">
+
         <a id="overviewLink"
            href="index.html"
-           class="text-gray-500 hover:text-indigo-600">
+           class="px-2 py-1 rounded
+                  text-gray-500 hover:text-indigo-600 hover:bg-gray-100
+                  dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-indigo-300">
           Overview
         </a>
 
-        <span class="text-indigo-600 font-medium border-b-2 border-indigo-600">
+        <span
+          class="px-2 py-1 rounded
+                 text-indigo-600 font-medium
+                 border-b-2 border-indigo-600
+                 dark:text-indigo-300 dark:border-indigo-300">
           Incident Explorer
         </span>
+        
+        <span
+          class="px-2 py-0.5 rounded bg-gray-100 text-gray-600
+                dark:bg-gray-700 dark:text-gray-300 uppercase tracking-wide">
+          Explorer view
+        </span>
       </nav>
+
+    </div>
+
+    <!-- RIGHT SIDE (FILTERS + TOGGLE) -->
+    <div class="flex items-center gap-2 text-xs">
+
+      <!-- DATE -->
+      <input
+        type="date"
+        id="dateFilter"
+        class="px-2 py-1 border rounded dark:bg-darkcard dark:border-gray-600 dark:text-white"
+      />
+
+      <button id="clearDate" class="text-indigo-500 hover:underline">
+        Clear
+      </button>
+
+      <!-- ISSUE FILTER -->
+      <select
+        id="issueFilter"
+        class="px-2 py-1 border rounded dark:bg-darkcard dark:border-gray-600 dark:text-white"
+      >
+        <option value="">All incidents</option>
+      </select>
+
+      <!-- DARK MODE -->
+      <button
+        id="darkModeBtn"
+        class="ml-2 px-2 py-1 rounded bg-gray-200 dark:bg-gray-700"
+      >
+        <span id="modeLabel">🌙</span>
+      </button>
 
     </div>
 
@@ -43,27 +105,8 @@
 </header>
 
 <!-- CONTENT -->
-<div class="max-w-6xl mx-auto px-4 py-8">
-
-  <!-- FILTERS -->
-  <div class="bg-white rounded-xl shadow p-4 mb-6 flex gap-4 items-center">
-
-    <input type="date"
-           id="dateFilter"
-           class="px-2 py-1 border rounded" />
-
-    <select id="issueFilter"
-            class="px-2 py-1 border rounded">
-      <option value="">All incidents</option>
-    </select>
-
-  </div>
-
-  <!-- LIST -->
-  <div id="incidentList" class="space-y-4"></div>
-
-</div>
-
+<div class="max-w-6xl mx-auto py-8 px-4">
+<div id="incidentList" class="space-y-4"></div>
 <script>
 const params = new URLSearchParams(window.location.search);
 const token = params.get('token');
@@ -135,7 +178,7 @@ function renderList(rows) {
 
   if (!rows.length) {
   container.innerHTML = `
-    <div class="text-sm text-gray-400">
+    <div class="text-sm text-gray-400 dark:text-gray-400">
       No incidents found
     </div>
   `;
@@ -152,10 +195,10 @@ function renderList(rows) {
     'text-gray-500';
 
   return `
-    <div class="bg-white rounded-xl shadow p-4 border border-gray-100">
+    <div class="bg-white dark:bg-darkcard rounded-xl shadow p-4 border border-gray-100">
 
       <!-- PAGE -->
-      <div class="text-xs text-gray-400 mb-1 break-all">
+      <div class="text-xs text-gray-400 dark:text-gray-400 mb-1 break-all">
         ${r.pageUrl || '—'}
       </div>
 
@@ -172,11 +215,11 @@ function renderList(rows) {
       <!-- FOOTER -->
       <div class="flex justify-between items-center mt-3">
 
-        <div class="text-sm font-medium text-gray-700">
+        <div class="text-sm font-medium text-gray-700 dark:text-gray-200">
           $${Number(r.estimatedDailyRevenueRisk || 0).toFixed(2)}
         </div>
 
-        <div class="text-xs text-gray-400">
+        <div class="text-xs text-gray-400 dark:text-gray-400">
           ${new Date(r.receivedAt).toLocaleTimeString()}
         </div>
 
@@ -213,7 +256,7 @@ function renderGrouped(rows) {
 
   if (!rows.length) {
     container.innerHTML = `
-      <div class="text-sm text-gray-400">
+      <div class="text-sm text-gray-400 dark:text-gray-400">
         No incidents found
       </div>
     `;
@@ -247,20 +290,32 @@ function renderGrouped(rows) {
   // 🎨 RENDER
   container.innerHTML = sortedPages.map(([page, data]) => {
 
-    const shortPage = page.replace(/^https?:\/\/(www\.)?/, '').slice(0, 60);
+    const shortPage = page
+      .replace(/^https?:\/\/(www\.)?/, '')
+      .replace(/\/$/, '')
+      .slice(0, 60);
 
     return `
-      <div class="bg-white rounded-xl shadow border border-gray-100">
+      <div class="bg-white dark:bg-darkcard rounded-xl shadow border border-gray-100">
 
         <!-- PAGE HEADER -->
         <div 
-          class="p-4 border-b flex justify-between items-center cursor-pointer hover:bg-gray-50"
+          class="p-4 border-b flex justify-between items-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
           onclick="togglePage('${btoa(page)}')"
         >
 
-          <div class="flex items-center gap-2 text-sm font-medium text-gray-700 break-all">
-            <span id="arrow-${btoa(page)}">▶</span>
-            ${shortPage}
+          <div class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200 break-all">
+            <span id="arrow-${btoa(page)}" class="text-xs text-gray-400">▶</span>
+            <a href="${page}" target="_blank"
+                onclick="event.stopPropagation();"
+              class="hover:underline text-indigo-600">
+              ${shortPage}
+            </a>
+            <button 
+              onclick="event.stopPropagation(); navigator.clipboard.writeText('${page}')"
+              class="text-xs text-gray-400 dark:text-gray-400 hover:text-indigo-600 ml-2">
+              copy
+            </button>
           </div>
 
           <div class="text-sm font-semibold text-red-600">
@@ -272,45 +327,52 @@ function renderGrouped(rows) {
         <!-- INCIDENTS -->
         <div id="group-${btoa(page)}" class="divide-y hidden">
 
-          ${data.incidents
-            .sort((a,b) =>
-              Number(b.estimatedDailyRevenueRisk || 0) -
-              Number(a.estimatedDailyRevenueRisk || 0)
-            )
-            .map(r => {
+         ${(() => {
 
-              const severity = (r.severity || 'INFO').toUpperCase();
+  const issueMap = new Map();
 
-              const color =
-                severity === 'HIGH' ? 'text-red-600' :
-                severity === 'MEDIUM' ? 'text-orange-600' :
-                'text-gray-500';
+  data.incidents.forEach(r => {
+    const issue = r.issueType || 'unknown';
 
-              return `
-                <div class="p-3 flex justify-between items-center text-sm">
+    if (!issueMap.has(issue)) {
+      issueMap.set(issue, {
+        slots: new Set(),
+        total: 0
+      });
+    }
 
-                  <div>
-                    <div class="font-medium ${color}">
-                      ${labelMap[r.issueType] || r.issueType}
-                    </div>
+    issueMap.get(issue).slots.add(r.slotId);
+    issueMap.get(issue).total += Number(r.estimatedDailyRevenueRisk || 0);
+  });
 
-                    <div class="text-xs text-gray-400">
-                      ${r.slotId || '—'}
-                    </div>
-                  </div>
+  return Array.from(issueMap.entries())
+    .sort((a,b) => b[1].total - a[1].total)
+    .map(([issue, obj]) => {
 
-                  <div class="text-right">
-                    <div class="text-gray-700">
-                      $${Number(r.estimatedDailyRevenueRisk || 0).toFixed(2)}
-                    </div>
-                    <div class="text-xs text-gray-400">
-                      ${new Date(r.receivedAt).toLocaleTimeString()}
-                    </div>
-                  </div>
+      return `
+        <div class="p-3">
 
-                </div>
-              `;
-            }).join('')}
+          <div class="flex justify-between items-center">
+
+            <div class="font-medium text-red-600">
+              ${labelMap[issue] || issue}
+            </div>
+
+            <div class="text-gray-700 dark:text-gray-200">
+              $${obj.total.toFixed(2)}
+            </div>
+
+          </div>
+
+          <div class="text-xs text-gray-400 dark:text-gray-400 mt-1">
+            ${Array.from(obj.slots).join(', ')}
+          </div>
+
+        </div>
+      `;
+    }).join('');
+
+})()}
 
         </div>
 
@@ -319,15 +381,27 @@ function renderGrouped(rows) {
   }).join('');
 }
 
-document.getElementById('incidentList').innerHTML =
-  `<div class="text-sm text-gray-400">Loading...</div>`;
 
+document.getElementById('incidentList').innerHTML =
+  `<div class="text-sm text-gray-400 dark:text-gray-400">Loading...</div>`;
+
+// DATE FILTER
 document.getElementById('dateFilter')
   .addEventListener('change', e => {
     activeDate = e.target.value;
     applyFilters();
   });
 
+// CLEAR DATE
+const clearDate = document.getElementById('clearDate');
+
+clearDate.addEventListener('click', () => {
+  activeDate = '';
+  document.getElementById('dateFilter').value = '';
+  applyFilters();
+});
+
+// ISSUE FILTER
 document.getElementById('issueFilter')
   .addEventListener('change', e => {
     selectedIssue = e.target.value;
@@ -366,6 +440,24 @@ function togglePage(id) {
     arrow.textContent = isHidden ? '▼' : '▶';
   }
 }
+
+const darkModeBtn = document.getElementById('darkModeBtn');
+const modeLabel = document.getElementById('modeLabel');
+
+if (localStorage.getItem('theme') === 'dark') {
+  document.documentElement.classList.add('dark');
+}
+
+modeLabel.textContent =
+  document.documentElement.classList.contains('dark')
+    ? 'Light Mode'
+    : 'Dark Mode';
+
+darkModeBtn.addEventListener('click', () => {
+  const isDark = document.documentElement.classList.toggle('dark');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  modeLabel.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+});
 </script>
 
 </body>
