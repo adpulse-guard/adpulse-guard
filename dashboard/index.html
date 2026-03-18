@@ -1670,7 +1670,15 @@ if (explorerLink) {
 
   const safeToken = token || new URLSearchParams(window.location.search).get('token');
 
-  if (!safeToken) return;
+  if (explorerLink && safeToken) {
+
+  let url = `details.html?token=${safeToken}`;
+
+  if (activeDate) url += `&date=${activeDate}`;
+  if (selectedIssueFilter) url += `&issue=${selectedIssueFilter}`;
+
+  explorerLink.href = url;
+}
 
   let url = `details.html?token=${safeToken}`;
 
