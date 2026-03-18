@@ -1513,9 +1513,8 @@ if (sortedPages.length) {
     return `
       <div class="rounded-lg p-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
 
-        <div onclick="togglePage(${JSON.stringify(url)})"
-             class="cursor-pointer flex justify-between items-center">
-
+        <div data-url="${url}"
+             class="page-toggle cursor-pointer flex justify-between items-center">
           <div class="truncate leading-tight">
             <span class="font-medium block truncate max-w-[300px]">
   <span class="mr-1">${hasHigh ? '🔴' : '🟠'}</span>
@@ -1546,6 +1545,12 @@ if (sortedPages.length) {
       </div>
     `;
   }).join('');
+  document.querySelectorAll('.page-toggle').forEach(el => {
+  el.addEventListener('click', () => {
+    const url = el.getAttribute('data-url');
+    togglePage(url);
+  });
+});
 if (sortedPages.length > 6) {
   pagesList.innerHTML += `
     <div class="text-xs text-center text-gray-400 mt-2">
