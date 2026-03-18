@@ -605,14 +605,7 @@ data.incidents.forEach(r => {
       .filter(Boolean)
   )];
 
-  if (!paths.length) {
-  return `
-    <div class="pl-2 text-sm text-gray-400 dark:text-gray-500">
-      <span class="text-xs uppercase tracking-wide">Ad unit path</span>
-      <div class="italic">Not available</div>
-    </div>
-  `;
-}
+  if (!paths.length) return '';
 
   return `
     <div class="pl-2 text-sm">
