@@ -67,20 +67,26 @@
 <script>
 const params = new URLSearchParams(window.location.search);
 const token = params.get('token');
+
+if (!token) {
+  document.body.innerHTML = `Access denied`;
+  throw new Error('Missing token');
+}
+
 const overviewLink = document.getElementById('overviewLink');
 
-if (overviewLink && token) {
-  overviewLink.href = `index.html?token=${token}`;
+if (overviewLink) {
+
+  let url = `index.html?token=${token}`;
+
+  const date = params.get('date');
+  const issue = params.get('issue');
+
+  if (date) url += `&date=${date}`;
+  if (issue) url += `&issue=${issue}`;
+
+  overviewLink.href = url;
 }
-const date = params.get('date');
-const issue = params.get('issue');
-
-let url = `index.html?token=${token}`;
-
-if (date) url += `&date=${date}`;
-if (issue) url += `&issue=${issue}`;
-
-overviewLink.href = url;
 
 if (!token) {
   document.body.innerHTML = `
