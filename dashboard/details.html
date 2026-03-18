@@ -569,11 +569,18 @@ data.incidents.forEach(r => {
 })()}
 
     <!-- ISSUE TITLE -->
-    <div class="font-semibold text-sm ${
-  ISSUE_GROUPS.DELIVERY.includes(issue)
-    ? 'text-red-600'
-    : 'text-orange-500'
-}">
+    ${(() => {
+  const severity = (
+    data.incidents.find(r => r.issueType === issue)?.severity || 'INFO'
+  ).toUpperCase();
+
+  const textColor =
+    severity === 'HIGH' ? 'text-red-600' :
+    severity === 'MEDIUM' ? 'text-orange-500' :
+    'text-gray-500';
+
+  return `<div class="font-semibold text-sm ${textColor}">`;
+})()}
       ${labelMap[issue] || issue}
     </div>
 
@@ -598,7 +605,14 @@ data.incidents.forEach(r => {
       .filter(Boolean)
   )];
 
-  if (!paths.length) return '';
+  if (!paths.length) {
+  return `
+    <div class="pl-2 text-sm text-gray-400 dark:text-gray-500">
+      <span class="text-xs uppercase tracking-wide">Ad unit path</span>
+      <div class="italic">Not available</div>
+    </div>
+  `;
+}
 
   return `
     <div class="pl-2 text-sm">
@@ -616,19 +630,20 @@ data.incidents.forEach(r => {
     <div class="pl-2 text-sm">
 
   <button
-    onclick="toggleChecks('${uniqueId}')"
-    class="text-xs text-indigo-500 hover:underline"
-  >
+    <button
+  onclick="toggleChecks('${uniqueId}')"
+  class="text-xs text-gray-400 hover:text-gray-300"
+>
     Show suggested checks
   </button>
 
   <div id="checks-${uniqueId}" class="hidden mt-2">
 
     <div class="text-gray-500 dark:text-gray-400 text-xs mb-1 uppercase tracking-wide">
-      Suggested checks
+      Suggested checks:
     </div>
 
-    <ul class="space-y-0.5">
+    <ul class="space-y-0.5 text-gray-400 dark:text-gray-500">
       ${
         (SUGGESTED_CHECKS[issue] || []).map(c => `<li>• ${c}</li>`).join('')
       }
