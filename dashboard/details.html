@@ -197,7 +197,7 @@ function renderList(rows) {
     'text-gray-500';
 
   return `
-    <div class="bg-white dark:bg-darkcard rounded-xl shadow p-4 border border-gray-200 dark:border-gray-700">
+    <div class="bg-white dark:bg-darkcard rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
 
       <!-- PAGE -->
       <div class="text-xs text-gray-400 dark:text-gray-400 mb-1 break-all">
@@ -298,11 +298,11 @@ function renderGrouped(rows) {
       .slice(0, 60);
 
     return `
-      <div class="bg-white dark:bg-darkcard rounded-xl shadow border border-gray-200 dark:border-gray-700">
+      <div class="bg-white dark:bg-darkcard rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
 
         <!-- PAGE HEADER -->
         <div 
-          class="p-4 border-b flex justify-between items-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+          class="px-4 py-2 border-b flex justify-between items-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
           onclick="togglePage('${btoa(page)}')"
         >
 
@@ -352,26 +352,35 @@ function renderGrouped(rows) {
     .map(([issue, obj]) => {
 
       return `
-        <div class="p-3">
+  <div class="p-4 space-y-2">
 
-          <div class="flex justify-between items-center">
+    <!-- ISSUE HEADER -->
+    <div class="flex justify-between items-center">
+      <div class="font-medium text-red-600">
+        ${labelMap[issue] || issue}
+      </div>
 
-            <div class="font-medium text-red-600">
-              ${labelMap[issue] || issue}
-            </div>
+      <div class="text-gray-700 dark:text-gray-200 text-sm font-medium">
+        $${obj.total.toFixed(2)}
+      </div>
+    </div>
 
-            <div class="text-gray-700 dark:text-gray-200">
-              $${obj.total.toFixed(2)}
-            </div>
+    <!-- SLOTS (BADGES) -->
+    <div class="flex flex-wrap gap-1">
+      ${Array.from(obj.slots).map(slot => `
+        <span class="px-2 py-1 text-[11px] bg-gray-100 dark:bg-gray-700 rounded">
+          ${slot}
+        </span>
+      `).join('')}
+    </div>
 
-          </div>
+    <!-- OPTIONAL -->
+    <div class="text-[11px] text-gray-400 dark:text-gray-500">
+      Suggested checks available in email
+    </div>
 
-          <div class="text-xs text-gray-400 dark:text-gray-400 mt-1">
-            ${Array.from(obj.slots).join(', ')}
-          </div>
-
-        </div>
-      `;
+  </div>
+`;
     }).join('');
 
 })()}
