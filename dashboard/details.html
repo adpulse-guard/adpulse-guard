@@ -86,15 +86,6 @@
         </button>
       </div>
 
-      <select
-        id="issueFilter"
-        class="px-2 py-1 text-sm border rounded
-               bg-white text-gray-900
-               dark:bg-darkcard dark:text-white"
-      >
-        <option value="">All incidents</option>
-      </select>
-
       <button
         id="darkModeBtn"
         class="ml-2 px-2 py-1 rounded bg-gray-200 dark:bg-gray-700"
@@ -108,6 +99,41 @@
 
 <!-- CONTENT -->
 <div class="max-w-6xl mx-auto py-8 px-4">
+
+<!-- FILTER BAR  -->
+<div class="bg-white dark:bg-darkcard rounded-xl shadow p-4 mb-4 flex flex-wrap items-center gap-3">
+
+  <span class="text-xs uppercase tracking-wide text-gray-500">
+    Filter by Incident Type
+  </span>
+
+  <select
+    id="issueFilter"
+    class="px-2 py-1 text-sm border rounded dark:bg-darkcard"
+  >
+    <option value="">All Incident Types</option>
+  </select>
+
+  <button
+    id="clearIssueFilter"
+    class="hidden inline-flex items-center justify-center
+           w-5 h-5 rounded-full
+           bg-indigo-50 text-indigo-600
+           hover:bg-indigo-100 hover:text-indigo-700
+           dark:bg-indigo-900/30 dark:text-indigo-300
+           dark:hover:bg-indigo-900/50
+           text-xs leading-none"
+  >
+    ✕
+  </button>
+
+  <span
+    id="issueFilterNote"
+    class="text-xs text-gray-400 hidden"
+  ></span>
+
+</div>
+
 <div id="incidentList" class="space-y-4"></div>
 <script>
 const params = new URLSearchParams(window.location.search);
@@ -138,6 +164,16 @@ const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxAD4aNij0ApHx21r68hq
 let allRows = [];
 let activeDate = params.get('date') || '';
 let selectedIssue = params.get('issue') || '';
+const clearIssueFilterBtn = document.getElementById('clearIssueFilter');
+const issueFilterNote = document.getElementById('issueFilterNote');
+
+function updateIssueClearVisibility() {
+  if (selectedIssue) {
+    clearIssueFilterBtn.classList.remove('hidden');
+  } else {
+    clearIssueFilterBtn.classList.add('hidden');
+  }
+}
 
 const labelMap = {
   gpt_script_missing: 'GPT script missing',
@@ -158,19 +194,67 @@ const labelMap = {
   expectedNetworkId_mismatch: 'Network configuration mismatch',
   unauthorized_domain: 'Unauthorized domain access'
 };
-  function populateIssueFilter(rows) {
+const ISSUE_GROUPS = {
+  DELIVERY: [
+    'gpt_script_missing',
+    'gpt_loaded_but_not_initialized',
+    'gpt_no_slot_requests',
+    'empty_response',
+    'phantom_slot_requested',
+    'defined_without_dom_no_request',
+    'slot_not_registered',
+    'slot_never_requested',
+    'wrong_network'
+  ],
+  LAYOUT: [
+    'unexpected_size',
+    'layout_overlap',
+    'ad_visibility_impaired',
+    'slot_container_collapsed'
+  ],
+  SECURITY: [
+    'token_invalid',
+    'clientId_mismatch',
+    'expectedNetworkId_mismatch',
+    'unauthorized_domain'
+  ]
+};
+
+function buildIssueDropdown(issueCounts) {
 
   const select = document.getElementById('issueFilter');
+  select.innerHTML = `<option value="">All Incident Types</option>`;
 
-  const unique = new Set(
-    rows.map(r => r.issueType).filter(Boolean)
-  );
+  Object.entries(ISSUE_GROUPS).forEach(([groupKey, issues]) => {
 
-  unique.forEach(type => {
-    const option = document.createElement('option');
-    option.value = type;
-    option.textContent = labelMap[type] || type;
-    select.appendChild(option);
+    const groupHeader = document.createElement('option');
+    const groupTitles = {
+  DELIVERY: '— Delivery & Rendering —',
+  LAYOUT: '— Layout & Visibility —',
+  SECURITY: '— Security & Access —'
+};
+
+groupHeader.textContent = groupTitles[groupKey];
+    groupHeader.disabled = true;
+    groupHeader.style.fontWeight = '600';
+
+    select.appendChild(groupHeader);
+
+    issues.forEach(issueKey => {
+
+      const label = labelMap[issueKey];
+      if (!label) return;
+
+      const count = issueCounts[issueKey] || 0;
+
+      const option = document.createElement('option');
+      option.value = issueKey;
+      option.textContent = `${label} (${count})`;
+
+      select.appendChild(option);
+
+    });
+
   });
 }
 
@@ -293,9 +377,13 @@ function renderGrouped(rows) {
   container.innerHTML = sortedPages.map(([page, data]) => {
 
     const shortPage = page
-      .replace(/^https?:\/\/(www\.)?/, '')
-      .replace(/\/$/, '')
-      .slice(0, 60);
+  .replace(/^https?:\/\/(www\.)?/, '')
+  .replace(/\/$/, '');
+
+  const displayPage =
+  shortPage.length > 60
+    ? shortPage.slice(0, 60) + '…'
+    : shortPage;
 
     return `
       <div class="bg-white dark:bg-darkcard rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
@@ -306,12 +394,12 @@ function renderGrouped(rows) {
           onclick="togglePage('${btoa(page)}')"
         >
 
-          <div class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200 break-all">
+          <div class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200 break-words">
             <span id="arrow-${btoa(page)}" class="text-xs text-gray-400">▶</span>
             <a href="${page}" target="_blank"
                 onclick="event.stopPropagation();"
               class="hover:underline text-indigo-600">
-              ${shortPage}
+              ${displayPage}
             </a>
             <button 
               onclick="event.stopPropagation(); navigator.clipboard.writeText('${page}')"
@@ -374,11 +462,6 @@ function renderGrouped(rows) {
       `).join('')}
     </div>
 
-    <!-- OPTIONAL -->
-    <div class="text-[11px] text-gray-400 dark:text-gray-500">
-      Suggested checks available in email
-    </div>
-
   </div>
 `;
     }).join('');
@@ -400,7 +483,18 @@ document.getElementById('incidentList').innerHTML =
 document.getElementById('dateFilter')
   .addEventListener('change', e => {
     activeDate = e.target.value;
-    applyFilters();
+
+const url = new URL(window.location);
+
+if (activeDate) {
+  url.searchParams.set('date', activeDate);
+} else {
+  url.searchParams.delete('date');
+}
+
+window.history.replaceState({}, '', url);
+
+applyFilters();
   });
 
 // CLEAR DATE
@@ -408,6 +502,9 @@ const clearDate = document.getElementById('clearDate');
 
 clearDate.addEventListener('click', () => {
   activeDate = '';
+  const url = new URL(window.location);
+  url.searchParams.delete('date');
+  window.history.replaceState({}, '', url);
   document.getElementById('dateFilter').value = '';
   applyFilters();
 });
@@ -416,7 +513,27 @@ clearDate.addEventListener('click', () => {
 document.getElementById('issueFilter')
   .addEventListener('change', e => {
     selectedIssue = e.target.value;
-    applyFilters();
+
+const url = new URL(window.location);
+
+if (selectedIssue) {
+  url.searchParams.set('issue', selectedIssue);
+} else {
+  url.searchParams.delete('issue');
+}
+
+window.history.replaceState({}, '', url);
+
+if (selectedIssue) {
+  const label = labelMap[selectedIssue] || selectedIssue;
+  issueFilterNote.textContent = `Showing impact: ${label}`;
+  issueFilterNote.classList.remove('hidden');
+} else {
+  issueFilterNote.classList.add('hidden');
+}
+
+updateIssueClearVisibility();
+applyFilters();
   });
 
 fetch(`${SHEET_URL}?token=${token}`)
@@ -426,17 +543,26 @@ fetch(`${SHEET_URL}?token=${token}`)
 
   allRows = j.data || [];
 
-  populateIssueFilter(allRows);
-  if (activeDate) {
-      document.getElementById('dateFilter').value = activeDate;
-    }
+  const issueCounts = {};
 
-    if (selectedIssue) {
-      document.getElementById('issueFilter').value = selectedIssue;
-    }
-
-  applyFilters();
+allRows.forEach(r => {
+  if (!r.issueType) return;
+  issueCounts[r.issueType] =
+    (issueCounts[r.issueType] || 0) + 1;
 });
+
+buildIssueDropdown(issueCounts);
+if (selectedIssue) {
+  document.getElementById('issueFilter').value = selectedIssue;
+
+  const label = labelMap[selectedIssue] || selectedIssue;
+  issueFilterNote.textContent = `Showing impact: ${label}`;
+  issueFilterNote.classList.remove('hidden');
+}
+  applyFilters();
+updateIssueClearVisibility();
+})
+
 function togglePage(id) {
   const el = document.getElementById(`group-${id}`);
   const arrow = document.getElementById(`arrow-${id}`);
@@ -468,6 +594,21 @@ darkModeBtn.addEventListener('click', () => {
   const isDark = document.documentElement.classList.toggle('dark');
   localStorage.setItem('theme', isDark ? 'dark' : 'light');
   modeLabel.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+});
+clearIssueFilterBtn.addEventListener('click', () => {
+
+  selectedIssue = '';
+
+  const url = new URL(window.location);
+  url.searchParams.delete('issue');
+  window.history.replaceState({}, '', url);
+
+  document.getElementById('issueFilter').value = '';
+  issueFilterNote.classList.add('hidden');
+
+  updateIssueClearVisibility();
+  applyFilters();
+
 });
 </script>
 
