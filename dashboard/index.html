@@ -1501,7 +1501,9 @@ if (sortedPages.length) {
 }
   pagesBox.classList.remove('hidden');
 
-  pagesList.innerHTML = sortedPages.map(([url, data]) => {
+  const visiblePages = sortedPages.slice(0, 6);
+
+  pagesList.innerHTML = visiblePages.map(([url, data]) => {
 
     const isOpen = expandedPage === url;
     const hasHigh = Array.from(data.issues).some(i => {
@@ -1509,12 +1511,12 @@ if (sortedPages.length) {
   return (sev || '').toLowerCase() === 'high';
 });
     return `
-      <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+      <div class="rounded-lg p-2 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
 
         <div onclick="togglePage(${JSON.stringify(url)})"
              class="cursor-pointer flex justify-between items-center">
 
-          <div class="truncate">
+          <div class="truncate leading-tight">
             <span class="font-medium block truncate max-w-[300px]">
   <span class="mr-1">${hasHigh ? '🔴' : '🟠'}</span>
   ${url}
@@ -1544,7 +1546,13 @@ if (sortedPages.length) {
       </div>
     `;
   }).join('');
-
+if (sortedPages.length > 6) {
+  pagesList.innerHTML += `
+    <div class="text-xs text-center text-gray-400 mt-2">
+      + ${sortedPages.length - 6} more pages affected
+    </div>
+  `;
+}
 } else {
   pagesBox.classList.add('hidden');
   note.textContent = '';
