@@ -134,55 +134,57 @@ function renderList(rows) {
   const container = document.getElementById('incidentList');
 
   if (!rows.length) {
-    container.innerHTML = `
-      <div class="text-sm text-gray-400">
-        No incidents found
-      </div>
-    `;
-    return;
-  }
+  container.innerHTML = `
+    <div class="text-sm text-gray-400">
+      No incidents found
+    </div>
+  `;
+  return;
+}
 
   container.innerHTML = rows.map(r => {
 
-    const severity = (r.severity || 'INFO').toUpperCase();
+  const severity = (r.severity || 'INFO').toUpperCase();
 
-    const color =
-      severity === 'HIGH' ? 'text-red-600' :
-      severity === 'MEDIUM' ? 'text-orange-600' :
-      'text-gray-500';
+  const color =
+    severity === 'HIGH' ? 'text-red-600' :
+    severity === 'MEDIUM' ? 'text-orange-600' :
+    'text-gray-500';
 
-    return `
-      <div class="bg-white rounded-xl shadow p-4">
+  return `
+    <div class="bg-white rounded-xl shadow p-4 border border-gray-100">
 
-        <div class="flex justify-between items-start">
+      <!-- PAGE -->
+      <div class="text-xs text-gray-400 mb-1 break-all">
+        ${r.pageUrl || '—'}
+      </div>
 
-          <div>
-            <div class="text-sm font-semibold ${color}">
-              ${labelMap[r.issueType] || r.issueType}
-            </div>
+      <!-- ISSUE -->
+      <div class="text-sm font-semibold ${color}">
+        ${labelMap[r.issueType] || r.issueType}
+      </div>
 
-            <div class="text-xs text-gray-500 mt-1">
-              Slot: ${r.slotId || '—'}
-            </div>
+      <!-- SLOT -->
+      <div class="text-xs text-gray-500 mt-1">
+        Slot: ${r.slotId || '—'}
+      </div>
 
-            <div class="text-xs text-gray-500">
-              Page: ${r.pageUrl || '—'}
-            </div>
-          </div>
+      <!-- FOOTER -->
+      <div class="flex justify-between items-center mt-3">
 
-          <div class="text-right text-xs text-gray-400">
-            ${new Date(r.receivedAt).toLocaleTimeString()}
-          </div>
-
-        </div>
-
-        <div class="mt-2 text-sm text-gray-700">
+        <div class="text-sm font-medium text-gray-700">
           $${Number(r.estimatedDailyRevenueRisk || 0).toFixed(2)}
         </div>
 
+        <div class="text-xs text-gray-400">
+          ${new Date(r.receivedAt).toLocaleTimeString()}
+        </div>
+
       </div>
-    `;
-  }).join('');
+
+    </div>
+  `;
+}).join('');
 
 }
 
@@ -202,8 +204,123 @@ function applyFilters() {
     );
   }
 
-  renderList(rows);
+  renderGrouped(rows);
 }
+
+function renderGrouped(rows) {
+
+  const container = document.getElementById('incidentList');
+
+  if (!rows.length) {
+    container.innerHTML = `
+      <div class="text-sm text-gray-400">
+        No incidents found
+      </div>
+    `;
+    return;
+  }
+
+  // 🧠 GROUP BY PAGE
+  const pageMap = new Map();
+
+  rows.forEach(r => {
+
+    const page = r.pageUrl || 'Unknown page';
+
+    if (!pageMap.has(page)) {
+      pageMap.set(page, {
+        incidents: [],
+        total: 0
+      });
+    }
+
+    const risk = Number(r.estimatedDailyRevenueRisk || 0);
+
+    pageMap.get(page).incidents.push(r);
+    pageMap.get(page).total += risk;
+  });
+
+  // 🔥 SORT pages by total revenue DESC
+  const sortedPages = Array.from(pageMap.entries())
+    .sort((a, b) => b[1].total - a[1].total);
+
+  // 🎨 RENDER
+  container.innerHTML = sortedPages.map(([page, data]) => {
+
+    const shortPage = page.replace(/^https?:\/\/(www\.)?/, '').slice(0, 60);
+
+    return `
+      <div class="bg-white rounded-xl shadow border border-gray-100">
+
+        <!-- PAGE HEADER -->
+        <div 
+          class="p-4 border-b flex justify-between items-center cursor-pointer hover:bg-gray-50"
+          onclick="togglePage('${btoa(page)}')"
+        >
+
+          <div class="flex items-center gap-2 text-sm font-medium text-gray-700 break-all">
+            <span id="arrow-${btoa(page)}">▶</span>
+            ${shortPage}
+          </div>
+
+          <div class="text-sm font-semibold text-red-600">
+            $${data.total.toFixed(2)}
+          </div>
+
+        </div>
+
+        <!-- INCIDENTS -->
+        <div id="group-${btoa(page)}" class="divide-y hidden">
+
+          ${data.incidents
+            .sort((a,b) =>
+              Number(b.estimatedDailyRevenueRisk || 0) -
+              Number(a.estimatedDailyRevenueRisk || 0)
+            )
+            .map(r => {
+
+              const severity = (r.severity || 'INFO').toUpperCase();
+
+              const color =
+                severity === 'HIGH' ? 'text-red-600' :
+                severity === 'MEDIUM' ? 'text-orange-600' :
+                'text-gray-500';
+
+              return `
+                <div class="p-3 flex justify-between items-center text-sm">
+
+                  <div>
+                    <div class="font-medium ${color}">
+                      ${labelMap[r.issueType] || r.issueType}
+                    </div>
+
+                    <div class="text-xs text-gray-400">
+                      ${r.slotId || '—'}
+                    </div>
+                  </div>
+
+                  <div class="text-right">
+                    <div class="text-gray-700">
+                      $${Number(r.estimatedDailyRevenueRisk || 0).toFixed(2)}
+                    </div>
+                    <div class="text-xs text-gray-400">
+                      ${new Date(r.receivedAt).toLocaleTimeString()}
+                    </div>
+                  </div>
+
+                </div>
+              `;
+            }).join('')}
+
+        </div>
+
+      </div>
+    `;
+  }).join('');
+}
+
+document.getElementById('incidentList').innerHTML =
+  `<div class="text-sm text-gray-400">Loading...</div>`;
 
 document.getElementById('dateFilter')
   .addEventListener('change', e => {
@@ -235,7 +352,20 @@ fetch(`${SHEET_URL}?token=${token}`)
 
   applyFilters();
 });
+function togglePage(id) {
+  const el = document.getElementById(`group-${id}`);
+  const arrow = document.getElementById(`arrow-${id}`);
 
+  if (!el) return;
+
+  const isHidden = el.classList.contains('hidden');
+
+  el.classList.toggle('hidden');
+
+  if (arrow) {
+    arrow.textContent = isHidden ? '▼' : '▶';
+  }
+}
 </script>
 
 </body>
