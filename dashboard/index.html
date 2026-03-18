@@ -1664,7 +1664,13 @@ window.history.replaceState({}, '', url);
 });
 });
   updateIssueClearVisibility();
+const explorerLink = document.querySelector('a[href="details.html"]');
 
+if (explorerLink && token) {
+  explorerLink.href = `details.html?token=${token}`;
+}
+explorerLink.href =
+  `details.html?token=${token}&date=${activeDate}&issue=${selectedIssueFilter}`;
 </script>
 
 </body>
