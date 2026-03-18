@@ -400,7 +400,11 @@ function renderGrouped(rows) {
     const risk = Number(r.estimatedDailyRevenueRisk || 0);
 
     pageMap.get(page).incidents.push(r);
-    pageMap.get(page).total += risk;
+
+if (!pageMap.get(page).totalSet) {
+  pageMap.get(page).total = Number(r.estimatedDailyRevenueRisk || 0);
+  pageMap.get(page).totalSet = true;
+}
   });
 
   // 🔥 SORT pages by total revenue DESC
@@ -451,19 +455,29 @@ function renderGrouped(rows) {
 
   const issueMap = new Map();
 
-  data.incidents.forEach(r => {
-    const issue = r.issueType || 'unknown';
+const pageRevenue = Number(data.incidents[0]?.estimatedDailyRevenueRisk || 0);
 
-    if (!issueMap.has(issue)) {
-      issueMap.set(issue, {
-        slots: new Set(),
-        total: 0
-      });
-    }
+const uniqueSlots = new Set(data.incidents.map(r => r.slotId));
+const slotCount = uniqueSlots.size || 1;
 
+const valuePerSlot = pageRevenue / slotCount;
+
+data.incidents.forEach(r => {
+  const issue = r.issueType || 'unknown';
+
+  if (!issueMap.has(issue)) {
+    issueMap.set(issue, {
+      slots: new Set(),
+      total: 0
+    });
+  }
+
+  if (!issueMap.get(issue).slots.has(r.slotId)) {
     issueMap.get(issue).slots.add(r.slotId);
-    issueMap.get(issue).total += Number(r.estimatedDailyRevenueRisk || 0);
-  });
+
+    issueMap.get(issue).total += valuePerSlot;
+  }
+});
   
   return Array.from(issueMap.entries())
     .sort((a,b) => b[1].total - a[1].total)
