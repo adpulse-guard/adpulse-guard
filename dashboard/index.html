@@ -196,6 +196,20 @@
       <div id="offenderIssue" class="mt-1 flex flex-wrap gap-1"></div>
   </div>
 
+<div id="affectedPagesBox"
+     class="hidden bg-white dark:bg-darkcard
+            rounded-xl shadow p-5 mb-6
+            border border-gray-200 dark:border-gray-700">
+
+  <h2 class="text-sm font-semibold mb-3">
+    📄 Affected Pages
+  </h2>
+
+  <div id="pagesSummaryNote" class="text-xs text-gray-400 mb-3"></div>
+  <div id="affectedPagesList" class="space-y-2 text-xs"></div>
+
+</div>
+
 <div id="securityWidget"
      class="hidden bg-gray-50 dark:bg-darkcard
             rounded-xl shadow p-5 mb-8
@@ -466,6 +480,7 @@ select.appendChild(groupHeader);
 
 let issueChart, severityChart, lossTrendChart;
 let allRows = [];
+let expandedPage = null;
 
 const dateInput = document.getElementById('dateFilter');
 const clearDate = document.getElementById('clearDate');
@@ -543,6 +558,9 @@ function incidentKey(r) {
 }
   function renderDashboard(rows, selectedDate = null, selectedClient = '') {
   document.getElementById('loadingIndicator').style.display = 'none';
+  if (expandedPage && !rows.some(r => r.pageUrl === expandedPage)) {
+  expandedPage = null;
+}
   const baseRows = rows.filter(r => {
   if (!r || !r.issueType || !r.receivedAt) return false;
 
@@ -608,6 +626,35 @@ baseRows.forEach(r => {
   }
 });
   const effectiveRows = lifecycleFilteredRows;
+  const pageMap = new Map();
+
+effectiveRows.forEach(r => {
+
+  if (!r.pageUrl) return;
+
+  const severity = (r.severity || '').toUpperCase();
+  if (!['HIGH','MEDIUM'].includes(severity)) return;
+
+  if (!pageMap.has(r.pageUrl)) {
+    pageMap.set(r.pageUrl, {
+      issues: new Set(),
+      slots: new Set(),
+      risk: 0
+    });
+  }
+
+  const p = pageMap.get(r.pageUrl);
+
+  if (r.issueType) p.issues.add(r.issueType);
+  if (r.slotId) p.slots.add(r.slotId);
+
+  const risk = Number(r.estimatedDailyRevenueRisk || 0);
+  p.risk = Math.max(p.risk, risk);
+
+});
+const sortedPages = Array.from(pageMap.entries())
+  .sort((a, b) => b[1].risk - a[1].risk);
+
   const GLOBAL_TYPES = [
   'gpt_script_missing',
   'gpt_loaded_but_not_initialized',
@@ -1442,6 +1489,67 @@ if (lossTrendChart) {
   });
 }
 }
+const pagesBox = document.getElementById('affectedPagesBox');
+const pagesList = document.getElementById('affectedPagesList');
+const note = document.getElementById('pagesSummaryNote');
+
+if (sortedPages.length) {
+  if (sortedPages.length > 1) {
+  note.textContent = `Showing ${sortedPages.length} affected pages · click to expand`;
+} else {
+  note.textContent = '';
+}
+  pagesBox.classList.remove('hidden');
+
+  pagesList.innerHTML = sortedPages.map(([url, data]) => {
+
+    const isOpen = expandedPage === url;
+    const hasHigh = Array.from(data.issues).some(i => {
+  const sev = effectiveRows.find(r => r.issueType === i)?.severity;
+  return (sev || '').toLowerCase() === 'high';
+});
+    return `
+      <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-3">
+
+        <div onclick="togglePage(${JSON.stringify(url)})"
+             class="cursor-pointer flex justify-between items-center">
+
+          <div class="truncate">
+            <span class="font-medium block truncate max-w-[300px]">
+  <span class="mr-1">${hasHigh ? '🔴' : '🟠'}</span>
+  ${url}
+</span><br/>
+            <span class="text-gray-400">
+              ${data.issues.size} issues · ${data.slots.size} slots
+            </span>
+          </div>
+
+          <div class="text-right">
+            <div class="font-semibold text-red-500">
+              $${data.risk.toFixed(2)}
+            </div>
+            <div class="text-gray-400 text-xs">
+              ${isOpen ? '▲' : '▼'}
+            </div>
+          </div>
+
+        </div>
+
+        ${
+          isOpen
+          ? renderPageDetails(url, data)
+          : ''
+        }
+
+      </div>
+    `;
+  }).join('');
+
+} else {
+  pagesBox.classList.add('hidden');
+  note.textContent = '';
+}
+
 const lastIssueTs = getLastIssueTimestamp(effectiveRows);
 
 let minutesAgo = null;
@@ -1612,6 +1720,45 @@ window.history.replaceState({}, '', url);
 });
 });
   updateIssueClearVisibility();
+function togglePage(url) {
+  expandedPage = expandedPage === url ? null : url;
+  renderDashboard(allRows, activeDate);
+}
+function renderPageDetails(url, data) {
+
+  return `
+    <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 text-xs">
+
+      <div class="mb-2 font-semibold text-gray-600 dark:text-gray-300">
+        Issues:
+      </div>
+
+      <div class="flex flex-wrap gap-1 mb-3">
+        ${Array.from(data.issues).map(i => `
+          <span class="px-2 py-0.5 rounded
+                       bg-indigo-50 text-indigo-600
+                       dark:bg-indigo-900/30 dark:text-indigo-300">
+            ${labelMap[i] || i}
+          </span>
+        `).join('')}
+      </div>
+
+      <div class="mb-2 font-semibold text-gray-600 dark:text-gray-300">
+        Slots:
+      </div>
+
+      <div class="text-gray-500 dark:text-gray-400">
+        ${Array.from(data.slots).slice(0,5).join('<br/>')}
+        ${
+          data.slots.size > 5
+          ? `<div class="text-gray-400 mt-1">+ ${data.slots.size - 5} more</div>`
+          : ''
+        }
+      </div>
+
+    </div>
+  `;
+}
 </script>
 
 </body>
