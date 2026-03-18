@@ -236,7 +236,20 @@ function buildIssueDropdown(issueCounts) {
 
 groupHeader.textContent = groupTitles[groupKey];
     groupHeader.disabled = true;
-    groupHeader.style.fontWeight = '600';
+    if (groupKey === 'DELIVERY') {
+  groupHeader.style.color = '#6366f1';
+  groupHeader.style.fontWeight = '600';
+}
+
+if (groupKey === 'LAYOUT') {
+  groupHeader.style.color = '#d97706';
+  groupHeader.style.fontWeight = '600';
+}
+
+if (groupKey === 'SECURITY') {
+  groupHeader.style.color = '#64748b';
+  groupHeader.style.fontWeight = '600';
+}
 
     select.appendChild(groupHeader);
 
@@ -250,6 +263,10 @@ groupHeader.textContent = groupTitles[groupKey];
       const option = document.createElement('option');
       option.value = issueKey;
       option.textContent = `${label} (${count})`;
+      if (count === 0) {
+      option.disabled = true;
+      option.style.color = '#9ca3af';
+}
 
       select.appendChild(option);
 
@@ -552,6 +569,9 @@ allRows.forEach(r => {
 });
 
 buildIssueDropdown(issueCounts);
+if (activeDate) {
+  document.getElementById('dateFilter').value = activeDate;
+}
 if (selectedIssue) {
   document.getElementById('issueFilter').value = selectedIssue;
 
