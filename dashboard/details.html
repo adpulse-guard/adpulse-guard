@@ -28,13 +28,11 @@
 
 <body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-white font-sans min-h-screen">
 
-<!-- HEADER -->
 <header class="bg-white dark:bg-darkcard shadow-sm">
   <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
     
     <div class="flex items-center gap-8">
 
-      <!-- BRAND -->
       <div class="flex items-center gap-2">
         <img src="Logo Shield.png" class="h-7 w-7" />
         <span class="text-sm font-semibold tracking-wide">
@@ -42,7 +40,6 @@
         </span>
       </div>
 
-      <!-- NAV -->
       <nav class="flex items-center gap-4 text-sm">
 
         <a id="overviewLink"
@@ -97,10 +94,8 @@
   </div>
 </header>
 
-<!-- CONTENT -->
 <div class="max-w-6xl mx-auto py-8 px-4">
 
-<!-- FILTER BAR  -->
 <div class="bg-white dark:bg-darkcard rounded-xl shadow p-4 mb-4 flex flex-wrap items-center gap-3">
 
   <span class="text-xs uppercase tracking-wide text-gray-500">
@@ -270,6 +265,22 @@ const SUGGESTED_CHECKS = {
 ],
   };
 
+    const ISSUE_LABEL = {
+  wrong_network: 'Wrong network · Configuration mismatch',
+  slot_not_registered: 'DOM slot not in GPT · No ad request',
+  phantom_slot_requested: 'Slot requested but container missing · Delivery compromised',
+  defined_without_dom_no_request: 'Slot defined but not requested · No ad request',
+  unexpected_size: 'Unexpected ad size · Creative mismatch',
+  empty_response: 'Empty response · No eligible demand',
+  layout_overlap: 'Layout overlap detected',
+  ad_visibility_impaired: 'Ad visibility impaired (content obstructing ad)',
+  slot_container_collapsed: 'Slot container collapsed · Rendered but zero height',
+  gpt_script_missing: 'GPT script missing · Ad serving not possible',
+  gpt_loaded_but_not_initialized: 'GPT loaded but not initialized · Ad stack not activated',
+  gpt_no_slot_requests: 'No GPT slot requests detected · Delivery halted',
+  slot_never_requested: 'Slot visible but no ad request sent · Delivery failure'
+};
+
 
 function buildIssueDropdown(issueCounts) {
 
@@ -406,7 +417,6 @@ function applyFilters() {
     }
   });
 
-  // 👉 sad filtriraš po issue
   if (selectedIssue) {
     rows = rows.filter(r =>
       r.issueType === selectedIssue
@@ -440,7 +450,6 @@ function renderGrouped(rows) {
     return;
   }
 
-  // 🧠 GROUP BY PAGE
   const pageMap = new Map();
 
   rows.forEach(r => {
@@ -464,11 +473,9 @@ if (!pageMap.get(page).totalSet) {
 }
   });
 
-  // 🔥 SORT pages by total revenue DESC
   const sortedPages = Array.from(pageMap.entries())
     .sort((a, b) => b[1].total - a[1].total);
 
-  // 🎨 RENDER
   container.innerHTML = sortedPages.map(([page, data]) => {
 
     const displayPage = page
@@ -570,19 +577,44 @@ data.incidents.forEach(r => {
 
     <!-- ISSUE TITLE -->
     ${(() => {
+
   const severity = (
     data.incidents.find(r => r.issueType === issue)?.severity || 'INFO'
   ).toUpperCase();
 
-  const textColor =
-    severity === 'HIGH' ? 'text-red-600' :
-    severity === 'MEDIUM' ? 'text-orange-500' :
-    'text-gray-500';
+  const emoji =
+    severity === 'HIGH' ? '🔴' :
+    severity === 'MEDIUM' ? '🟠' :
+    '⚪';
 
-  return `<div class="font-semibold text-sm ${textColor}">`;
-})()}
-      ${labelMap[issue] || issue}
+  const fullLabel = ISSUE_LABEL[issue] || labelMap[issue] || issue;
+
+  const [title, ...rest] = fullLabel.split('·');
+  const subtext = rest.join('·').trim();
+
+  return `
+    <div class="flex items-start gap-2">
+
+      <span class="text-sm mt-0.5">${emoji}</span>
+
+      <div>
+        <div class="font-semibold text-sm text-gray-800 dark:text-gray-100">
+          ${title.trim()}
+        </div>
+
+        ${
+          subtext
+            ? `<div class="text-xs text-gray-500 dark:text-gray-400">
+                ${subtext}
+              </div>`
+            : ''
+        }
+
+      </div>
+
     </div>
+  `;
+})()}
 
     <!-- AFFECTED SLOTS -->
     <div class="pl-2 text-sm">
@@ -623,7 +655,6 @@ data.incidents.forEach(r => {
     <div class="pl-2 text-sm">
 
   <button
-    <button
   onclick="toggleChecks('${uniqueId}')"
   class="text-xs text-indigo-400 hover:text-indigo-300 font-medium"
 >
@@ -660,7 +691,6 @@ data.incidents.forEach(r => {
 document.getElementById('incidentList').innerHTML =
   `<div class="text-sm text-gray-400 dark:text-gray-400">Loading...</div>`;
 
-// DATE FILTER
 document.getElementById('dateFilter')
   .addEventListener('change', e => {
     activeDate = e.target.value;
@@ -678,7 +708,6 @@ window.history.replaceState({}, '', url);
 applyFilters();
   });
 
-// CLEAR DATE
 const clearDate = document.getElementById('clearDate');
 
 clearDate.addEventListener('click', () => {
@@ -690,7 +719,6 @@ clearDate.addEventListener('click', () => {
   applyFilters();
 });
 
-// ISSUE FILTER
 document.getElementById('issueFilter')
   .addEventListener('change', e => {
     selectedIssue = e.target.value;
