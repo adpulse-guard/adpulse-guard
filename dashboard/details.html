@@ -129,7 +129,7 @@
 
 </div>
 
-<div id="incidentList" class="space-y-4"></div>
+<div id="incidentList" class="space-y-6"></div>
 <script>
 const params = new URLSearchParams(window.location.search);
 const token = params.get('token');
@@ -354,7 +354,9 @@ function renderList(rows) {
     'text-gray-500';
 
   return `
-    <div class="bg-white dark:bg-darkcard rounded-lg shadow-sm border border-gray-200 dark:border-gray-600/30">
+    <div class="bg-white dark:bg-darkcard rounded-xl shadow-sm border border-gray-200 dark:border-gray-600/30
+            hover:shadow-md hover:border-indigo-300
+            transition-all duration-200">
 
       <!-- PAGE -->
       <div class="text-xs text-gray-400 dark:text-gray-400 mb-1 break-all">
@@ -477,6 +479,8 @@ if (!pageMap.get(page).totalSet) {
     .sort((a, b) => b[1].total - a[1].total);
 
   container.innerHTML = sortedPages.map(([page, data]) => {
+    const hasHigh = data.incidents.some(r => r.severity === 'HIGH');
+    const hasMedium = data.incidents.some(r => r.severity === 'MEDIUM');
 
     const displayPage = page
   .replace(/^https?:\/\/(www\.)?/, '')
@@ -484,31 +488,63 @@ if (!pageMap.get(page).totalSet) {
   .slice(0, 60);
 
     return `
-      <div class="bg-white dark:bg-darkcard rounded-lg shadow-sm border border-gray-200 dark:border-gray-600/30">
+      <div class="bg-white dark:bg-darkcard rounded-xl shadow-sm border border-gray-200 dark:border-gray-600/30
+                  hover:shadow-md hover:border-indigo-300
+                  transition-all duration-200">
 
         <!-- PAGE HEADER -->
         <div 
-          class="px-4 py-2 border-b flex justify-between items-center cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
-          onclick="togglePage('${btoa(page)}')"
-        >
+  class="px-4 py-4 border-b cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
+  onclick="togglePage('${btoa(page)}')"
+>
 
-          <div class="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-200 break-words">
-            <span id="arrow-${btoa(page)}" class="text-xs text-gray-400">▶</span>
-            <div class="flex items-center gap-1 text-sm">
-              <span class="text-gray-400 text-xs">Page:</span>
-              <a href="${page}" target="_blank"
-                 onclick="event.stopPropagation();"
-                 class="hover:underline text-indigo-600">
-                 ${displayPage}
-                </a>
-            </div>
-          </div>
+  <div class="flex justify-between items-center gap-4">
 
-          <div class="text-sm font-semibold text-red-600">
-            $${data.total.toFixed(2)}
-          </div>
+    <!-- LEFT -->
+    <div class="flex items-start gap-2">
 
+  <span class="mt-1 text-sm">
+    ${
+      hasHigh
+        ? '🔴'
+        : hasMedium
+        ? '🟠'
+        : '⚪'
+    }
+  </span>
+
+      <span id="arrow-${btoa(page)}" class="text-xs text-gray-400 mt-1">▶</span>
+
+      <div>
+        <div class="text-xs text-gray-400 uppercase tracking-wide">
+          Page
         </div>
+
+        <a href="${page}" target="_blank"
+           onclick="event.stopPropagation();"
+           class="text-sm font-semibold text-indigo-600 hover:underline break-all">
+          ${displayPage}
+        </a>
+      </div>
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="text-right">
+
+      <div class="text-xs text-gray-400 uppercase tracking-wide">
+        Revenue at risk
+      </div>
+
+      <div class="text-lg font-bold text-red-600 tabular-nums">
+        $${data.total.toFixed(2)}
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
 
         <!-- INCIDENTS -->
         <div id="group-${btoa(page)}" class="divide-y hidden">
@@ -558,8 +594,6 @@ data.incidents.forEach(r => {
       const glow =
         severity === 'HIGH'
           ? 'hover:shadow-[0_0_18px_rgba(239,68,68,0.35)]'
-        : severity === 'MEDIUM'
-          ? 'hover:shadow-[0_0_16px_rgba(251,146,60,0.30)]'
         : '';
       const groupColor =
         ISSUE_GROUPS.DELIVERY.includes(issue) ? 'text-red-600' :
@@ -611,7 +645,7 @@ data.incidents.forEach(r => {
       <span class="text-sm mt-0.5">${emoji}</span>
 
       <div>
-        <div class="font-semibold text-sm text-gray-800 dark:text-gray-100">
+        <div class="font-semibold text-sm text-gray-900 dark:text-gray-100">
           ${title.trim()}
         </div>
 
@@ -628,14 +662,14 @@ data.incidents.forEach(r => {
     </div>
   `;
 })()}
-
+    <div class="border-t border-gray-200/60 dark:border-gray-600/40 my-2"></div>
     <!-- AFFECTED SLOTS -->
-    <div class="pl-2 text-sm">
+    <div class="pl-2 text-xs font-mono">
   <div class="text-gray-500 dark:text-gray-400 text-xs mb-1 uppercase tracking-wide">
     Affected Slots:
   </div>
 
-  <ul class="space-y-0.5 text-gray-700 dark:text-gray-300 text-sm pl-1">
+  <ul class="space-y-0.5 text-gray-700 dark:text-gray-300 text-xs pl-1">
     ${Array.from(obj.slots).map(slot => `
       <li class="opacity-80">• ${slot}</li>
     `).join('')}
@@ -664,7 +698,7 @@ data.incidents.forEach(r => {
     </div>
   `;
 })()}
-
+    <div class="border-t border-gray-200/60 dark:border-gray-600/40 my-2"></div>
     <!-- SUGGESTED CHECKS -->
     <div class="pl-2 text-sm">
 
@@ -675,7 +709,7 @@ data.incidents.forEach(r => {
     🔎 Show suggested checks
   </button>
 
-  <div id="checks-${uniqueId}" class="hidden mt-2 bg-gray-50 dark:bg-black/20 rounded-md p-3">
+  <div id="checks-${uniqueId}" class="hidden mt-2 bg-gray-50 dark:bg-gray-800/40 border border-gray-200 dark:border-gray-700 rounded-md p-3">
 
     <div class="text-gray-500 dark:text-gray-400 text-xs mb-1 uppercase tracking-wide">
       💡 Suggested checks:
