@@ -19,6 +19,35 @@
     }
   };
 </script>
+<style>
+/* SCROLLBAR – global */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* LIGHT */
+::-webkit-scrollbar-thumb {
+  background: #c7c7c7;
+  border-radius: 6px;
+}
+
+/* DARK MODE */
+.dark::-webkit-scrollbar-track {
+  background: #1e1e2f;
+}
+
+.dark::-webkit-scrollbar-thumb {
+  background: #4b4b6a;
+}
+
+.dark::-webkit-scrollbar-thumb:hover {
+  background: #6366f1;
+}
+</style>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Incident Explorer</title>
@@ -133,7 +162,7 @@
 
   <!-- FULL LIST -->
   <div id="pageList"
-       class="space-y-2 max-h-[75vh] overflow-y-auto">
+       class="space-y-2">
   </div>
 
   <!-- SLIDE PANEL -->
