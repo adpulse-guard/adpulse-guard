@@ -667,8 +667,11 @@ function renderSidebar(pageMap) {
           Page
         </div>
 
-        <div class="text-sm font-semibold text-indigo-600 break-all">
-          ${displayPage}
+        <div class="text-sm font-semibold text-gray-700 dark:text-gray-200
+                    hover:text-indigo-600 dark:hover:text-indigo-300
+                    transition break-all truncate"
+              title="${page}">
+            ${displayPage}
         </div>
 
         <div class="text-sm mt-1 font-semibold text-red-600 tabular-nums">
