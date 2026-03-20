@@ -765,7 +765,31 @@ function renderDetails(page, data) {
 
                 <div>
                   <div class="font-semibold ${color}">
-                    ${ISSUE_LABEL[issue] || labelMap[issue] || issue}
+                    ${(() => {
+
+  const fullLabel = ISSUE_LABEL[issue] || labelMap[issue] || issue;
+
+  const [title, ...rest] = fullLabel.split('·');
+  const subtext = rest.join('·').trim();
+
+  return `
+    <div>
+
+      <div class="font-semibold text-gray-900 dark:text-gray-100 text-sm">
+        ${title.trim()}
+      </div>
+
+      ${
+        subtext
+          ? `<div class="text-xs text-gray-500 dark:text-gray-400">
+               ${subtext}
+             </div>`
+          : ''
+      }
+
+    </div>
+  `;
+})()}
                   </div>
 
                   <div class="text-xs text-gray-500 mt-1">
@@ -783,7 +807,34 @@ function renderDetails(page, data) {
             <div class="mt-3 text-xs text-gray-500">
               ${Array.from(obj.slots).map(s => `• ${s}`).join('<br>')}
             </div>
+          <div class="mt-3">
 
+  <button
+    onclick="toggleChecks('${btoa(issue + page)}')"
+    class="text-indigo-500 hover:text-indigo-600 text-xs font-medium">
+    🔎 Show suggested checks
+  </button>
+
+  <div id="checks-${btoa(issue + page)}"
+       class="hidden mt-2 bg-gray-50 dark:bg-gray-800/40
+              border border-gray-200 dark:border-gray-700
+              rounded-md p-3">
+
+    <div class="text-gray-500 dark:text-gray-400 text-xs mb-1 uppercase tracking-wide">
+      💡 Suggested checks:
+    </div>
+
+    <ul class="space-y-1 text-gray-500 dark:text-gray-400 text-xs leading-relaxed">
+      ${
+        (SUGGESTED_CHECKS[issue] || [])
+          .map(c => `<li>• ${c}</li>`)
+          .join('')
+      }
+    </ul>
+
+  </div>
+
+</div>
           </div>
         `;
       }).join('')}
