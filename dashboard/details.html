@@ -398,11 +398,6 @@ function renderList(rows) {
 
   const severity = (r.severity || 'INFO').toUpperCase();
 
-  const color =
-    severity === 'HIGH' ? 'text-red-600' :
-    severity === 'MEDIUM' ? 'text-orange-600' :
-    'text-gray-500';
-
   return `
     <div class="bg-white dark:bg-darkcard rounded-xl shadow-sm border border-gray-200 dark:border-gray-600/30
             hover:shadow-md hover:border-indigo-300
@@ -672,11 +667,6 @@ function renderSidebar(pageMap) {
     const hasHigh = data.incidents.some(r => r.severity === 'HIGH');
     const hasMedium = data.incidents.some(r => r.severity === 'MEDIUM');
 
-    const emoji =
-      hasHigh ? '🔴' :
-      hasMedium ? '🟠' :
-      '⚪';
-
     const displayPage = page
       .replace(/^https?:\/\/(www\.)?/, '')
       .replace(/\/$/, '')
@@ -824,25 +814,17 @@ function renderDetails(page, data) {
         const percent = Math.round((obj.total / totalPageRevenue) * 100);
         const severity = (obj.severity || 'INFO').toUpperCase();
 
-        const color =
-          severity === 'HIGH' ? 'text-red-600' :
-          severity === 'MEDIUM' ? 'text-orange-500' :
-          'text-gray-500';
-
-        const emoji =
-          severity === 'HIGH' ? '🔴' :
-          severity === 'MEDIUM' ? '🟠' :
-          '⚪';
-
         return `
-          <div class="mb-5 p-4 rounded-xl border
-                      border-gray-200 dark:border-gray-700/50
-                      hover:shadow-md transition">
+          <div class="mb-5 p-4 rounded-xl border-l-4
+            ${severity === 'HIGH' ? 'border-l-red-500/80' :
+              severity === 'MEDIUM' ? 'border-l-orange-400/80' :
+              'border-l-gray-400/60'}
+              border-gray-200 dark:border-gray-700/50
+              hover:shadow-md transition">
 
             <div class="flex justify-between items-start">
 
               <div class="flex items-start gap-2">
-                <span class="mt-[2px]">${emoji}</span>
                   <div>
                     ${(() => {
 
@@ -859,7 +841,13 @@ function renderDetails(page, data) {
   <div class="font-semibold text-gray-900 dark:text-gray-100 text-[15px]">
     ${title.trim()}
   </div>
-<span class="text-[11px] px-2 py-0.5 rounded bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+<span class="text-[11px] px-2 py-0.5 rounded
+  ${severity === 'HIGH'
+    ? 'bg-red-500/10 text-red-500'
+    : severity === 'MEDIUM'
+    ? 'bg-orange-400/10 text-orange-400'
+    : 'bg-gray-500/10 text-gray-400'}
+">
   ${percent}%
 </span>
 </div>
@@ -913,13 +901,13 @@ function renderDetails(page, data) {
   <div id="checks-${btoa(issue + page)}"
        class="hidden mt-2 bg-gray-50 dark:bg-gray-800/40
               border border-gray-200 dark:border-gray-700
-              rounded-md p-3">
+              rounded-lg p-3.5">
 
-    <div class="text-gray-500 dark:text-gray-400 text-xs mb-1 uppercase tracking-wide">
+    <div class="text-gray-500 dark:text-gray-400 text-[11px] mb-2 font-semibold uppercase tracking-wide">
       💡 Suggested checks:
     </div>
 
-    <ul class="space-y-1 text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
+    <ul class="space-y-1 text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
       ${
         (SUGGESTED_CHECKS[issue] || [])
           .map(c => `<li>• ${c}</li>`)
