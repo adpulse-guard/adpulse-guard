@@ -1,1551 +1,1150 @@
 <!DOCTYPE html>
-<html lang="en" class="">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AdPulse Guard</title>
+  <title>Reality Mode™</title>
+  <style>
+    :root { 
+  --apg-bg: #1e1e2f;
+  --apg-card: #2a2a3b;
+  --apg-primary: #6366f1;
+  --apg-primary-soft: #818cf8;
+  --apg-text: #f3f4f6;
+  --apg-muted: #9ca3af;
+  --apg-danger: #ef4444;
+}
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: { sans: ['Inter', 'sans-serif'] },
-          colors: { 
-            darkcard: '#2a2a3b',
-            darkbg: '#1e1e2f'
-          }
-        }
-      }
-    };
-  </script>
+body {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: radial-gradient(
+    1200px 600px at top,
+    #25253a,
+    var(--apg-bg)
+  );
+  color: var(--apg-text);
+  padding: 48px 20px;
+  max-width: 720px;
+  margin: auto;
+}
 
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+.box {
+  backdrop-filter: blur(6px);
+  background: linear-gradient(
+    180deg,
+    rgba(255,255,255,0.05),
+    rgba(255,255,255,0)
+  );
+  background-color: var(--apg-card);
+  padding: 28px;
+  border-radius: 16px;
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+h1 {
+  font-size: 24px;
+  margin-bottom: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.title-row{
+  position:relative;
+}
+
+.title-row::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(
+      rgba(255,255,255,0.05) 1px,
+      transparent 1px
+    );
+  background-size:100% 6px;
+  pointer-events:none;
+}
+
+.title-row svg{
+  width:100%;
+  height:48px;
+  overflow: hidden;
+}
+
+.title-row path{
+  fill:none;
+  stroke:#ef4444;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  stroke-dasharray:1300;
+  stroke-dashoffset:1300;
+  animation: ekgDraw 9s linear infinite;
+  filter:
+    drop-shadow(0 0 3px rgba(239,68,68,0.5))
+    drop-shadow(0 0 8px rgba(239,68,68,0.35))
+    drop-shadow(0 0 16px rgba(239,68,68,0.15));
+}
+
+p {
+  margin-bottom: 10px;
+  line-height: 1.65;
+}
+
+.highlight {
+  color: var(--apg-primary);
+  font-weight: 600;
+}
+
+.fade {
+  opacity: 0.8;
+  font-size: 13px;
+  color: var(--apg-muted);
+}
+
+.quote {
+  margin-top: 26px;
+  font-style: italic;
+  color: var(--apg-muted);
+}
+
+a.dashboard-link {
+  color: var(--apg-primary-soft);
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(129,140,248,0.6);
+}
+
+a.dashboard-link:hover {
+  color: #c7d2fe;
+  border-bottom-color: #c7d2fe;
+}
+
+.pulse-bar {
+  font-family: monospace;
+  letter-spacing:2px;
+  font-size:14px;
+  margin-left:6px;
+  display:inline;
+  vertical-align:middle;
+}
+
+.pulse-bar span {
+  transition: opacity 0.3s;
+}
+
+@keyframes pulseBlink {
+  0% { opacity:1 }
+  50% { opacity:0.4 }
+  100% { opacity:1 }
+}
+
+@keyframes scan {
+0% { opacity:0.4 }
+50% { opacity:1 }
+100% { opacity:0.4 }
+}
+
+#pulseScoreValue {
+animation:scan 2s infinite;
+}
+
+.critical {
+  animation: pulseBlink 1s infinite;
+}
+
+@keyframes ekgDraw{
+  from { stroke-dashoffset:1300; }
+  to { stroke-dashoffset:0; }
+}
+
+.revenue-badge{
+  display:inline-block;
+  padding:6px 10px;
+  border-radius:8px;
+  background:rgba(239,68,68,0.15);
+  color:#f87171;
+  font-weight:600;
+  margin-top:6px;
+}
+
+.score-good{
+color:#4ade80;
+font-weight:600;
+}
+
+.score-mid{
+color:#facc15;
+font-weight:600;
+}
+
+.score-bad{
+color:#fb923c;
+font-weight:600;
+}
+
+.score-critical{
+color:#f87171;
+font-weight:700;
+}
+
+.section-title{
+  font-size:11px;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:var(--apg-muted);
+  margin-bottom:6px;
+}
+
+.section-divider{
+  border-top:1px solid rgba(255,255,255,0.08);
+  margin:16px 0;
+}
+
+@keyframes pulseGlow {
+  0% { filter: drop-shadow(0 0 3px rgba(239,68,68,0.3)); }
+  50% { filter: drop-shadow(0 0 8px rgba(239,68,68,0.6)); }
+  100% { filter: drop-shadow(0 0 3px rgba(239,68,68,0.3)); }
+}
+  </style>
 </head>
-
-<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-white font-sans min-h-screen">
-
-<div id="loadingIndicator" class="fixed inset-0 z-50 flex items-center justify-center bg-white/70 dark:bg-darkbg/70 text-sm text-gray-500">
-  <div class="flex flex-col items-center">
-    <svg class="animate-spin h-6 w-6 text-indigo-500 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-    </svg>
-    Loading monitoring data…
-  </div>
-</div>
-
-<header class="bg-white dark:bg-darkcard shadow-sm">
-  <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-    
-    <div class="flex items-center gap-2">
-      <img
-        src="Logo Shield.png"
-        alt="AdPulse Guard"
-        class="h-7 w-7"
-      />
-      <span class="text-sm font-semibold tracking-wide">
-        AdPulse Guard
-      </span>
-    </div>
-
-    <div class="flex flex-wrap items-center gap-2 text-xs md:flex-nowrap">
-
-      <span
-  id="viewModeLabel"
-  class="px-2 py-0.5 rounded bg-indigo-50 text-indigo-600
-         dark:bg-indigo-900/30 dark:text-indigo-300
-         uppercase tracking-wide"
->
-  Summary view
-</span>
-
-      <div class="flex items-center gap-2">
-        <input
-          type="date"
-          id="dateFilter"
-          class="px-2 py-1 border rounded dark:bg-darkcard"
-        />
-        <button id="clearDate" class="text-indigo-500 hover:underline">
-          Clear
-        </button>
-      </div>
-
-      <button
-        id="darkModeBtn"
-        class="ml-2 px-2 py-1 rounded bg-gray-200 dark:bg-gray-700"
-      >
-        <span id="modeLabel">🌙</span>
-      </button>
-
-    </div>
-  </div>
-</header>
-
-<div id="dashboardContent" class="max-w-6xl mx-auto py-8 px-4">
-
-  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-4 mb-4 flex flex-wrap items-center gap-3">
-  <span class="text-xs uppercase tracking-wide text-gray-500">
-    Filter by Incident Type
-  </span>
-  <select
-  id="issueFilter"
-  class="px-2 py-1 text-sm border rounded dark:bg-darkcard"
->
-  <option value="">All Incident Types</option>
-</select>
-  <button
-  id="clearIssueFilter"
-  class="hidden inline-flex items-center justify-center
-         w-5 h-5 rounded-full
-         bg-indigo-50 text-indigo-600
-         hover:bg-indigo-100 hover:text-indigo-700
-         dark:bg-indigo-900/30 dark:text-indigo-300
-         dark:hover:bg-indigo-900/50
-         text-xs leading-none"
-  title="Clear incident filter"
-  aria-label="Clear incident filter"
->
-  ✕
-</button>
-  <span
-    id="issueFilterNote"
-    class="text-xs text-gray-400 hidden"
-  ></span>
-</div>
-
-<div
-  id="affectedSlotsPanel"
-  class="hidden bg-white dark:bg-darkcard rounded-xl shadow p-4 mb-6"
->
-  <div class="flex items-center justify-between mb-3">
-    <h3 class="text-sm font-semibold">
-      🎯 Impacted Slots (Filtered View)
-    </h3>
-
-    <button
-      id="copySlotsBtn"
-      class="text-xs text-indigo-600 hover:underline dark:text-indigo-300"
-    >
-      Copy list
-    </button>
-  </div>
-
-  <ul
-    id="affectedSlotsList"
-    class="text-xs space-y-1 max-h-48 overflow-auto"
-  ></ul>
-
-  <p class="text-[11px] text-gray-400 mt-4 opacity-80">
-    Showing slots impacted by selected incident type
-  </p>
-</div>
-<div class="bg-gray-100 dark:bg-[#232334] 
-            rounded-2xl p-6 mb-10 
-            grid grid-cols-1 sm:grid-cols-3 gap-6">
-
-  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center sm:col-span-1 flex flex-col justify-center">
-    <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">
-      Revenue-Impacting Slots
-    </div>
-    <div id="slotCount" class="text-4xl font-bold">—</div>
-  </div>
-
-  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center sm:col-span-2 border-l-4 border-red-300 dark:border-red-600">
-    <div class="text-xs uppercase tracking-wide text-gray-500 mb-1 whitespace-nowrap">
-  Revenue at Risk
-    </div>
-    <div id="dailyLoss" 
-     class="text-4xl font-bold text-red-600 whitespace-nowrap">
-  $—
-</div>
-    <div class="text-xs text-gray-400 mt-1">
-  Calculated based on impacted slots
-</div>
-  </div>
-</div>
-  <div id="topOffenderBox"
-     class="hidden bg-white dark:bg-darkcard
-            rounded-xl shadow p-5 mb-6
-            border border-gray-200 dark:border-gray-700">
-
-    <h2 class="text-lg font-semibold mb-2">
-  🚨 Highest Impact Incident
-<span class="text-red-600 text-sm font-medium">Action recommended</span>
-</h2>
-    <p><strong>Slot:</strong> <span id="offenderSlot"></span></p>
-    <p><strong>Estimated Impact:</strong> <span id="offenderLoss"></span></p>
-    <p><strong>Page:</strong></p>
-      <div id="offenderPage" class="mt-1"></div>
-    <p><strong>Incident:</strong></p>
-      <div id="offenderIssue" class="mt-1 flex flex-wrap gap-1"></div>
-  </div>
-
-<div id="securityWidget"
-     class="hidden bg-gray-50 dark:bg-darkcard
-            rounded-xl shadow p-5 mb-8
-            border-l-4 border-gray-300 dark:border-gray-600">
-
-  <div class="flex items-center justify-between mb-3">
-    <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300">
-      🔐 Security & Access Signals
-    </h2>
-    <span id="securityCount"
-          class="text-xs px-2 py-1 rounded bg-gray-100 text-gray-600
-                 dark:bg-gray-700 dark:text-gray-300">
+<body>
+  <div style="
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:20px;
+  padding:0 4px;
+">
+  
+  <div style="
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:8px 4px 22px;
+  padding:8px 12px;
+  border-radius:12px;
+  background:rgba(255,255,255,0.03);
+">
+    <img
+      src="Logo Shield.png"
+      alt="AdPulse Guard"
+      style="
+        width:30px;
+        height:30px;
+        opacity:0.85;
+        filter:
+        drop-shadow(0 0 10px rgba(99,102,241,0.45))
+        drop-shadow(0 0 24px rgba(99,102,241,0.25));
+      "
+      title="Detected by AdPulse Guard · Reality Mode™"
+    />
+    <span>
+      <strong>AdPulse Guard</strong>
+      <span style="opacity:0.6;">· Reality Mode™</span>
     </span>
   </div>
-
-  <ul id="securityList"
-      class="text-xs space-y-2 text-gray-600 dark:text-gray-400">
-  </ul>
-
 </div>
-  
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div class="bg-white dark:bg-darkcard rounded-xl shadow p-4">
-      <h2 class="text-xs uppercase tracking-wide text-gray-500 mb-2">Incident Types</h2>
-      <div class="h-64">
-        <canvas id="issueChart"></canvas>
-      </div>
-    </div>
+  <div class="box">
+  <div class="title-row">
+  <h1 id="title">Reality check loading…</h1>
+  <div id="titleEkg"></div>
+</div>
+  <p id="summary"></p>
+  <div id="details"></div>
+</div>
 
-    <div class="bg-white dark:bg-darkcard rounded-xl shadow p-4">
-      <h2 class="text-xs uppercase tracking-wide text-gray-500 mb-2">Severity Breakdown</h2>
-      <div class="h-64">
-        <canvas id="severityChart"></canvas>
-      </div>
-    </div>
-
-    <div id="lossChartWrapper" class="bg-white dark:bg-darkcard rounded-xl shadow p-4 md:col-span-2">
-      <h2 class="text-xs uppercase tracking-wide text-gray-500 mb-2">Revenue at Risk Trend</h2>
-      <div class="h-64">
-        <canvas id="lossTrendChart"></canvas>
-      </div>
-    </div>
-  </div>
-<p class="text-xs mt-6 text-right">
-    <span id="lastUpdated" class="text-indigo-600 dark:text-indigo-300">—</span>
-  </p>
-</div> 
+  <p class="quote" id="quote"></p>
+  <p class="fade" id="dashboardLink" style="margin-top:24px;"></p>
+  <div style="margin-top:28px; opacity:0.6; text-align:center;">
+<hr style="border:none;border-top:1px solid rgba(255,255,255,0.08);margin-bottom:14px;">
+<span class="fade">Never Miss a Beat.</span>
+</div>
 
   <script>
+    'use strict';
+    const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+    const ekgPatterns = {
 
-const params = new URLSearchParams(window.location.search);
-const fromParam = params.get('from');
-const token = params.get('token');
-let activeDate = params.get('date') || '';
-let selectedIssueFilter = params.get('issue') || '';
-const cameFromReality = fromParam === 'reality';
-const affectedSlotsPanel = document.getElementById('affectedSlotsPanel');
-const affectedSlotsList = document.getElementById('affectedSlotsList');
-const copySlotsBtn = document.getElementById('copySlotsBtn');
-copySlotsBtn.addEventListener('click', () => {
-  const text = Array.from(
-    affectedSlotsList.querySelectorAll('li')
-  )
-    .map(li => li.textContent.replace('• ', ''))
-    .join('\n');
+good: [
+`M-40 20
+L0 20
+L25 20
+L35 28
+L45 12
+L55 24
+L80 20
+L110 20
+L120 30
+L132 10
+L145 24
+L175 20
+L210 20
+L222 28
+L235 12
+L248 24
+L280 20
+L315 20
+L330 30
+L344 10
+L358 25
+L390 20
+L395 22
+L400 18
+L405 20
+L420 20
+L432 27
+L445 13
+L460 24
+L495 20
+L530 20
+L545 30
+L560 10
+L575 24
+L610 20
+L650 20
+L662 27
+L676 12
+L690 24
+L725 20
+L760 20
+L765 22
+L770 18
+L775 20
+L772 29
+L785 11
+L800 24
+L820 20
+L825 22
+L830 18
+L835 20
+L860 20
+L900 20`
+],
 
-  navigator.clipboard.writeText(text);
-});
-function animateCurrency(el, target, duration = 1200) {
+mid: [
+`M-40 20
+L0 20
+L30 20
+L42 32
+L55 8
+L68 26
+L95 20
+L125 20
+L140 34
+L155 10
+L170 28
+L205 20
+L240 20
+L252 36
+L265 9
+L280 30
+L315 20
+L350 20
+L365 32
+L380 12
+L395 26
+L430 20
+L435 21
+L440 19
+L445 20
+L470 20
+L485 36
+L500 10
+L515 28
+L550 20
+L585 20
+L600 34
+L615 12
+L630 26
+L665 20
+L700 20
+L715 36
+L730 10
+L745 28
+L780 20
+L820 20
+L825 22
+L830 18
+L835 20
+L860 20
+L900 20`
+],
 
-  if (el._animationFrame) {
-    cancelAnimationFrame(el._animationFrame);
-  }
+bad: [
+`M-40 20
+L0 20
+L20 20
+L35 36
+L48 6
+L60 32
+L85 20
+L115 20
+L130 38
+L145 8
+L160 30
+L195 20
+L230 20
+L245 40
+L260 6
+L275 34
+L310 20
+L315 23
+L320 17
+L325 21
+L330 20
+L345 20
+L360 38
+L375 10
+L390 28
+L430 20
+L470 20
+L485 40
+L500 6
+L515 32
+L550 20
+L585 20
+L600 38
+L615 8
+L630 30
+L670 20
+L710 20
+L725 40
+L740 6
+L755 32
+L790 20
+L820 20
+L825 22
+L830 18
+L835 20
+L860 20
+L900 20`
+],
 
-  const start = 0;
-  const startTime = performance.now();
+critical: [
+`M-40 20
+L0 20
+L15 20
+L28 40
+L40 4
+L52 34
+L75 20
+L105 20
+L118 42
+L130 2
+L145 36
+L170 20
+L210 20
+L225 44
+L238 4
+L255 38
+L290 20
+L330 20
+L335 22
+L340 18
+L345 20
+L360 2
+L375 36
+L410 22
+L415 18
+L420 20
+L450 20
+L465 40
+L480 6
+L495 34
+L530 20
+L570 20
+L585 42
+L600 2
+L615 36
+L650 20
+L655 24
+L660 16
+L665 20
+L690 20
+L705 44
+L720 4
+L735 38
+L770 20
+L820 20
+L825 22
+L830 18
+L835 20
+L860 20
+L900 20`
+]
 
-  function frame(now) {
-
-    const progress = Math.min((now - startTime) / duration, 1);
-    const eased = 1 - Math.pow(1 - progress, 4);
-
-    const value = start + (target - start) * eased;
-
-    el.textContent =
-      `$${value.toLocaleString(undefined,{
-        minimumFractionDigits:2,
-        maximumFractionDigits:2
-      })}`;
-
-    if (progress < 1) {
-      el._animationFrame = requestAnimationFrame(frame);
-    }
-  }
-
-  el._animationFrame = requestAnimationFrame(frame);
-}
-if (!token) {
-  document.body.innerHTML = `
-    <div style="padding:40px;font-family:Inter,sans-serif">
-      <h2>Access denied</h2>
-      <p>This dashboard link is client-specific.</p>
-    </div>
-  `;
-  throw new Error('Missing dashboard token');
-}
-Chart.register(ChartDataLabels);
-const issueChartEl = document.getElementById('issueChart');
-const severityChartEl = document.getElementById('severityChart');
-const lossTrendChartEl = document.getElementById('lossTrendChart');
-
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxAD4aNij0ApHx21r68hq5TLx2k2r3VT9_obEe7I-EX_l3JGDQSnrY84LcA4QG8Ldf2ig/exec';
-const CACHE_KEY = 'apg_cache';
-const CACHE_TTL = 5 * 60 * 1000;
-
-const labelMap = {
-  gpt_script_missing: 'GPT script missing',
-  gpt_loaded_but_not_initialized: 'GPT loaded but not initialized',
-  gpt_no_slot_requests: 'No GPT slot requests',
-  wrong_network: 'Incorrect ad network ID',
-  slot_not_registered: 'DOM slot not in GPT',
-  defined_without_dom_no_request: 'GPT slot defined without DOM',
-  phantom_slot_requested: 'Phantom slot requested',
-  unexpected_size: 'Unexpected size',
-  empty_response: 'No ad response returned',
-  layout_overlap: 'Layout overlap',
-  ad_visibility_impaired: 'Ad visibility impaired',
-  slot_container_collapsed: 'Slot container collapsed',
-  token_invalid: 'Invalid security token',
-  clientId_mismatch: 'Client ID mismatch',
-  expectedNetworkId_mismatch: 'Network configuration mismatch',
-  unauthorized_domain: 'Unauthorized domain access'
 };
-  const shortLabelMap = {
-  'GPT script missing': 'GPT script',
-  'GPT loaded but not initialized': 'GPT init',
-  'No GPT slot requests': 'No requests',
-  'Incorrect ad network ID': 'Network',
-  'DOM slot not in GPT': 'Not in GPT',
-  'GPT slot defined without DOM': 'No DOM',
-  'Phantom slot requested': 'Phantom',
-  'Unexpected size': 'Size',
-  'No ad response returned': 'Empty',
-  'Layout overlap': 'Overlap',
-  'Ad visibility impaired': 'Visibility',
-  'Slot container collapsed': 'Collapsed'
+    const el = {
+      title: document.getElementById("title"),
+      summary: document.getElementById("summary"),
+      details: document.getElementById("details"),
+      quote: document.getElementById("quote"),
+      dashboardLink: document.getElementById("dashboardLink"),
+      copyBtn: document.getElementById("copyBtn"),
+      copyStatus: document.getElementById("copyStatus")
 };
-  const SECURITY_ISSUES = [
-  'token_invalid',
-  'clientId_mismatch',
-  'expectedNetworkId_mismatch',
-  'unauthorized_domain'
+    (function () {
+    const titles = [
+  "This is why we can't have nice things. Or stable revenue.",
+  "This deployment had confidence.",
+  "Somewhere, QA just looked away.",
+  "Minimal testing. Maximum consequences.",
+  "This page chose chaos.",
+  "It compiled. That was enough, apparently.",
+  "We call this ‘creative interpretation.’",
+  "Technically alive. Operational? Debatable.",
+  "This wasn’t reviewed. It was believed.",
+  "Bold strategy. Let’s see how it plays out.",
+  "You shipped it. The ads noticed.",
+  "Another day, another mess.",
+  "May the ad gods have mercy.",
+  "You break it, you track it.",
+  "Look what you did.",
+  "Oh goodie. Issues again. It’s like I never left.",
+  "Did you see your revenue drop? I did.",
+  "It's giving: no QA.",
+  "Who needs stability anyway?",
+  "The ads tried. You didn’t.",
+  "Same page, same chaos.",
+  "Your stack, your circus.",
+  "The numbers are in. They're crying.",
+  "Fixing things is optional, right?",
+  "Today's mood: broken impressions.",
+  "I ran the diagnostics. You're not gonna like it.",
+  "Guess which slot failed this time.",
+  "Your creative is doing stand-up. Not rendering.",
+  "Some people meditate. I monitor your mistakes.",
+  "Your tags are fine. Said no one ever.",
+  "Let me guess. No one tested this.",
+  "Reality called. It wants its fill rate back.",
+  "At least the background color is nice.",
+  "Well, at least some slots tried.",
+  "Good news: the alert works. Bad news: the alert works.",
+  "Welcome back to the crime scene.",
+  "Someone deployed that? Bold.",
+  "Revenue down? Color me unsurprised.",
+  "Your revenue graph just sighed.",
+  "Ever seen an ad cry? See below.",
+  "Remember when things worked? Me neither.",
+  "Would you like a tissue or a dev?",
+  "It broke itself, sure. Let’s go with that.",
+  "Revenue leaking like a gossip at lunch.",
+  "You ignored yesterday’s alert. Bold strategy.",
+  "Revenue called. It’s not coming back.",
+  "You test in prod? How avant-garde.",
+  "Another day, another dollar... lost.",
+  "Don’t look at me. I just report the damage.",
+  "This could’ve been prevented. So naturally, it wasn’t.",
+  "I told you yesterday. You didn’t listen."
 ];
-  const ISSUE_GROUPS = {
-  DELIVERY: [
-    'gpt_script_missing',
-    'gpt_loaded_but_not_initialized',
-    'gpt_no_slot_requests',
-    'empty_response',
-    'phantom_slot_requested',
-    'defined_without_dom_no_request',
-    'slot_not_registered',
-    'wrong_network'
-  ],
-  LAYOUT: [
-    'unexpected_size',
-    'layout_overlap',
-    'ad_visibility_impaired',
-    'slot_container_collapsed'
-  ],
-  SECURITY: [
-    'token_invalid',
-    'clientId_mismatch',
-    'expectedNetworkId_mismatch',
-    'unauthorized_domain'
-  ]
-};  
 
-function buildIssueDropdown(issueCounts) {
-  const select = document.getElementById('issueFilter');
-  const currentValue = selectedIssueFilter;
+    const quotes = [
+      "Enough to hurt, not enough to cry over. Yet.",
+      "Monitoring is cheaper than regret.",
+      "Silence from the ad server is never good.",
+      "Confidence is not a testing strategy.",
+      "Hope is not a fallback.",
+      "Everything is fine. Until it isn’t.",
+      "Your stack has trust issues.",
+      "The logs saw everything.",
+      "Fixing things builds character.",
+      "Just pretend it's all working fine.",
+      "We're not mad. Just disappointed.",
+      "May tomorrow bring fewer alerts.",
+      "Nice drop in revenue today. Was that part of the plan?",
+      "'It’s probably fine.' — You, yesterday. Me, not laughing.",
+      "Fun fact: Ignoring issues doesn’t fix them.",
+      "Stop pretending everything’s working.",
+      "Take me back to the world of fake smiles.",
+      "Have you tried turning it off and on again?",
+      "Try clearing cache and pretending everything's fine.",
+      "Restart browser. Pray to ad gods. Repeat.",
+      "Reboot your hope. It might help.",
+      "Clear cookies. Clean conscience.",
+      "Production is the new staging.",
+      "Ignore it and see if it fixes itself. Spoiler alert, it doesn’t.",
+      "Refresh the page. That’s the extent of our support.",
+      "Blame it on the intern. Works every time.",
+      "Maybe it’s a feature, not a bug.",
+      "At this point, just scream into the void.",
+      "Try yoga. Or debugging. Both are painful.",
+      "Tell your boss you’re handling it. Then don’t.",
+      "Sometimes, the fix is emotional detachment.",
+      "Check if the WiFi light is blinking. Always helps.",
+      "Drink water. Fix ads. In that order.",
+      "Have you sacrificed an ad slot to the algorithm lately?",
+      "Suspected cause: Friday deployment.",
+      "Maybe it’s the alignment of the stars. Or just bad code.",
+];
+    const dashboardCTAs = [
+  "Want receipts? <a class='dashboard-link' href='{url}'>Open the dashboard.</a>",
+  "Enough sarcasm. <a class='dashboard-link' href='{url}'>Show me the dashboard.</a>",
+  "Curious how bad it really is? <a class='dashboard-link' href='{url}'>Dashboard’s this way.</a>",
+  "This is the summary. <a class='dashboard-link' href='{url}'>The damage is in the dashboard.</a>",
+  "Reality hurts less with charts. <a class='dashboard-link' href='{url}'>Open dashboard.</a>",
+  "Ready for the uncomfortable truth? <a class='dashboard-link' href='{url}'>Dashboard’s waiting.</a>",
+  "You’ve seen the jokes. <a class='dashboard-link' href='{url}'>Now see the data.</a>",
+  "This is the sarcasm layer. <a class='dashboard-link' href='{url}'>Reality lives in the dashboard.</a>",
+  "I made it funny. <a class='dashboard-link' href='{url}'>The dashboard won’t.</a>",
+  "Laugh now. <a class='dashboard-link' href='{url}'>Fix it later.</a>",
+  "Feeling skeptical? <a class='dashboard-link' href='{url}'>Here are the receipts.</a>",
+  "Want proof I’m not exaggerating? <a class='dashboard-link' href='{url}'>Open the dashboard.</a>",
+  "I wish this was a joke. <a class='dashboard-link' href='{url}'>It’s not.</a>",
+  "Receipts > vibes. <a class='dashboard-link' href='{url}'>Dashboard.</a>",
+  "Charts don’t lie. <a class='dashboard-link' href='{url}'>Unfortunately.</a>",
+  "Curious where the money went? <a class='dashboard-link' href='{url}'>Follow the trail.</a>",
+  "That drop wasn’t imaginary. <a class='dashboard-link' href='{url}'>See it here.</a>",
+  "If revenue could scream, it would point here → <a class='dashboard-link' href='{url}'>Dashboard</a>",
+  "Want to stop the bleeding? <a class='dashboard-link' href='{url}'>Start here.</a>",
+  "This view is opinionated. <a class='dashboard-link' href='{url}'>The dashboard is factual.</a>",
+  "You can’t unsee this. <a class='dashboard-link' href='{url}'>Might as well open the dashboard.</a>",
+  "I did my part. <a class='dashboard-link' href='{url}'>Your move.</a>",
+  "This is where denial ends. <a class='dashboard-link' href='{url}'>Dashboard.</a>",
+  "Still think it’s fine? <a class='dashboard-link' href='{url}'>Check again.</a>",
+];
 
-  select.innerHTML = `
-    <option value="">All Incident Types</option>
-  `;
-
-  const groupTitles = {
-    DELIVERY: '— Delivery & Rendering —',
-    LAYOUT: '— Layout & Visibility —',
-    SECURITY: '— Security & Access —'
-  };
-
-  Object.entries(ISSUE_GROUPS).forEach(([groupKey, issues]) => {
-
-  const enriched = issues.map(issueKey => {
-    const label = labelMap[issueKey];
-    if (!label) return null;
-
-    return {
-      key: issueKey,
-      label,
-      count: issueCounts[label] || 0
+    const detailsMessages = {
+      gptScriptMissing: [
+        "Script loading was more of a suggestion.",
+        "Script tag missing. So is revenue.",
+        "No script. No drama. Just nothing.",
+        "This page is running on imagination.",
+        "This page is monetizing spiritually.",
+        "No GPT. No mercy.",
+        "Guess who forgot the script?",
+        "GPT? Never showed up.",
+        "It's 2026. GPT still needs to be invited.",
+        "No GPT, no party.",
+        "This page ghosted GPT first.",
+        "GPT not found. Like your QA process.",
+        "You removed the engine and expected movement.",
+        "The stack begins with a script. This one doesn’t.",
+        "You deployed vibes. Not infrastructure."
+],
+      gptNotInitialized: [
+        "GPT engine failed.",
+        "GPT said 'not today.'",
+        "GPT unit? Ghosted.",
+        "GPT was invited. It did not RSVP.",
+        "The engine exists. Just not here.",
+        "Somewhere, GPT is working. Not on this page.",
+        "GPT never made it past planning.",
+        "GPT decided to take the day off.",
+        "GPT never showed up to work today.",
+        "Your ads are waiting for a bus that isn’t coming.",
+        "GPT said: absolutely not.",
+        "Somewhere, fill rate just evaporated.",
+        "GPT is currently reconsidering life choices.",
+        "This page forgot the fundamentals.",
+        "Existential crisis much?",
+        "GPT exists. It just never woke up.",
+        "googletag.cmd.push() went on vacation.",
+        "The engine loaded. It chose not to function.",
+        "Initialization was optional, apparently.",
+        "Stack half-loaded. Confidence fully loaded.",
+        "Something blocked GPT. Probably you.",
+        "It started. Then it stopped believing."
+],
+      gptNoSlotRequests: [
+        "GPT loaded. Asked for nothing. Powerful minimalism.",
+        "On purpose?",
+        "You loaded the stack and forgot the ads.",
+        "Engine running. Nobody driving.",
+        "Slots defined. Requests missing. Classic.",
+        "The stack showed up. The ads didn’t.",
+        "GPT initialized and then… did nothing.",
+        "Infrastructure without intent."
+],
+      phantom: [
+        "Defined in GPT. Requested. Nowhere to render. Impressive.",
+        "Requested a slot that doesn’t exist. Bold move.",
+        "Ad call sent. DOM said ‘who dis?’",
+        "You paid for that request. It rendered into vibes.",
+        "GPT delivered. The page ghosted it.",
+        "Phantom slot successfully billed to nowhere.",
+        "You paid for an ad call. The page disagreed.",
+        "An ad was requested. The page declined the invitation.",
+        "Live request. No container. Stunning execution.",
+        "Somewhere an ad server tried its best.",
+        "Phantom traffic is still traffic.",
+        "You’re paying for invisible impressions.",
+        "The DOM declined participation.",
+        "Ghost slot energy is strong today.",
+        "The ad server delivered into philosophical space.",
+        "This slot believes in itself. The page doesn’t.",
+        "Ad server delivered. DOM said ‘not my problem.’"
+    ],
+      domFail: [
+        "Slots ghosted the GPT. Pity.",
+        "GPT who?",
+        "Rendered into the void.",
+        "Slot appeared in DOM but not in GPT. Classic.",
+        "A DOM slot that doesn’t even exist in GPT. Bold.",
+        "Hiding from GPT again.",
+        "Maybe the div is shy.",
+        "No div, no deal.",
+        "DOM is a concept. Apparently.",
+        "Have you tried actually putting the thing on the page?"
+      ],
+      wrongNetwork: [
+        "Really?",
+        "Someone fat-fingered again.",
+        "This is not your network. It never was.",
+        "You called the wrong house.",
+        "Network identity crisis detected.",
+        "Someone typed fast. Too fast.",
+        "Wrong network. Right confidence.",
+        "This isn’t even your ad stack.",
+        "Misconfigured network ID. Surprise!",
+        "Wrong address, try again.",
+        "Ad call sent to the void.",
+        "Cosplay gone wrong.",
+        "This isn't even your ad network. Bold.",
+        "Calling ads from the wrong house again?",
+        "It's giving: wrong number.",
+        "You mixed up your networks. Again."
+      ],
+      emptyResponse: [
+        "slots got ghosted by the ad server.",
+        "Ad server said: nope.",
+        "The ad server stared back. Blankly.",
+        "Delivery was attempted. Enthusiasm was not.",
+        "Fill rate is on vacation.",
+        "An ad call was made. It declined.",
+        "Your inventory feels unloved.",
+        "Silence is not a monetization strategy.",
+        "Empty is a bold aesthetic choice.",
+        "This is minimalism, but for revenue.",
+        "404: creative not found.",
+        "Awkward silence. No ad. Just vibes.",
+        "An ad that showed up... nowhere.",
+        "Creative skipped leg day. And delivery.",
+        "Ad call went out. Nobody came back.",
+        "Crickets. Literal ad crickets.",
+        "Empty response. Much wow.",
+        "No ad. No explanation. Just vibes."
+      ],
+      unexpectedSize: [
+        "slots couldn’t commit to a size.",
+        "Creative trying to squeeze where it doesn’t fit.",
+        "Creative size mismatch. Like, by a lot.",
+        "Wrong outfit for the slot party.",
+        "Cosplay gone wrong: size edition.",
+        "Creative squeezed where it didn't belong.",
+        "Size mismatch: it's not you, it's the layout.",
+        "This creative came dressed incorrectly.",
+        "That size was optimistic.",
+        "The slot had boundaries. The creative didn’t.",
+        "Wrong dimensions. Right attitude.",
+        "Fit check: failed.",
+        "Trying to wear a size S in a size L slot.",
+        "Slot size drama, again.",
+        "That creative was never going to fit."
+      ],
+      noDomNoRequest: [
+        "No matching DOM. Classic.",
+        "Defined in GPT. Forgot to put it on the page.",
+        "Rendered in GPT, nowhere to go.",
+        "DOM who?",
+        "This slot exists in theory.",
+        "Defined in code. Forgotten in layout.",
+        "A beautiful definition with nowhere to live.",
+        "Configuration without commitment.",
+        "Technically configured. Emotionally unsupported.",
+        "A slot exists… spiritually.",
+        "Configured beautifully. Rendered nowhere.",
+        "GPT knows about it. The page does not.",
+        "GPT spoke, DOM didn’t listen.",
+        "Invisible slots are a choice, I guess.",
+        "Someone forgot to place the actual div.",
+        "DefineSlot... to nowhere.",
+        "Rendered in code, missing in action.",
+        "DOM skipped its shift again.",
+        "You're defining slots for ghosts now?",
+        "Defined. Forgotten. Classic.",
+        "This slot is living in configuration purgatory.",
+        "Someone typed defineSlot and walked away.",
+        "GPT slots with abandonment issues."
+],
+      neverRequested: [
+        "Defined slot. Zero requests. Inspirational laziness.",
+        "GPT defined it. Nobody asked for it.",
+        "This slot is waiting for a request that never came.",
+        "A slot was configured. Execution stayed optional.",
+        "DefineSlot without display(). A classic tragedy.",
+        "The slot exists. The request does not.",
+        "Configuration: yes. Action: no.",
+        "Defined beautifully. Never actually used.",
+        "Someone forgot the final step.",
+        "The slot was invited to the party. Nobody opened the door."
+],
+      containerCollapsed: [
+        "Your layout compressed this slot into a philosophical concept.",
+        "Rendered. Then immediately crushed by CSS.",
+        "The slot exists but has no physical form.",
+        "Height: 0px. Expectations: high.",
+        "Layout shift turned this slot into vapor.",
+        "A perfectly rendered ad inside a perfectly invisible container.",
+        "CSS won this round.",
+        "The slot rendered. Gravity disagreed.",
+        "Display: block. Height: existential."
+    ],
+      layoutOverlap: [
+        "This slot is being bullied by its neighbors.",
+        "Something is sitting on top of the ad. Rude.",
+        "Another element decided it deserved the spotlight.",
+        "The ad is there. You just can’t see it.",
+        "Other content is stealing the spotlight. Literally.",
+        "Your layout has territorial disputes.",
+        "Ads are being visually mugged by the page.",
+        "The ad is trying to be seen. The layout says no.",
+        "Overlapping elements are the new ad blockers.",
+        "The slot rendered but got visually silenced.",
+        "The slot is technically visible. Just… covered.",
+        "Layering issues detected. CSS is feeling spicy.",
+        "The ad is there, but it’s playing peekaboo with users.", 
+        "Visual obstruction: now featuring your layout.",
+        "The ad is trying to shine. The layout is throwing shade.",
+    ],
+      visibilityImpaired: [
+        "The ad rendered. Humans cannot see it.",
+        "Rendered in a corner where no one looks.",
+        "Your layout is playing hide and seek with ads.",
+        "Visibility technically optional today.",
+        "Maybe the ad is shy.",
+        "The ad is present. The page disagrees.",
+        "Obstructed view. Monetization not amused.",
+        "Ad is in the room, but it’s hiding in the closet.",
+        "Content politely stepped in front of the ad.",
+        "An ad rendered somewhere behind the scenery.",
+        "The slot exists. It’s just hiding.",
+        "Visibility score: questionable.",
+        "The ad exists, but it’s not really part of the page experience.",
+        "Creative delivered into a visual blackout."
+    ]
     };
-  }).filter(Boolean);
 
-  enriched.sort((a, b) => b.count - a.count);
-
-  if (enriched.every(e => e.count === 0)) return;
-
-  const groupHeader = document.createElement('option');
-  groupHeader.textContent = groupTitles[groupKey];
-  groupHeader.disabled = true;
-
-if (groupKey === 'DELIVERY') {
-  groupHeader.style.color = '#6366f1'; 
-  groupHeader.style.fontWeight = '600';
-}
-
-if (groupKey === 'LAYOUT') {
-  groupHeader.style.color = '#d97706'; 
-  groupHeader.style.fontWeight = '600';
-}
-
-if (groupKey === 'SECURITY') {
-  groupHeader.style.color = '#64748b'; 
-  groupHeader.style.fontWeight = '600';
-}
-
-select.appendChild(groupHeader);
-
-  enriched.forEach(({ key, label, count }) => {
-
-    const option = document.createElement('option');
-    option.value = key;
-    option.textContent = `${label} (${count})`;
-
-    if (count === 0) {
-      option.disabled = true;
-      option.style.color = '#9ca3af';
-    }
-
-    select.appendChild(option);
-  });
-});
-
-  select.value = currentValue || '';
-}
-  const APG_BRAND = {
-  primary: '#6366f1',        
-  primarySoft: '#818cf8',
-
-  danger: '#c2410c',
-  warning: '#d97706',
-  success: '#15803d',
-
-  textMuted: '#6b7280',
-  textMutedDark: '#c7c9d1',
-
-  chartBorderLight: 'rgba(255,255,255,0.35)',
-  chartBorderDark: 'rgba(0,0,0,0.25)',
-
-  bgInfoLight: '#eef2ff',
-  bgInfoDark: 'rgba(99,102,241,0.2)'
-};
-
-let issueChart, severityChart, lossTrendChart;
-let allRows = [];
-
-const dateInput = document.getElementById('dateFilter');
-const clearDate = document.getElementById('clearDate');
-const viewModeLabel = document.getElementById('viewModeLabel');
-const issueFilter = document.getElementById('issueFilter');
-const issueFilterNote = document.getElementById('issueFilterNote');
-const clearIssueFilterBtn = document.getElementById('clearIssueFilter');
-const lossChartWrapper = document.getElementById('lossChartWrapper');
-if (selectedIssueFilter) {
-  issueFilter.value = selectedIssueFilter;
-}
-function updateIssueClearVisibility() {
-  if (selectedIssueFilter) {
-    clearIssueFilterBtn.classList.remove('hidden');
-  } else {
-    clearIssueFilterBtn.classList.add('hidden');
-  }
-}
-function updateViewModeLabel(selectedDate) {
-  viewModeLabel.className =
-    'px-2 py-0.5 rounded uppercase tracking-wide text-xs';
-
-  if (cameFromReality) {
-    viewModeLabel.textContent = '🎭 Entered via Reality Mode™';
-    viewModeLabel.title = 'This session was entered from Reality Mode™';
-    viewModeLabel.classList.add(
-      'cursor-help',
-      'font-medium',
-      'bg-purple-100',
-      'text-purple-700',
-      'dark:bg-purple-900/30',
-      'dark:text-purple-300'
-    );
-    viewModeLabel.classList.remove('uppercase');
-    return;
-  }
-
-  if (selectedDate) {
-    viewModeLabel.textContent = 'Daily view';
-    viewModeLabel.title = '';
-    viewModeLabel.classList.add(
-      'bg-indigo-100',
-      'text-indigo-700',
-      'dark:bg-indigo-900/30',
-      'dark:text-indigo-300'
-    );
-  } else {
-    viewModeLabel.textContent = 'Summary view';
-    viewModeLabel.title = '';
-    viewModeLabel.classList.add(
-      'bg-gray-100',
-      'text-gray-600',
-      'dark:bg-gray-700',
-      'dark:text-gray-300'
-    );
-  }
-}
-  updateViewModeLabel(cameFromReality ? null : activeDate);
-function getLastIssueTimestamp(rows) {
-  if (!rows || !rows.length) return null;
-
-  const timestamps = rows
-    .map(r => new Date(r.receivedAt).getTime())
-    .filter(ts => !isNaN(ts));
-
-  return timestamps.length ? Math.max(...timestamps) : null;
-}
-function incidentKey(r) {
-  const dateKey = (r.receivedAt || '').split('T')[0] || '';
-  const slot = r.slotId || '__global__';
-  const page = r.pageUrl || '';
-  return r.pageLoadId
-    ? `${r.pageLoadId}__${r.issueType}__${slot}`
-    : `${dateKey}__${page}__${r.issueType}__${slot}`;
-}
-  function renderDashboard(rows, selectedDate = null, selectedClient = '') {
-  document.getElementById('loadingIndicator').style.display = 'none';
-  const baseRows = rows.filter(r => {
-  if (!r || !r.issueType || !r.receivedAt) return false;
-
-  const dateKey = r.receivedAt.split('T')[0];
-
-  if (selectedDate && dateKey !== selectedDate) return false;
-
-  return true;
-});
-  const dropdownIssueTypes = {};
-
-baseRows.forEach(r => {
-  const label = labelMap[r.issueType] || r.issueType;
-  dropdownIssueTypes[label] =
-    (dropdownIssueTypes[label] || 0) + 1;
-});
-  const filteredRows = rows.filter(r => {
-  if (!r || !r.issueType || !r.receivedAt) return false;
-
-  const dateKey = r.receivedAt.split('T')[0];
-
-  if (selectedDate && dateKey !== selectedDate) return false;
-  if (selectedIssueFilter && r.issueType !== selectedIssueFilter) return false;
-
-  return true;
-});
-  affectedSlotsPanel.classList.add('hidden');
-  affectedSlotsList.innerHTML = '';
-  const issueTypes = {};
-  const securityCounts = {};
-  const severities = {};
-  const dailyTotals = {};
-  const isSingleDayView = !!selectedDate;  
-  const pageMaxRisk = new Map();
-  const issueDedupeSet = new Set();
-  const severityDedupeSet = new Set();
-  const lifecycleMap = new Map();
-
-  filteredRows.forEach(r => {
-  if (!r || !r.issueType || !r.receivedAt) return;
-
-  const dateKey = r.receivedAt.split('T')[0];
-  const key = `${dateKey}__${r.pageUrl}__${r.slotId}__${r.issueType}`;
-
-  if (!lifecycleMap.has(key)) {
-    lifecycleMap.set(key, []);
-  }
-
-  lifecycleMap.get(key).push(r);
-});
-
-  const lifecycleFilteredRows = [];
-
-  lifecycleMap.forEach(records => {
-  const finalRecord = records.find(
-  r => (r.phase || '').toLowerCase() === 'final'
-);
-
-  if (finalRecord) {
-    lifecycleFilteredRows.push(finalRecord);
-  } else {
-    lifecycleFilteredRows.push(records[0]);
-  }
-});
-  const effectiveRows = lifecycleFilteredRows;
-  const GLOBAL_TYPES = [
-  'gpt_script_missing',
-  'gpt_loaded_but_not_initialized',
-  'gpt_no_slot_requests'
-];
-
-const globalRow = effectiveRows.find(r =>
-  GLOBAL_TYPES.includes(r.issueType) &&
-  ['HIGH','MEDIUM'].includes((r.severity || '').toUpperCase())
-);
-
-const hasGlobal = !!globalRow;
-
-  effectiveRows.forEach(r => {
-
-  if (!r || !r.issueType || !r.receivedAt) return;
-
-  const dateKey = r.receivedAt.split('T')[0];
-
-  const isSecurity = SECURITY_ISSUES.includes(r.issueType);
-
-  const isGlobalType = GLOBAL_TYPES.includes(r.issueType);
-
-  const severity = (r.severity || '').toUpperCase();
-
-
-const isRevenueEligible =
-  !isSecurity &&
-  (severity === 'HIGH' || severity === 'MEDIUM');
-
-  const typeLabel = labelMap[r.issueType] || r.issueType;
-
-  if (isSecurity) {
-
-  const securityKey = incidentKey(r);
-
-  if (!issueDedupeSet.has(securityKey)) {
-    issueDedupeSet.add(securityKey);
-    securityCounts[typeLabel] =
-      (securityCounts[typeLabel] || 0) + 1;
-  }
-
-} else {
-
-  const dedupeKey = incidentKey(r);
-
-if (!issueDedupeSet.has(dedupeKey)) {
-  issueDedupeSet.add(dedupeKey);
-  issueTypes[typeLabel] =
-    (issueTypes[typeLabel] || 0) + 1;
-}
-
-}
-
-  const rawSev = (r.severity || 'INFO').toUpperCase();
-  const sev =
-    ['HIGH','MEDIUM','LOW','INFO'].includes(rawSev)
-      ? rawSev
-      : 'INFO';
-
-  const severityKey = incidentKey(r);
-
-  if (!severityDedupeSet.has(severityKey)) {
-  severityDedupeSet.add(severityKey);
-  severities[sev] = (severities[sev] || 0) + 1;
-}
-
-  if (isRevenueEligible) {
-    const isGlobalType = GLOBAL_TYPES.includes(r.issueType);
-    if (hasGlobal && !isGlobalType) {
-    return;
-  }
-    const total = Number(r.estimatedDailyRevenueRisk || 0);
-    const slots = Number(r.affectedSlotCount || 0);
-
-    let revenue;
-
-    if (isGlobalType) {
-
-    revenue = total;
-
-    const key = `${dateKey}__${r.pageUrl}__GLOBAL`;
-
-    if (!pageMaxRisk.has(key) || revenue > pageMaxRisk.get(key).revenue) {
-      pageMaxRisk.set(key, { revenue });
-    }
-
-  } else {
-    if (selectedIssueFilter) {
-      revenue = slots > 0 ? total / slots : 0;
-
-      const key = `${dateKey}__${r.pageUrl}__${r.slotId}`;
-
-      if (!pageMaxRisk.has(key) || revenue > pageMaxRisk.get(key).revenue) {
-        pageMaxRisk.set(key, { revenue });
-      }
-
-    } else {
-      revenue = total;
-
-      const key = `${dateKey}__${r.pageUrl}`;
-
-      if (!pageMaxRisk.has(key) || revenue > pageMaxRisk.get(key).revenue) {
-        pageMaxRisk.set(key, { revenue });
-      }
-    }
-  }
-}
-});
-const isDark = document.documentElement.classList.contains('dark');
-const severityColorMap = {
-  HIGH: isDark ? 'rgba(239,68,68,0.85)' : 'rgba(220,38,38,0.85)',
-  MEDIUM: APG_BRAND.warning,
-  LOW: APG_BRAND.primarySoft,
-  INFO: isDark
-  ? '#6b7280'     
-  : '#9ca3af'     
-};
-
-const severityLabels = Object.keys(severities);
-const severityData = Object.values(severities);
-const severityColors = severityLabels.map(
-  s => severityColorMap[s] || '#9ca3af'
-);
-const affectedSlots = new Set();
-
-effectiveRows.forEach(r => {
-  if (!r || !r.slotId || !r.issueType || !r.receivedAt) return;
-
-  const dateKey = r.receivedAt.split('T')[0];
-
-  if (SECURITY_ISSUES.includes(r.issueType)) return;
-  affectedSlots.add(r.slotId);
-});
-if (!selectedIssueFilter) {
-
-  affectedSlotsPanel.classList.add('hidden');
-  affectedSlotsList.innerHTML = '';
-
-} else {
-
-  const globalIssueTypes = [
-    'gpt_script_missing',
-    'gpt_loaded_but_not_initialized',
-    'gpt_no_slot_requests'
+    const urlParams = new URLSearchParams(window.location.search);
+    const param = k => urlParams.get(k);
+    const float = k => Number(param(k)) || 0;
+    const num = k => Number(param(k)) || 0;
+    const slots = num("slots");
+    const issues = num("issues");
+    if (issues === 0) {
+
+  const calmLines = [
+    "Everything appears to be working. Suspicious.",
+    "No issues detected. Either things are fine or nobody looked closely.",
+    "The ad stack is calm. For now.",
+    "Monitoring continues. The silence is unsettling.",
+    "No incidents detected. Enjoy the temporary peace.",
+    "Reality Mode found nothing. This is rare.",
+    "Your ads are behaving today. Don't get used to it.",
+    "The system reports stability. I'm watching closely.",
+    "No issues detected. Revenue might actually be flowing.",
+    "This page escaped judgment today."
   ];
 
-  if (globalIssueTypes.includes(selectedIssueFilter)) {
-  affectedSlotsPanel.classList.remove('hidden');
-  affectedSlotsList.innerHTML = `
-    <li class="text-xs text-gray-600 dark:text-gray-400 italic">
-      This incident impacts all ad slots on the page.
-    </li>
-  `;
-} else if (affectedSlots.size) {
-  affectedSlotsPanel.classList.remove('hidden');
-  affectedSlotsList.innerHTML = Array.from(affectedSlots)
-    .sort()
-    .map(s => `
-      <li class="font-sans text-xs tracking-tight text-gray-700 dark:text-gray-300 leading-relaxed">
-        <span class="text-gray-400 dark:text-gray-500 mr-1">•</span>${s}
-      </li>
-    `)
-    .join('');
-} else {
-  affectedSlotsPanel.classList.add('hidden');
-  affectedSlotsList.innerHTML = '';
-}
-}
-const totalIssues = Object.values(issueTypes)
-  .reduce((a, b) => a + b, 0);
-
-const uniqueSlotPageSet = new Set();
-
-effectiveRows.forEach(r => {
-  if (!r || !r.slotId || !r.receivedAt) return;
-
-  const dateKey = r.receivedAt.split('T')[0];
-  if (SECURITY_ISSUES.includes(r.issueType)) return;
-
-  const severity = (r.severity || '').toUpperCase();
-  if (!['HIGH','MEDIUM'].includes(severity)) return;
-
-  const isGlobalType = GLOBAL_TYPES.includes(r.issueType);
-
-  if (isGlobalType) return;
-
-  uniqueSlotPageSet.add(`${dateKey}__${r.pageUrl}__${r.slotId}`);
-});
-const securityWidget = document.getElementById('securityWidget');
-const securityList = document.getElementById('securityList');
-const securityCountEl = document.getElementById('securityCount');
-
-const totalSecurity = Object.values(securityCounts)
-  .reduce((a, b) => a + b, 0);
-
-if (totalSecurity > 0) {
-  securityWidget.classList.remove('hidden');
-  securityCountEl.textContent =
-    `${totalSecurity} signal${totalSecurity > 1 ? 's' : ''}`;
-
-  securityList.innerHTML = Object.entries(securityCounts)
-    .map(([label, count]) => `
-      <li class="flex justify-between items-center">
-        <span>${label}</span>
-        <span class="text-gray-500">${count}</span>
-      </li>
-    `)
-    .join('');
-} else {
-  securityWidget.classList.add('hidden');
-  securityList.innerHTML = '';
-} 
-const globalSlotsMap = new Map();
-
-effectiveRows.forEach(r => {
-  if (!GLOBAL_TYPES.includes(r.issueType)) return;
-  if (!['HIGH','MEDIUM'].includes((r.severity || '').toUpperCase())) return;
-
-  const key = `${r.receivedAt.split('T')[0]}__${r.pageUrl}`;
-  const slots = Number(r.affectedSlotCount || 0);
-
-  if (!globalSlotsMap.has(key)) {
-    globalSlotsMap.set(key, slots);
-  } else {
-    globalSlotsMap.set(
-      key,
-      Math.max(globalSlotsMap.get(key), slots)
-    );
-  }
-});
-
-const globalSlotsTotal = Array.from(globalSlotsMap.values())
-  .reduce((a,b)=>a+b,0);
-
-let totalImpactedSlots;
-
-if (hasGlobal) {
-  totalImpactedSlots = globalSlotsTotal;
-} else {
-  totalImpactedSlots = uniqueSlotPageSet.size;
-}
-
-let dedupedTotalLoss = 0;
-
-pageMaxRisk.forEach((obj, key) => {
-  dedupedTotalLoss += obj.revenue;
-
-  const dateKey = key.split('__')[0];
-  if (!dailyTotals[dateKey]) dailyTotals[dateKey] = 0;
-  dailyTotals[dateKey] += obj.revenue;
-});
-
-let topSlot = null;
-let topLoss = 0;
-
-if (globalRow) {
-
-  topLoss = Number(globalRow.estimatedDailyRevenueRisk || 0);
-
-  topSlot = {
-    slotId: '__global__',
-    pages: new Set([globalRow.pageUrl]),
-    issues: new Set([globalRow.issueType])
-  };
-}
-
-const slotPageRevenueMap = new Map();
-
-effectiveRows.forEach(r => {
-  if (!r.slotId || !r.pageUrl || !r.receivedAt) return;
-
-  const dateKey = r.receivedAt.split('T')[0];
-
-  const severity = (r.severity || '').toUpperCase();
-  if (!['HIGH','MEDIUM'].includes(severity)) return;
-
-  const key = selectedDate
-  ? `${r.slotId}__${r.pageUrl}`
-  : `${r.slotId}__${r.pageUrl}__${dateKey}`;
-
-  const slots = Number(r.affectedSlotCount || 0);
-  const total = Number(r.estimatedDailyRevenueRisk || 0);
-
-  const revenue =
-    slots > 0 ? total / slots : 0;
-
-  slotPageRevenueMap.set(
-    key,
-    Math.max(slotPageRevenueMap.get(key) || 0, revenue)
-  );
-});
-
-const slotAggregatedMap = new Map();
-
-slotPageRevenueMap.forEach((revenue, key) => {
-  const parts = key.split('__');
-  const slotId = parts[0];
-  const pageUrl = parts[1];
-
-
-  if (!slotAggregatedMap.has(slotId)) {
-    slotAggregatedMap.set(slotId, {
-      totalRevenue: 0,
-      pages: new Set(),
-      issues: new Set()
-    });
-  }
-
-  const slotData = slotAggregatedMap.get(slotId);
-
-  slotData.totalRevenue += revenue;
-  slotData.pages.add(pageUrl);
-});
-
-effectiveRows.forEach(r => {
-  if (!r.slotId) return;
-  if (!slotAggregatedMap.has(r.slotId)) return;
-  const dateKey = r.receivedAt.split('T')[0];
-
-  slotAggregatedMap.get(r.slotId).issues.add(r.issueType);
-});
-
-if (!topSlot) {
-
-  slotAggregatedMap.forEach((data, slotId) => {
-    if (data.totalRevenue > topLoss) {
-      topLoss = data.totalRevenue;
-      topSlot = {
-        slotId,
-        pages: data.pages,
-        issues: data.issues
-      };
-    }
-  });
-
-}
-document.getElementById('slotCount').textContent = totalImpactedSlots;
-
-const dailyLossEl = document.getElementById('dailyLoss');
-
-dailyLossEl.style.transform = "scale(1.08)";
-dailyLossEl.style.transition = "transform 0.25s ease";
-
-setTimeout(() => {
-  dailyLossEl.style.transform = "scale(1)";
-}, 250);
-
-animateCurrency(dailyLossEl, dedupedTotalLoss, 1800);
-
-if (dedupedTotalLoss === 0) {
-  dailyLossEl.classList.remove(
-    'bg-gradient-to-r',
-    'from-red-600',
-    'to-red-500',
-    'bg-clip-text',
-    'text-transparent'
-  );
-  dailyLossEl.classList.add('text-green-600');
-} else {
-  dailyLossEl.classList.remove('text-green-600');
-}
-
-if (isSingleDayView && totalIssues === 0)
- {
-  confetti({
-    particleCount: 120,
-    spread: 70,
-    origin: { y: 0.6 }
-  });
-}
-  const box = document.getElementById('topOffenderBox');
-  const globalIssueTypes = [
-  'gpt_script_missing',
-  'gpt_loaded_but_not_initialized',
-  'gpt_no_slot_requests'
-];
-
-if (selectedIssueFilter && globalIssueTypes.includes(selectedIssueFilter)) {
-
-  box.classList.remove('hidden');
-
-  document.querySelector('#topOffenderBox strong').textContent = 'Scope:';
-  document.getElementById('offenderSlot').textContent =
-    'Page-level impact (all ad slots)';
-
-  document.getElementById('offenderLoss').textContent =
-    `$${dedupedTotalLoss.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
-
-  const pages = [
-    ...new Set(
-      filteredRows
-        .filter(r =>
-          r.issueType === selectedIssueFilter &&
-          r.pageUrl
-          )
-        .map(r => r.pageUrl)
-        .filter(Boolean)
-    )
-  ].sort();
-
-  if (pages.length) {
-    document.getElementById('offenderPage').innerHTML = `
-      <div class="max-h-40 overflow-auto pr-1">
-        <ul class="list-disc list-inside space-y-1 text-xs">
-          ${pages.map(p => `
-            <li>
-              <a href="${p}" target="_blank"
-                 class="text-indigo-400 hover:text-indigo-300 break-all">
-                ${p}
-              </a>
-            </li>
-          `).join('')}
-        </ul>
-      </div>
-    `;
-  } else {
-    document.getElementById('offenderPage').innerHTML = `
-      <span class="text-xs text-gray-400 italic">
-        No page URLs available for this filter
-      </span>
-    `;
-  }
-
-  document.getElementById('offenderIssue').innerHTML = `
-    <span class="inline-flex items-center
-           bg-indigo-50 text-indigo-600
-           dark:bg-indigo-900/30 dark:text-indigo-300
-           text-xs px-2 py-0.5 rounded
-           font-medium tracking-tight">
-      ${labelMap[selectedIssueFilter]}
-    </span>
-  `;
-
-} else if (topSlot) {
-  box.classList.remove('hidden');
-
-  const offenderSlotEl = document.getElementById('offenderSlot');
-  const offenderSlotLabelEl =
-    document.querySelector('#topOffenderBox strong');
-
-  const isGlobalSlot =
-    !topSlot.slotId ||
-    topSlot.slotId === '__global__' ||
-    (topSlot.slotId && topSlot.slotId.toLowerCase().includes('global'));
-
-  if (isGlobalSlot) {
-    offenderSlotLabelEl.textContent = 'Scope:';
-    offenderSlotEl.textContent = 'Page-level impact (all ad slots)';
-  } else {
-    offenderSlotLabelEl.textContent = 'Slot:';
-    offenderSlotEl.textContent = topSlot.slotId;
-  }
-  
-
-  document.getElementById('offenderLoss').textContent =
-    `$${topLoss.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
-
-const offenderPagesSet = new Set();
-
-if (topSlot && topSlot.issues && topSlot.issues.size) {
-  effectiveRows.forEach(r => {
-    if (!r || !r.pageUrl) return;
-
-    if (topSlot.issues.has(r.issueType)) {
-      const sev = (r.severity || '').toUpperCase();
-      if (['HIGH','MEDIUM'].includes(sev)) {
-        offenderPagesSet.add(r.pageUrl);
-      }
-    }
-  });
-}
-
-const pages = Array.from(offenderPagesSet).sort();
-
-  document.getElementById('offenderPage').innerHTML = `
-  <div class="max-h-40 overflow-auto pr-1">
-    <ul class="list-disc list-inside space-y-1 text-xs">
-      ${pages.map(p =>
-        `<li>
-          <a href="${p}" target="_blank"
-             class="text-indigo-400 hover:text-indigo-300 no-underline hover:underline break-all">
-            ${p}
-          </a>
-        </li>`
-      ).join('')}
-    </ul>
-  </div>
+  const calmQuotes = [
+    "Even chaos needs a day off.",
+    "Silence from the logs is suspicious.",
+    "Peace is temporary.",
+    "Monitoring never sleeps.",
+    "Enjoy the quiet while it lasts."
+  ];
+
+  el.title.innerHTML =
+    "Reality Mode™: Suspiciously calm";
+
+  el.summary.innerHTML =
+    pick(calmLines);
+
+  const barClass = "pulse-bar";
+
+  el.details.innerHTML = `
+<p>
+Pulse status: <span class="highlight">stable</span><br>
+Pulse score: <span class="highlight" id="pulseScoreValue">98%</span> · <span class="${barClass}">${meterBar(98)}</span>
+
+Estimated time until next alert: unpredictable.
+</p>
 `;
 
+  el.quote.innerText =
+    pick(calmQuotes);
 
-document.getElementById('offenderIssue').innerHTML =
-  Array.from(topSlot.issues)
-    .map(i => `
-      <span class="inline-flex items-center
-             bg-indigo-50 text-indigo-600
-             dark:bg-indigo-900/30 dark:text-indigo-300
-             hover:bg-indigo-100 dark:hover:bg-indigo-900/50
-             text-xs px-2 py-0.5 rounded
-             font-medium tracking-tight mr-1">
-        ${labelMap[i] || i}
-      </span>
-    `)
-    .join('');
-  } else {
-    box.classList.add('hidden');
-  }
-  
-const barEntries = Object.entries(issueTypes);
-buildIssueDropdown(dropdownIssueTypes);
-updateIssueClearVisibility();
-const fullLabels = [];
-const issueKeys = [];
-const values = [];
-const labels = [];
+  animatePulseScore(98);
+    } else {
+    const pluralize = (count, singular, plural) =>
+     count === 1 ? singular : plural;
 
-barEntries.forEach(([label, count]) => {
+    const issueWord = pluralize(issues, "issue", "issues");
+    const slotWord = pluralize(slots, "slot", "slots");
+    const complaintWord = pluralize(issues, "complaint", "complaints");
+    const violationWord = pluralize(issues, "violation", "violations");
+    const alertWord = pluralize(issues, "alert", "alerts");
+    const reminderWord = pluralize(issues, "reminder", "reminders");
+    const mistakeWord = pluralize(issues, "fresh mistake", "fresh mistakes");
+    const betrayalWord = pluralize(issues, "revenue betrayal", "revenue betrayals");
+    const problemWord = pluralize(issues, "problem", "problems");
+    const timeWord = pluralize(issues, "time", "times");
+    const loss = float("loss");
+    const gptScriptMissing = num("gptScriptMissing");
+    const gptNotInitialized = num("gptNotInitialized");
+    const gptNoSlotRequests = num("gptNoSlotRequests");
+    const domFail = num("domFail");
+    const phantom = num("phantom");
+    const noDomNoRequest = num("noDomNoRequest");
+    const wrongNetwork = num("wrongNetwork");
+    const emptyResponse = num("emptyResponse");
+    const unexpectedSize = num("unexpectedSize");
+    const neverRequested = num("neverRequested");
+    const containerCollapsed = num("containerCollapsed");
+    const layoutOverlap = num("layoutOverlap");
+    const visibilityImpaired = num("visibilityImpaired");
+    const pulseScore = computePulseScore();
+    const pulseMeta = pulseLabel(pulseScore);
+    let scoreClass = "score-good";
 
-  fullLabels.push(label);
-  values.push(count);
-  labels.push(shortLabelMap[label] || label);
+      if(pulseScore < 85) scoreClass = "score-mid";
+      if(pulseScore < 60) scoreClass = "score-bad";
+      if(pulseScore < 35) scoreClass = "score-critical";
 
-  const issueKey = Object.entries(labelMap)
-    .find(([k, v]) => v === label)?.[0];
-
-  issueKeys.push(issueKey || '');
-});
-
-const bgColors = labels.map(() => APG_BRAND.primary);
-
-if (issueChart) {
-  issueChart.destroy();
-}
-
-  issueChart = new Chart(issueChartEl, {
-  type: 'bar',
-  data: {
-    labels: labels,
-    datasets: [{
-      data: values,
-      backgroundColor: bgColors,
-      hoverBackgroundColor: bgColors
-    }]
-  },
-  options: {
-    maintainAspectRatio: false,
-    hover: { mode: 'index', intersect: false },
-    animation: { duration: 300, easing: 'easeOutCubic' },
-
-    onClick: (evt, elements) => {
-  if (!elements.length) return;
-
-  const index = elements[0].index;
-  const issueKey = issueKeys[index];
-  const fullLabel = fullLabels[index];
-
-  if (!issueKey) return;
-
-  selectedIssueFilter = issueKey;
-  issueFilter.value = issueKey;
-  updateIssueClearVisibility();
-
-  issueFilterNote.textContent =
-    `Showing impact related to: ${fullLabel}`;
-  issueFilterNote.classList.remove('hidden');
-
-  requestAnimationFrame(() => {
-  renderDashboard(allRows, activeDate);
-});
-},
-
-    plugins: {
-      tooltip: {
-        backgroundColor: document.documentElement.classList.contains('dark')
-          ? '#2a2a3b'
-          : '#111827',
-        titleColor: '#ffffff',
-        bodyColor: '#e5e7eb',
-        borderColor: '#6366f1',
-        borderWidth: 1,
-        padding: 10,
-        cornerRadius: 6,
-        displayColors: false,
-        caretPadding: 8,
-        callbacks: {
-          title: (items) => {
-            const index = items[0].dataIndex;
-            return fullLabels[index]; 
-  },
-          label: (ctx) => {
-    const value = ctx.raw;
-    const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-    const pct = total ? Math.round((value / total) * 100) : 0;
-            return [
-              `${value} incidents`,
-              `~${pct}% of all incidents`
-            ];
-          }
-        }
-      },
-      legend: { display: false },
-      datalabels: {
-        color: '#ffffff',
-        anchor: 'center',
-        align: 'center',
-        font: { weight: 'bold', size: 12 }
-      }
-    },
-
-    scales: {
-      x: {
-        ticks: {
-    color: '#9ca3af',
-    autoSkip: false,
-    maxRotation: 0,
-    font: { size: 11 }
-  }
-      },
-      y: {
-        beginAtZero: true,
-        ticks: { color: '#9ca3af', font: { size: 11 } },
-        grid: { color: 'rgba(156,163,175,0.2)' }
-      }
-    }
-  }
-});
-  
-if (severityChart) {
-
-  severityChart.data.labels = severityLabels;
-  severityChart.data.datasets[0].data = severityData;
-  severityChart.data.datasets[0].backgroundColor = severityColors;
-  severityChart.update();
-
-} else {
-
-  severityChart = new Chart(severityChartEl, {
-  type: 'pie',
-  data: {
-    labels: severityLabels,
-    datasets: [{
-      data: severityData,
-      backgroundColor: severityColors,
-      borderColor: '#ffffff',
-      borderWidth: 1.4
-    }]
-  },
-  options: {
-    maintainAspectRatio: false,
-    plugins: {
-  tooltip: {
-  backgroundColor: document.documentElement.classList.contains('dark')
-    ? '#2a2a3b'
-    : '#111827',
-  titleColor: '#ffffff',
-  bodyColor: '#e5e7eb',
-  borderColor: '#6366f1',
-  borderWidth: 1,
-  padding: 10,
-  cornerRadius: 6,
-  displayColors: false,
-  caretPadding: 8,
-
-  callbacks: {
-    title: () => null,
-    label: (ctx) => {
-      const value = ctx.raw;
-      const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-      const pct = Math.round((value / total) * 100);
-      return [
-  `${value} incidents`,
-  `~${pct}% of all incidents`
+    const issueLines = [
+      issues => `Your page has <span class="highlight">${issues}</span> ${complaintWord} from the ad gods,`,
+      issues => `The ad gods have filed <span class="highlight">${issues}</span> formal ${complaintWord},`,
+      issues => `<span class="highlight">${issues}</span> ways you've disappointed the algorithm today,`,
+      issues => `Page karma: <span class="highlight">${issues}</span> ${violationWord},`,
+      issues => `This page annoyed the ad gods <span class="highlight">${issues}</span> ${timeWord},`,
+      issues => `<span class="highlight">${issues}</span> ${violationWord} detected,`,
+      issues => `Your ad setup triggered <span class="highlight">${issues}</span> ${alertWord},`,
+      issues => `<span class="highlight">${issues}</span> ${reminderWord} that testing exists,`,
+      issues => `Your page collected <span class="highlight">${issues}</span> ${mistakeWord} today,`,
+      issues => `<span class="highlight">${issues}</span> ways this page chose violence,`,
+      issues => `<span class="highlight">${issues}</span> ${betrayalWord} detected,`,
+      issues => `The ad stack filed <span class="highlight">${issues}</span> ${issues === 1 ? "grievance" : "grievances"},`,
+      issues => `<span class="highlight">${issues}</span> things that absolutely did not need to break,`,
+      issues => `<span class="highlight">${issues}</span> opportunities to not ship this,`,
+      issues => `<span class="highlight">${issues}</span> ${problemWord} walked into this page. None were invited.`
 ];
+    const slotLines = [
+      slots => `spread across <span class="highlight">${slots}</span> innocent ${slotWord}.`,
+      slots => `<span class="highlight">${slots}</span> ${slotWord} ${slots === 1 ? "is" : "are"} now emotionally unavailable.`,
+      slots => `affecting <span class="highlight">${slots}</span> ${slotWord} just trying to exist.`,
+      slots => `<span class="highlight">${slots}</span> ${slotWord} ${slots === 1 ? "is" : "are"} somewhere crying in binary.`,
+      slots => `spread across <span class="highlight">${slots}</span> unsuspecting ${slotWord}.`,
+      slots => `<span class="highlight">${slots}</span> ${slotWord} ${slots === 1 ? "is" : "are"} reconsidering ${slots === 1 ? "its" : "their"} career choices.`,
+      slots => `<span class="highlight">${slots}</span> ${slotWord} ${slots === 1 ? "is" : "are"} now spiritually exhausted.`,
+      slots => `impacting <span class="highlight">${slots}</span> tiny monetization ${slotWord} just trying to get paid.`,
+      slots => `<span class="highlight">${slots}</span> ${slotWord} tried. The page did not.`,
+      slots => `<span class="highlight">${slots}</span> ${slotWord} walked in hopeful. ${slots === 1 ? "It left confused." : "They left confused."}`,
+      slots => `<span class="highlight">${slots}</span> ${slotWord} ${slots === 1 ? "is" : "are"} currently filing for emotional support.`,
+      slots => `disrupting <span class="highlight">${slots}</span> little ad ${slotWord}.`
+];
+
+    function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+
+function computePulseScore() {
+  let score = 100;
+
+  score -= issues * 6;
+  score -= slots * 2;
+
+  if (gptScriptMissing > 0) score -= 40;
+  if (gptNotInitialized > 0) score -= 30;
+  if (gptNoSlotRequests > 0) score -= 35;
+
+  score -= phantom * 10;
+  score -= noDomNoRequest * 8;
+  score -= domFail * 8;
+  score -= wrongNetwork * 12;
+  score -= emptyResponse * 6;
+  score -= unexpectedSize * 5;
+  score -= neverRequested * 7;
+
+  score -= containerCollapsed * 8;
+  score -= layoutOverlap * 10;
+  score -= visibilityImpaired * 10;
+
+  if (loss > 0) score -= Math.min(25, Math.floor(loss / 20));
+
+  return clamp(Math.round(score), 0, 100);
+}
+
+function pulseLabel(score) {
+  if (score >= 85) return { label: "Stable"};
+  if (score >= 70) return { label: "Irregular"};
+  if (score >= 50) return { label: "Unstable"};
+  if (score >= 30) return { label: "Weak"};
+  return { label: "Critical"};
+}
+
+function meterBar(score){
+
+const blocks = 10;
+const filled = Math.floor(score / 10);
+
+let bar = "";
+
+for (let i = 0; i < blocks; i++) {
+bar += i < filled
+? `<span>●</span>`
+: `<span style="opacity:0.25">○</span>`;
+}
+
+return bar;
+
+}
+
+function animatePulseScore(score){
+
+  const elScore = document.querySelector("#pulseScoreValue");
+  if(!elScore) return;
+
+  let current = 0;
+
+  const interval = setInterval(()=>{
+
+    current += 2;
+
+    if(current >= score){
+      current = score;
+      clearInterval(interval);
     }
-  }
-},
-  legend: {
-  position: 'bottom',
-  labels: {
-    boxWidth: 12,
-    padding: 18,
-    font: {
-      size: 11,
-      weight: '500'
-    }
-  }
-},
-  datalabels: {
-    color: '#ffffff',
-    font: {
-      weight: '600',
-      size: 12
-    },
-    formatter: (value, ctx) => {
-      const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-      return Math.round((value / total) * 100) + '%';
-    }
-  }
-}
-  }
-});
-}
-if (isSingleDayView) {
-  if (lossTrendChart) {
-    lossTrendChart.destroy();
-    lossTrendChart = null;
-  }
-  lossChartWrapper.style.display = 'none';
-} else {
-  lossChartWrapper.style.display = 'block';
 
-  const sortedDates = Object.keys(dailyTotals).sort();
+    elScore.textContent = current + "%";
 
-if (lossTrendChart) {
+  },20);
 
-  lossTrendChart.data.labels = sortedDates;
-  lossTrendChart.data.datasets[0].data =
-    sortedDates.map(d => dailyTotals[d]);
-
-  lossTrendChart.update();
-
-} else {
-
-  lossTrendChart = new Chart(lossTrendChartEl, {
-    type: 'line',
-    data: {
-      labels: sortedDates,
-      datasets: [{
-        data: sortedDates.map(d => dailyTotals[d]),
-        borderColor: '#6366f1',
-        backgroundColor: 'rgba(99,102,241,0.04)',
-        fill: true,
-        tension: 0.3,
-        pointRadius: 4
-      }]
-    },
-    options: {
-      maintainAspectRatio: false,
-      animation: {
-        duration: 400,
-        easing: 'easeOutQuart'
-      },
-      interaction: {
-        mode: 'index',
-        intersect: false
-      },
-      plugins: {
-        tooltip: {
-          backgroundColor: document.documentElement.classList.contains('dark')
-            ? '#2a2a3b'
-            : '#111827',
-          titleColor: '#ffffff',
-          bodyColor: '#e5e7eb',
-          borderColor: '#6366f1',
-          borderWidth: 1,
-          padding: 10,
-          cornerRadius: 6,
-          displayColors: false,
-          caretPadding: 8,
-          callbacks: {
-            title: (items) => `Date: ${items[0].label}`,
-            label: (ctx) => `Estimated risk: $${ctx.raw.toLocaleString()}`
-          }
-        },
-        legend: { display: false },
-        datalabels: {
-          align: 'top',
-          anchor: 'end',
-          offset: 6,
-          font: { size: 11, weight: '400' },
-          color: () =>
-            document.documentElement.classList.contains('dark')
-              ? '#9ca3af'
-              : '#6b7280',
-          formatter: v => `$${v.toLocaleString()}`
-        }
-      }
-    }
-  });
-}
-}
-const lastIssueTs = getLastIssueTimestamp(effectiveRows);
-
-let minutesAgo = null;
-if (lastIssueTs) {
-  minutesAgo = Math.floor((Date.now() - lastIssueTs) / 60000);
 }
 
-let statusText = '';
+    el.title.innerHTML = pick(titles);
+    const ekg = document.getElementById("titleEkg");
+    let ekgSet = ekgPatterns.good;
 
-if (!lastIssueTs) {
-  statusText = 'System Status: Operational · No incident detected yet';
-} else if (minutesAgo < 10) {
-  statusText = 'System Status: Operational · Incident detected recently';
-} else if (minutesAgo < 60) {
-  statusText = `System Status: Operational · Last incident ${minutesAgo}m ago`;
-} else if (minutesAgo < 1440) {
-  const hours = Math.floor(minutesAgo / 60);
-  statusText = `System Status: Operational · Last incident ${hours}h ago`;
-} else {
-  const days = Math.floor(minutesAgo / 1440);
-  statusText = `System Status: Operational · Last incident ${days}d ago`;
+      if (pulseScore < 85) ekgSet = ekgPatterns.mid;
+      if (pulseScore < 60) ekgSet = ekgPatterns.bad;
+      if (pulseScore < 35) ekgSet = ekgPatterns.critical;
+
+    const ekgPath = pick(ekgSet);
+      if (ekg) ekg.innerHTML = `
+<svg viewBox="0 0 900 40" preserveAspectRatio="none">
+<path d="${ekgPath}"/>
+</svg>
+`;
+
+    el.summary.innerHTML = `${pick(issueLines)(issues)} ${pick(slotLines)(slots)}`;
+
+    const details = [];
+const barClass = pulseScore < 30 ? "pulse-bar critical" : "pulse-bar";
+let pulseMessage = `
+Pulse status: 
+<span class="highlight">${pulseMeta.label}</span>
+<br>
+Pulse Score: 
+<span id="pulseScoreValue" class="${scoreClass}">${pulseScore}%</span>
+<br>
+`;
+
+if (loss > 0) {
+  pulseMessage += `
+<div class="revenue-badge">
+Revenue exposure $${loss}/day
+</div>
+`;
 }
 
-const statusEl = document.getElementById('lastUpdated');
-if (statusEl) {
-  statusEl.textContent = statusText;
 
-  statusEl.classList.remove(
-    'text-indigo-600',
-    'text-indigo-500',
-    'text-indigo-400',
-    'dark:text-indigo-300',
-    'dark:text-indigo-400',
-    'text-gray-400',
-    'dark:text-gray-500'
-  );
+details.push(`
+<div class="section-divider"></div>
+<div class="section-title">System vitals</div>
+<div style="margin-bottom:12px">${pulseMessage}</div>
+<div class="section-divider"></div>
+`);
 
-  if (!lastIssueTs || minutesAgo < 1440) {
-    statusEl.classList.add('text-indigo-500', 'dark:text-indigo-400');
-  } else {
-    statusEl.classList.add('text-gray-400', 'dark:text-gray-500');
-  }
+details.push(`<div class="section-title">Incident details</div>`);
+
+    if (neverRequested > 0) details.push(`🛑 ${neverRequested} Slots defined but never requested. ${pick(detailsMessages.neverRequested)}`);
+    if (containerCollapsed > 0) details.push(`📉 ${containerCollapsed} Collapsed slot containers. ${pick(detailsMessages.containerCollapsed)}`);
+    if (layoutOverlap > 0) details.push(`🧱 ${layoutOverlap} Ads overlapped by page elements. ${pick(detailsMessages.layoutOverlap)}`);
+    if (visibilityImpaired > 0) details.push(`👁️ ${visibilityImpaired} Ads visually obstructed. ${pick(detailsMessages.visibilityImpaired)}`);  
+    if (gptScriptMissing > 0) details.push(`🧠 ${gptScriptMissing} GPT script missing. ${pick(detailsMessages.gptScriptMissing)}`);
+    if (gptNotInitialized > 0) details.push(`🧠 ${gptNotInitialized} GPT not initialized. ${pick(detailsMessages.gptNotInitialized)}`);
+    if (gptNoSlotRequests > 0) details.push(`🧠 ${gptNoSlotRequests} No GPT slot requests. ${pick(detailsMessages.gptNoSlotRequests)}`);
+    if (domFail > 0) details.push(`🕳️ ${domFail} DOM slots not registered in GPT. ${pick(detailsMessages.domFail)}`);
+    if (phantom > 0) details.push(`👻 ${phantom} Phantom slot requests. ${pick(detailsMessages.phantom)}`);
+    if (noDomNoRequest > 0) details.push(`🧩 ${noDomNoRequest} GPT slots had no matching DOM (no request). ${pick(detailsMessages.noDomNoRequest)}`);
+    if (wrongNetwork > 0) details.push(`🔌 ${wrongNetwork} Wrong network IDs. ${pick(detailsMessages.wrongNetwork)}`);
+    if (emptyResponse > 0) details.push(`📭 ${emptyResponse} Empty ad responses. ${pick(detailsMessages.emptyResponse)}`);
+    if (unexpectedSize > 0) details.push(`📏 ${unexpectedSize} Unexpected creative sizes. ${pick(detailsMessages.unexpectedSize)}`);
+
+
+const moods = [
+  "disappointed",
+  "barely functional",
+  "emotionally exhausted",
+  "questioning your deployment process",
+  "holding on by a thread",
+  "confused but operational",
+  "experiencing trust issues",
+  "in need of a hug",
+  "wondering if it’s worth it",
+  "existential crisis",
+  "ready to throw a monitor",
+  "pretending everything is fine",
+  "QA is a myth, right?",
+  "just hoping it’s not Friday",
+  "feeling like a detective in a noir film",
+  "wondering if this is all a dream",
+  "pretending this is staging",
+  "running purely on hope",
+  "feeling overwhelmed"
+];
+el.details.innerHTML =
+details.map(d => `<p>${d}</p>`).join('');
+animatePulseScore(pulseScore);
+
+el.details.innerHTML += `
+<div class="section-divider"></div>
+<p style="opacity:0.85">
+AdPulse mood today: ${pick(moods)}
+</p>
+`;
+
+    el.quote.innerText = pick(quotes);
+    
+    const blameSuggestions = [
+  "Suspected cause: someone deployed on Friday.",
+  "Likely culprit: a confident developer.",
+  "Probable cause: 'it worked on my machine'.",
+  "Main suspect: whoever last touched the template.",
+  "Root cause analysis: vibes.",
+  "Primary suspect: a last-minute commit.",
+  "Most likely scenario: a 'quick fix' that wasn’t.",
+  "Most likely explanation: nobody tested this.",
+  "Blame candidate: the intern. Probably unfair, but still.",
+  "Technical diagnosis: overconfidence.",
+  "Suspected cause: a deploy that 'should be fine'.",
+  "Probable culprit: the 'it’s probably fine' mindset.",
+  "Primary suspect: someone who said 'ship it'.",
+  "Root cause: a developer with trust issues.",
+  "Prime suspect: Friday deployment.",
+];
+
+el.quote.innerText +=
+"\n\n" + pick(blameSuggestions);
+    const dashboardUrl = param("dash");
+if (dashboardUrl) {
+  const decodedUrl = decodeURIComponent(dashboardUrl);
+  const cta = pick(dashboardCTAs).replace('{url}', decodedUrl);
+  el.dashboardLink.innerHTML = cta;
 }
-};
-
-const darkModeBtn = document.getElementById('darkModeBtn');
-const modeLabel = document.getElementById('modeLabel');
-if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
-modeLabel.textContent = document.documentElement.classList.contains('dark') ? 'Light Mode' : 'Dark Mode';
-darkModeBtn.addEventListener('click', () => {
-  const isDark = document.documentElement.classList.toggle('dark');
-  localStorage.setItem('theme', isDark ? 'dark' : 'light');
-  modeLabel.textContent = isDark ? 'Light Mode' : 'Dark Mode';
-
-  if (issueChart) issueChart.update();
-  if (severityChart) severityChart.update();
-  if (lossTrendChart) lossTrendChart.update();
-});
-
-let renderedFromCache = false;
-const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
-if (cached && Date.now() - cached.ts < CACHE_TTL) {
-  allRows = cached.data;
-  renderedFromCache = true;
-
-  if (activeDate) dateInput.value = activeDate;
-  updateViewModeLabel(cameFromReality ? null : activeDate);
-  requestAnimationFrame(() => {
-  renderDashboard(allRows, activeDate);
-});
 }
-fetch(`${SHEET_URL}?token=${token}`)
-  .then(r => r.json())
-  .then(j => {
-  allRows = j.data || [];
-
-  localStorage.setItem(
-    CACHE_KEY,
-    JSON.stringify({ ts: Date.now(), data: allRows })
-  );
-  if (renderedFromCache) return;
-  if (activeDate) dateInput.value = activeDate;
-    updateViewModeLabel(cameFromReality ? null : activeDate);
-    requestAnimationFrame(() => {
-    renderDashboard(allRows, activeDate);
-});
-  })
-  .catch((error) => {
-    console.error('Error fetching data:', error);
-    document.getElementById('loadingIndicator').style.display = 'none';
-  })
-  .finally(() => {
-    document.getElementById('loadingIndicator').style.display = 'none';
-  });
-
-dateInput.addEventListener('change', () => {
-  activeDate = dateInput.value;
-  const url = new URL(window.location);
-  if (activeDate) {
-  url.searchParams.set('date', activeDate);
-} else {
-  url.searchParams.delete('date');
-}
-
-if (fromParam) {
-  url.searchParams.set('from', fromParam);
-}
-  window.history.replaceState({}, '', url);
-  updateViewModeLabel(cameFromReality ? null : activeDate);
-  requestAnimationFrame(() => {
-  renderDashboard(allRows, activeDate);
-});
-});
-
-clearDate.addEventListener('click', () => {
-  activeDate = '';
-  dateInput.value = '';
-  const url = new URL(window.location);
-url.searchParams.delete('date');
-
-if (fromParam) {
-  url.searchParams.set('from', fromParam);
-}
-
-window.history.replaceState({}, '', url);
-
-  updateViewModeLabel(cameFromReality ? null : '');
-  requestAnimationFrame(() => {
-  renderDashboard(allRows, '');
-});
-});
-
-  issueFilter.addEventListener('change', () => {
-  selectedIssueFilter = issueFilter.value;
-  const url = new URL(window.location);
-
-if (selectedIssueFilter) {
-  url.searchParams.set('issue', selectedIssueFilter);
-} else {
-  url.searchParams.delete('issue');
-}
-
-window.history.replaceState({}, '', url);
-
-  if (selectedIssueFilter) {
-    const label = labelMap[selectedIssueFilter] || selectedIssueFilter;
-    issueFilterNote.textContent = `Showing impact related to: ${label}`;
-    issueFilterNote.classList.remove('hidden');
-  } else {
-    issueFilterNote.classList.add('hidden');
-  }
-  updateIssueClearVisibility();
-  requestAnimationFrame(() => {
-  renderDashboard(allRows, activeDate);
-});
-});
-  clearIssueFilterBtn.addEventListener('click', () => {
-  const url = new URL(window.location);
-  url.searchParams.delete('issue');
-  window.history.replaceState({}, '', url);
-  selectedIssueFilter = '';
-  issueFilter.value = '';
-  issueFilterNote.classList.add('hidden');
-  issueFilter.blur();
-  updateIssueClearVisibility();
-  requestAnimationFrame(() => {
-  renderDashboard(allRows, activeDate);
-});
-});
-  updateIssueClearVisibility();
-</script>
-
+console.debug("APG Reality Mode loaded");
+    })();
+  </script>
 </body>
 </html>
