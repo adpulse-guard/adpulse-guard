@@ -208,6 +208,37 @@ font-weight:700;
   50% { filter: drop-shadow(0 0 8px rgba(239,68,68,0.6)); }
   100% { filter: drop-shadow(0 0 3px rgba(239,68,68,0.3)); }
 }
+
+.incident {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.04);
+  transition: all 0.2s ease;
+}
+
+.incident:hover {
+  background: rgba(255,255,255,0.08);
+  transform: translateY(-1px);
+}
+
+.incident-title {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 2px;
+}
+
+.incident-desc {
+  font-size: 13px;
+  color: var(--apg-muted);
+}
+
+.incident.critical {
+  border-left: 3px solid #ef4444;
+}
+
+.incident.high {
+  border-left: 3px solid #fb923c;
+}
   </style>
 </head>
 <body>
@@ -253,7 +284,8 @@ font-weight:700;
   <div id="titleEkg"></div>
 </div>
   <p id="summary"></p>
-  <div id="details"></div>
+  <div id="incidents"></div>
+  <div id="stats"></div>
 </div>
 
   <p class="quote" id="quote"></p>
@@ -480,7 +512,8 @@ L900 20`
     const el = {
       title: document.getElementById("title"),
       summary: document.getElementById("summary"),
-      details: document.getElementById("details"),
+      incidents: document.getElementById("incidents"),
+      stats: document.getElementById("stats"),
       quote: document.getElementById("quote"),
       dashboardLink: document.getElementById("dashboardLink"),
       copyBtn: document.getElementById("copyBtn"),
@@ -641,6 +674,7 @@ L900 20`
         "This page forgot the fundamentals.",
         "Existential crisis much?",
         "GPT exists. It just never woke up.",
+        "Everything is technically there. Just not working.",
         "googletag.cmd.push() went on vacation.",
         "The engine loaded. It chose not to function.",
         "Initialization was optional, apparently.",
@@ -655,6 +689,7 @@ L900 20`
         "Engine running. Nobody driving.",
         "Slots defined. Requests missing. Classic.",
         "The stack showed up. The ads didn’t.",
+        "You built the pipeline and forgot to turn it on.",
         "GPT initialized and then… did nothing.",
         "Infrastructure without intent."
 ],
@@ -700,6 +735,7 @@ L900 20`
         "This isn’t even your ad stack.",
         "Misconfigured network ID. Surprise!",
         "Wrong address, try again.",
+        "This isn’t misconfiguration. This is identity theft.",
         "Ad call sent to the void.",
         "Cosplay gone wrong.",
         "This isn't even your ad network. Bold.",
@@ -790,6 +826,7 @@ L900 20`
         "A perfectly rendered ad inside a perfectly invisible container.",
         "CSS won this round.",
         "The slot rendered. Gravity disagreed.",
+        "Your layout is actively sabotaging monetization.",
         "Display: block. Height: existential."
     ],
       layoutOverlap: [
@@ -864,25 +901,32 @@ L900 20`
 
   const barClass = "pulse-bar";
 
-  el.details.innerHTML = `
-<p>
-Pulse status: <span class="highlight">stable</span><br>
-Pulse score: <span class="highlight" id="pulseScoreValue">98%</span> · <span class="${barClass}">${meterBar(98)}</span>
+  el.incidents.innerHTML = `
+  <div class="section-title">All quiet... suspiciously.</div>
+  <div class="incident">
+    <div class="incident-title">😌 No incidents detected</div>
+    <div class="incident-desc">Enjoy it while it lasts.</div>
+  </div>
+  `;
 
-Estimated time until next alert: unpredictable.
-</p>
-`;
+  el.stats.innerHTML = `
+  <div class="section-title">System vitals</div>
+
+  <div style="margin-top:6px">
+    Pulse: <span class="score-good">Stable • 98%</span>
+  </div>
+  `
 
   el.quote.innerText =
     pick(calmQuotes);
-
-  animatePulseScore(98);
-    } else {
+  return;
+    }
+    
     const pluralize = (count, singular, plural) =>
      count === 1 ? singular : plural;
 
-    const issueWord = pluralize(issues, "issue", "issues");
-    const slotWord = pluralize(slots, "slot", "slots");
+    const issueWord = issues === 1 ? "issue" : "issues"; 
+    const slotWord = slots === 1 ? "slot" : "slots";
     const complaintWord = pluralize(issues, "complaint", "complaints");
     const violationWord = pluralize(issues, "violation", "violations");
     const alertWord = pluralize(issues, "alert", "alerts");
@@ -1036,51 +1080,185 @@ function animatePulseScore(score){
 </svg>
 `;
 
-    el.summary.innerHTML = `${pick(issueLines)(issues)} ${pick(slotLines)(slots)}`;
+    el.summary.innerHTML =
+      pick(issueLines)(issues) + " " + pick(slotLines)(slots);
 
-    const details = [];
-const barClass = pulseScore < 30 ? "pulse-bar critical" : "pulse-bar";
-let pulseMessage = `
-Pulse status: 
-<span class="highlight">${pulseMeta.label}</span>
-<br>
-Pulse Score: 
-<span id="pulseScoreValue" class="${scoreClass}">${pulseScore}%</span>
-<br>
-`;
+    const incidentItems = [];
+    const statItems = [];
 
-if (loss > 0) {
-  pulseMessage += `
+statItems.push(`
+<div class="section-title">System vitals</div>
+
+<div style="margin-top:6px">
+  Pulse: <span class="${scoreClass}">${pulseMeta.label} • ${pulseScore}%</span>
+</div>
+
+${loss > 0 ? `
 <div class="revenue-badge">
 Revenue exposure $${loss}/day
 </div>
-`;
-}
-
-
-details.push(`
-<div class="section-divider"></div>
-<div class="section-title">System vitals</div>
-<div style="margin-bottom:12px">${pulseMessage}</div>
-<div class="section-divider"></div>
+` : ""}
 `);
 
-details.push(`<div class="section-title">Incident details</div>`);
+    const severityMap = {
+  gptScriptMissing: 'HIGH',
+  gptNotInitialized: 'HIGH',
+  gptNoSlotRequests: 'HIGH',
 
-    if (neverRequested > 0) details.push(`🛑 ${neverRequested} Slots defined but never requested. ${pick(detailsMessages.neverRequested)}`);
-    if (containerCollapsed > 0) details.push(`📉 ${containerCollapsed} Collapsed slot containers. ${pick(detailsMessages.containerCollapsed)}`);
-    if (layoutOverlap > 0) details.push(`🧱 ${layoutOverlap} Ads overlapped by page elements. ${pick(detailsMessages.layoutOverlap)}`);
-    if (visibilityImpaired > 0) details.push(`👁️ ${visibilityImpaired} Ads visually obstructed. ${pick(detailsMessages.visibilityImpaired)}`);  
-    if (gptScriptMissing > 0) details.push(`🧠 ${gptScriptMissing} GPT script missing. ${pick(detailsMessages.gptScriptMissing)}`);
-    if (gptNotInitialized > 0) details.push(`🧠 ${gptNotInitialized} GPT not initialized. ${pick(detailsMessages.gptNotInitialized)}`);
-    if (gptNoSlotRequests > 0) details.push(`🧠 ${gptNoSlotRequests} No GPT slot requests. ${pick(detailsMessages.gptNoSlotRequests)}`);
-    if (domFail > 0) details.push(`🕳️ ${domFail} DOM slots not registered in GPT. ${pick(detailsMessages.domFail)}`);
-    if (phantom > 0) details.push(`👻 ${phantom} Phantom slot requests. ${pick(detailsMessages.phantom)}`);
-    if (noDomNoRequest > 0) details.push(`🧩 ${noDomNoRequest} GPT slots had no matching DOM (no request). ${pick(detailsMessages.noDomNoRequest)}`);
-    if (wrongNetwork > 0) details.push(`🔌 ${wrongNetwork} Wrong network IDs. ${pick(detailsMessages.wrongNetwork)}`);
-    if (emptyResponse > 0) details.push(`📭 ${emptyResponse} Empty ad responses. ${pick(detailsMessages.emptyResponse)}`);
-    if (unexpectedSize > 0) details.push(`📏 ${unexpectedSize} Unexpected creative sizes. ${pick(detailsMessages.unexpectedSize)}`);
+  wrongNetwork: 'HIGH',
+  emptyResponse: 'HIGH',
 
+  domFail: 'MEDIUM',
+  phantom: 'MEDIUM',
+  noDomNoRequest: 'MEDIUM',
+
+  neverRequested: 'LOW',
+  containerCollapsed: 'LOW',
+  unexpectedSize: 'LOW',
+  layoutOverlap: 'LOW',
+  visibilityImpaired: 'LOW'
+};
+
+    if (neverRequested > 0) incidentItems.push({
+  severity: severityMap.neverRequested,
+  html: `
+  <div class="incident ${severityMap.neverRequested.toLowerCase()}">
+    <div class="incident-title">🛑 ${neverRequested} Slots never requested</div>
+    <div class="incident-desc">${pick(detailsMessages.neverRequested)}</div>
+  </div>
+  `
+});
+
+if (containerCollapsed > 0) incidentItems.push({
+  severity: severityMap.containerCollapsed,
+  html: `
+  <div class="incident ${severityMap.containerCollapsed.toLowerCase()}">
+    <div class="incident-title">📉 ${containerCollapsed} Collapsed slot containers</div>
+    <div class="incident-desc">${pick(detailsMessages.containerCollapsed)}</div>
+  </div>
+  `
+});
+
+if (layoutOverlap > 0) incidentItems.push({
+  severity: severityMap.layoutOverlap,
+  html: `
+  <div class="incident ${severityMap.layoutOverlap.toLowerCase()}">
+    <div class="incident-title">🧱 ${layoutOverlap} Ads overlapped</div>
+    <div class="incident-desc">${pick(detailsMessages.layoutOverlap)}</div>
+  </div>
+  `
+});
+
+if (visibilityImpaired > 0) incidentItems.push({
+  severity: severityMap.visibilityImpaired,
+  html: `
+  <div class="incident ${severityMap.visibilityImpaired.toLowerCase()}">
+    <div class="incident-title">👁️ ${visibilityImpaired} Ads obstructed</div>
+    <div class="incident-desc">${pick(detailsMessages.visibilityImpaired)}</div>
+  </div>
+  `
+});
+
+if (gptScriptMissing > 0) incidentItems.push({
+  severity: severityMap.gptScriptMissing,
+  html: `
+  <div class="incident ${severityMap.gptScriptMissing.toLowerCase()}">
+    <div class="incident-title">🧠 ${gptScriptMissing} GPT script missing</div>
+    <div class="incident-desc">${pick(detailsMessages.gptScriptMissing)}</div>
+  </div>
+  `
+});
+
+if (gptNotInitialized > 0) incidentItems.push({
+  severity: severityMap.gptNotInitialized,
+  html: `
+  <div class="incident ${severityMap.gptNotInitialized.toLowerCase()}">
+    <div class="incident-title">🧠 ${gptNotInitialized} GPT not initialized</div>
+    <div class="incident-desc">${pick(detailsMessages.gptNotInitialized)}</div>
+  </div>
+  `
+});
+
+if (gptNoSlotRequests > 0) incidentItems.push({
+  severity: severityMap.gptNoSlotRequests,
+  html: `
+  <div class="incident ${severityMap.gptNoSlotRequests.toLowerCase()}">
+    <div class="incident-title">🧠 ${gptNoSlotRequests} No GPT slot requests</div>
+    <div class="incident-desc">${pick(detailsMessages.gptNoSlotRequests)}</div>
+  </div>
+  `
+});
+
+if (domFail > 0) incidentItems.push({
+  severity: severityMap.domFail,
+  html: `
+  <div class="incident ${severityMap.domFail.toLowerCase()}">
+    <div class="incident-title">🕳️ ${domFail} DOM not registered</div>
+    <div class="incident-desc">${pick(detailsMessages.domFail)}</div>
+  </div>
+  `
+});
+
+if (phantom > 0) incidentItems.push({
+  severity: severityMap.phantom,
+  html: `
+  <div class="incident ${severityMap.phantom.toLowerCase()}">
+    <div class="incident-title">👻 ${phantom} Phantom slot</div>
+    <div class="incident-desc">${pick(detailsMessages.phantom)}</div>
+  </div>
+  `
+});
+
+if (noDomNoRequest > 0) incidentItems.push({
+  severity: severityMap.noDomNoRequest,
+  html: `
+  <div class="incident ${severityMap.noDomNoRequest.toLowerCase()}">
+    <div class="incident-title">🧩 ${noDomNoRequest} No DOM match</div>
+    <div class="incident-desc">${pick(detailsMessages.noDomNoRequest)}</div>
+  </div>
+  `
+});
+
+if (wrongNetwork > 0) incidentItems.push({
+  severity: severityMap.wrongNetwork,
+  html: `
+  <div class="incident ${severityMap.wrongNetwork.toLowerCase()}">
+    <div class="incident-title">🔌 ${wrongNetwork} Wrong network</div>
+    <div class="incident-desc">${pick(detailsMessages.wrongNetwork)}</div>
+  </div>
+  `
+});
+
+if (emptyResponse > 0) incidentItems.push({
+  severity: severityMap.emptyResponse,
+  html: `
+  <div class="incident ${severityMap.emptyResponse.toLowerCase()}">
+    <div class="incident-title">📭 ${emptyResponse} Empty responses</div>
+    <div class="incident-desc">${pick(detailsMessages.emptyResponse)}</div>
+  </div>
+  `
+});
+
+if (unexpectedSize > 0) incidentItems.push({
+  severity: severityMap.unexpectedSize,
+  html: `
+  <div class="incident ${severityMap.unexpectedSize.toLowerCase()}">
+    <div class="incident-title">📏 ${unexpectedSize} Wrong sizes</div>
+    <div class="incident-desc">${pick(detailsMessages.unexpectedSize)}</div>
+  </div>
+  `
+});
+
+    if (incidentItems.length === 0) {
+  incidentItems.push({
+  severity: "LOW",
+  html: `
+  <div class="incident">
+    <div class="incident-title">🤨 No obvious issues</div>
+    <div class="incident-desc">Either it's fine… or something is hiding.</div>
+  </div>
+  `
+});
 
 const moods = [
   "disappointed",
@@ -1103,16 +1281,38 @@ const moods = [
   "running purely on hope",
   "feeling overwhelmed"
 ];
-el.details.innerHTML =
-details.map(d => `<p>${d}</p>`).join('');
-animatePulseScore(pulseScore);
 
-el.details.innerHTML += `
-<div class="section-divider"></div>
-<p style="opacity:0.85">
-AdPulse mood today: ${pick(moods)}
-</p>
-`;
+const incidentHeaders = [
+  "So yeah... here’s what happened:",
+  "Let’s unpack this disaster:",
+  "Here’s the damage report:",
+  "What went wrong (short version):",
+  "The situation, summarized:",
+  "Your ad stack had thoughts:",
+  "Here’s where things got weird:",
+];
+
+  incidentItems.sort((a, b) => {
+    const order = { HIGH: 3, MEDIUM: 2, LOW: 1 };
+    return (order[b.severity] || 0) - (order[a.severity] || 0);
+  });
+    el.incidents.innerHTML = `
+    <div class="section-title">${pick(incidentHeaders)}</div>
+    <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+      ${incidentItems.map(i => i.html).join("")}
+    </div>
+    `;
+
+    el.stats.innerHTML = `
+      ${statItems.join("")}
+
+    <div class="section-divider"></div>
+
+    <p style="opacity:0.85">
+      AdPulse mood today: ${pick(moods)}
+    </p>
+    `;
+animatePulseScore(pulseScore);
 
     el.quote.innerText = pick(quotes);
     
@@ -1136,6 +1336,78 @@ AdPulse mood today: ${pick(moods)}
 
 el.quote.innerText +=
 "\n\n" + pick(blameSuggestions);
+
+// === Context-aware humor engine ===
+
+let extraLines = [];
+
+if (
+  gptScriptMissing > 0 &&
+  emptyResponse > 0 &&
+  wrongNetwork > 0
+) {
+  el.quote.innerText += "\n\nImpressive. Everything is broken at once.";
+}
+
+if (
+  phantom > 0 &&
+  emptyResponse > 0 &&
+  layoutOverlap > 0
+) {
+  el.quote.innerText += "\n\nEven when ads show up, they regret it.";
+}
+
+if (issues > 10) {
+  el.quote.innerText += "\n\nThis is no longer debugging. This is archaeology.";
+}
+
+if (phantom > 0 && noDomNoRequest > 0) {
+  el.quote.innerText += "\n\nYou're sending ads into the void. Bold strategy.";
+}
+
+if (layoutOverlap > 0 || visibilityImpaired > 0) {
+  el.quote.innerText += "\n\nThe ads are there. The page just disagrees.";
+}
+
+if (emptyResponse >= 5) {
+  el.quote.innerText += "\n\nAt this point, inventory is just a suggestion.";
+}
+
+if (emptyResponse >= 3) {
+  extraLines.push("At this point, the ad server is ignoring you on purpose.");
+}
+
+if (
+  gptScriptMissing > 0 ||
+  (gptNotInitialized > 0 && issues > 5)
+) {
+  extraLines.push("We’re not debugging anymore. We’re rebuilding.");
+}
+
+if (
+  gptNoSlotRequests > 0 &&
+  phantom > 0 &&
+  noDomNoRequest > 0
+) {
+  extraLines.push("Nothing is connected to anything. Love that for you.");
+}
+
+if (issues > 8) {
+  extraLines.push("This isn’t a bug. It’s a lifestyle.");
+}
+
+if (loss > 50) {
+  extraLines.push("That revenue drop had a personality.");
+}
+
+if (phantom > 0 && emptyResponse > 0) {
+  extraLines.push("Half your ads are invisible. The other half gave up.");
+}
+
+if (extraLines.length > 0) {
+  el.quote.innerText += "\n\n" + pick(extraLines);
+}
+
     const dashboardUrl = param("dash");
 if (dashboardUrl) {
   const decodedUrl = decodeURIComponent(dashboardUrl);
