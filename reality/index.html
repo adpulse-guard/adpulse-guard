@@ -1261,16 +1261,18 @@ if (unexpectedSize > 0) incidentItems.push({
   `
 });
 
-    if (incidentItems.length === 0) {
+if (incidentItems.length === 0) {
   incidentItems.push({
-  severity: "LOW",
-  html: `
-  <div class="incident">
-    <div class="incident-title">🤨 No obvious issues</div>
-    <div class="incident-desc">Either it's fine… or something is hiding.</div>
-  </div>
-  `
-});
+    severity: "LOW",
+    html: `
+    <div class="incident">
+      <div class="incident-title">🤨 No obvious issues</div>
+      <div class="incident-desc">Either it's fine… or something is hiding.</div>
+    </div>
+    `
+  });
+}
+
 
 const moods = [
   "disappointed",
@@ -1327,27 +1329,7 @@ const incidentHeaders = [
 animatePulseScore(pulseScore);
 
     el.quote.innerText = pick(quotes);
-    
-    const blameSuggestions = [
-  "Suspected cause: someone deployed on Friday.",
-  "Likely culprit: a confident developer.",
-  "Probable cause: 'it worked on my machine'.",
-  "Main suspect: whoever last touched the template.",
-  "Root cause analysis: vibes.",
-  "Primary suspect: a last-minute commit.",
-  "Most likely scenario: a 'quick fix' that wasn’t.",
-  "Most likely explanation: nobody tested this.",
-  "Blame candidate: the intern. Probably unfair, but still.",
-  "Technical diagnosis: overconfidence.",
-  "Suspected cause: a deploy that 'should be fine'.",
-  "Probable culprit: the 'it’s probably fine' mindset.",
-  "Primary suspect: someone who said 'ship it'.",
-  "Root cause: a developer with trust issues.",
-  "Prime suspect: Friday deployment.",
-];
 
-el.quote.innerText +=
-"\n\n" + pick(blameSuggestions);
 
 // === Context-aware humor engine ===
 
@@ -1425,7 +1407,6 @@ if (dashboardUrl) {
   const decodedUrl = decodeURIComponent(dashboardUrl);
   const cta = pick(dashboardCTAs).replace('{url}', decodedUrl);
   el.dashboardLink.innerHTML = cta;
-}
 }
 console.debug("APG Reality Mode loaded");
     })();
