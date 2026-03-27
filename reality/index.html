@@ -297,6 +297,18 @@ font-weight:700;
 
   <script>
     'use strict';
+    window.onerror = (msg, src, line, col, err) => {
+  console.error(err);
+
+  document.body.innerHTML = `
+    <div style="padding:40px; font-family:monospace; color:#f87171;">
+      💥 JS crashed:<br><br>
+      ${msg}<br>
+      line: ${line}, col: ${col}<br><br>
+      ${err?.stack || ""}
+    </div>
+  `;
+};
     const pick = arr => arr[Math.floor(Math.random() * arr.length)];
     const ekgPatterns = {
 
@@ -1259,7 +1271,6 @@ if (unexpectedSize > 0) incidentItems.push({
   </div>
   `
 });
-    }
 
 const moods = [
   "disappointed",
