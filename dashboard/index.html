@@ -665,12 +665,26 @@ const sortedPages = Array.from(pageMap.entries())
   'gpt_no_slot_requests'
 ];
 
+const globalPageDateSet = new Set();
+
+effectiveRows.forEach(r => {
+  if (!r || !r.pageUrl || !r.receivedAt) return;
+
+  const severity = (r.severity || '').toUpperCase();
+
+  if (
+    GLOBAL_TYPES.includes(r.issueType) &&
+    ['HIGH','MEDIUM'].includes(severity)
+  ) {
+    const dateKey = r.receivedAt.split('T')[0];
+    globalPageDateSet.add(`${dateKey}__${r.pageUrl}`);
+  }
+});
+
 const globalRow = effectiveRows.find(r =>
   GLOBAL_TYPES.includes(r.issueType) &&
   ['HIGH','MEDIUM'].includes((r.severity || '').toUpperCase())
 );
-
-const hasGlobal = !!globalRow;
 
   effectiveRows.forEach(r => {
 
@@ -727,8 +741,10 @@ if (!issueDedupeSet.has(dedupeKey)) {
 }
 
   if (isRevenueEligible) {
-    const isGlobalType = GLOBAL_TYPES.includes(r.issueType);
-    if (hasGlobal && !isGlobalType) {
+  const isGlobalType = GLOBAL_TYPES.includes(r.issueType);
+  const pageDateKey = `${dateKey}__${r.pageUrl}`;
+
+  if (globalPageDateSet.has(pageDateKey) && !isGlobalType) {
     return;
   }
     const total = Number(r.estimatedDailyRevenueRisk || 0);
@@ -843,10 +859,12 @@ effectiveRows.forEach(r => {
   if (!['HIGH','MEDIUM'].includes(severity)) return;
 
   const isGlobalType = GLOBAL_TYPES.includes(r.issueType);
+const pageDateKey = `${dateKey}__${r.pageUrl}`;
 
-  if (isGlobalType) return;
+if (isGlobalType) return;
+if (globalPageDateSet.has(pageDateKey)) return;
 
-  uniqueSlotPageSet.add(`${dateKey}__${r.pageUrl}__${r.slotId}`);
+uniqueSlotPageSet.add(`${dateKey}__${r.pageUrl}__${r.slotId}`);
 });
 const securityWidget = document.getElementById('securityWidget');
 const securityList = document.getElementById('securityList');
@@ -896,11 +914,7 @@ const globalSlotsTotal = Array.from(globalSlotsMap.values())
 
 let totalImpactedSlots;
 
-if (hasGlobal) {
-  totalImpactedSlots = globalSlotsTotal;
-} else {
-  totalImpactedSlots = uniqueSlotPageSet.size;
-}
+totalImpactedSlots = globalSlotsTotal + uniqueSlotPageSet.size;
 
 let dedupedTotalLoss = 0;
 
