@@ -273,6 +273,32 @@ const token = params.get('token');
 let activeDate = params.get('date') || '';
 let selectedIssueFilter = params.get('issue') || '';
 const cameFromReality = fromParam === 'reality';
+function syncExplorerLink() {
+  const explorerLink = document.getElementById('explorerLink');
+  if (!explorerLink || !token) return;
+
+  const url = new URL('details.html', window.location.href);
+
+  url.searchParams.set('token', token);
+
+  if (activeDate) {
+    url.searchParams.set('date', activeDate);
+  } else {
+    url.searchParams.delete('date');
+  }
+
+  if (selectedIssueFilter) {
+    url.searchParams.set('issue', selectedIssueFilter);
+  } else {
+    url.searchParams.delete('issue');
+  }
+
+  if (fromParam) {
+    url.searchParams.set('from', fromParam);
+  }
+
+  explorerLink.href = url.pathname.split('/').pop() + url.search;
+}
 const affectedSlotsPanel = document.getElementById('affectedSlotsPanel');
 const affectedSlotsList = document.getElementById('affectedSlotsList');
 const copySlotsBtn = document.getElementById('copySlotsBtn');
@@ -1293,14 +1319,34 @@ if (issueChart) {
   if (!issueKey) return;
 
   selectedIssueFilter = issueKey;
-  issueFilter.value = issueKey;
-  updateIssueClearVisibility();
+issueFilter.value = issueKey;
 
-  issueFilterNote.textContent =
-    `Showing impact related to: ${fullLabel}`;
-  issueFilterNote.classList.remove('hidden');
+const url = new URL(window.location);
 
-  requestAnimationFrame(() => {
+if (selectedIssueFilter) {
+  url.searchParams.set('issue', selectedIssueFilter);
+} else {
+  url.searchParams.delete('issue');
+}
+
+if (activeDate) {
+  url.searchParams.set('date', activeDate);
+}
+
+if (fromParam) {
+  url.searchParams.set('from', fromParam);
+}
+
+window.history.replaceState({}, '', url);
+syncExplorerLink();
+
+updateIssueClearVisibility();
+
+issueFilterNote.textContent =
+  `Showing impact related to: ${fullLabel}`;
+issueFilterNote.classList.remove('hidden');
+
+requestAnimationFrame(() => {
   renderDashboard(allRows, activeDate);
 });
 },
@@ -1623,6 +1669,7 @@ if (fromParam) {
   url.searchParams.set('from', fromParam);
 }
   window.history.replaceState({}, '', url);
+  syncExplorerLink();
   updateViewModeLabel(cameFromReality ? null : activeDate);
   requestAnimationFrame(() => {
   renderDashboard(allRows, activeDate);
@@ -1640,7 +1687,7 @@ if (fromParam) {
 }
 
 window.history.replaceState({}, '', url);
-
+  syncExplorerLink();
   updateViewModeLabel(cameFromReality ? null : '');
   requestAnimationFrame(() => {
   renderDashboard(allRows, '');
@@ -1658,6 +1705,7 @@ if (selectedIssueFilter) {
 }
 
 window.history.replaceState({}, '', url);
+syncExplorerLink();
 
   if (selectedIssueFilter) {
     const label = labelMap[selectedIssueFilter] || selectedIssueFilter;
@@ -1677,6 +1725,7 @@ window.history.replaceState({}, '', url);
   window.history.replaceState({}, '', url);
   selectedIssueFilter = '';
   issueFilter.value = '';
+  syncExplorerLink();
   issueFilterNote.classList.add('hidden');
   issueFilter.blur();
   updateIssueClearVisibility();
@@ -1685,29 +1734,7 @@ window.history.replaceState({}, '', url);
 });
 });
   updateIssueClearVisibility();
-const explorerLink = document.getElementById('explorerLink');
-
-if (explorerLink) {
-
-  const safeToken = token || new URLSearchParams(window.location.search).get('token');
-
-  if (explorerLink && safeToken) {
-
-  let url = `details.html?token=${safeToken}`;
-
-  if (activeDate) url += `&date=${activeDate}`;
-  if (selectedIssueFilter) url += `&issue=${selectedIssueFilter}`;
-
-  explorerLink.href = url;
-}
-
-  let url = `details.html?token=${safeToken}`;
-
-  if (activeDate) url += `&date=${activeDate}`;
-  if (selectedIssueFilter) url += `&issue=${selectedIssueFilter}`;
-
-  explorerLink.href = url;
-}
+syncExplorerLink();
 </script>
 
 </body>
