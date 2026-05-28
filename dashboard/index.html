@@ -1574,7 +1574,6 @@ fetch(`${SHEET_URL}?token=${token}`)
     CACHE_KEY,
     JSON.stringify({ ts: Date.now(), data: allRows })
   );
-  if (renderedFromCache) return;
   if (activeDate) dateInput.value = activeDate;
     updateViewModeLabel(cameFromReality ? null : activeDate);
     requestAnimationFrame(() => {
