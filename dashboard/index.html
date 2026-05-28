@@ -1015,9 +1015,17 @@ const pageExpectedMap = new Map();
 
 effectiveRows.forEach(r => {
   if (!r.pageUrl || !r.receivedAt) return;
-  if (hasGlobal && !GLOBAL_TYPES.includes(r.issueType)) return;
 
   const dateKey = r.receivedAt.split('T')[0];
+  const pageDateKey = `${dateKey}__${r.pageUrl}`;
+
+  if (
+    globalPageDateSet.has(pageDateKey) &&
+    !GLOBAL_TYPES.includes(r.issueType)
+  ) {
+    return;
+  }
+
   const key = `${dateKey}__${r.pageUrl}`;
 
   const expected = Number(r.expectedSlotCount || 0);
