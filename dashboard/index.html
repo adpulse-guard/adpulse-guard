@@ -588,7 +588,7 @@ function incidentKey(r) {
     ? `${r.pageLoadId}__${r.issueType}__${slot}`
     : `${dateKey}__${page}__${r.issueType}__${slot}`;
 }
-  function renderDashboard(rows, selectedDate = null, selectedClient = '') {
+  function renderDashboard(rows, selectedDate = null, selectedClient = '', animateMetrics = true) {
   document.getElementById('loadingIndicator').style.display = 'none';
 
   const baseRows = rows.filter(r => {
@@ -1108,7 +1108,15 @@ setTimeout(() => {
   dailyLossEl.style.transform = "scale(1)";
 }, 250);
 
-animateCurrency(dailyLossEl, dedupedTotalLoss, 700);
+if (animateMetrics) {
+  animateCurrency(dailyLossEl, dedupedTotalLoss, 700);
+} else {
+  dailyLossEl.textContent =
+    `$${dedupedTotalLoss.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    })}`;
+}
 
 if (dedupedTotalLoss === 0) {
   dailyLossEl.classList.remove(
@@ -1630,7 +1638,7 @@ if (cached && Date.now() - cached.ts < CACHE_TTL) {
   if (activeDate) dateInput.value = activeDate;
   updateViewModeLabel(cameFromReality ? null : activeDate);
   requestAnimationFrame(() => {
-  renderDashboard(allRows, activeDate);
+  renderDashboard(allRows, activeDate, '', false);
 });
 }
 fetch(`${SHEET_URL}?token=${token}`)
