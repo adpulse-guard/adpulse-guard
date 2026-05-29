@@ -938,9 +938,9 @@ effectiveRows.forEach(r => {
 const globalSlotsTotal = Array.from(globalSlotsMap.values())
   .reduce((a,b)=>a+b,0);
 
-let totalImpactedSlots;
+let totalImpactedSlotsRaw;
 
-totalImpactedSlots = globalSlotsTotal + uniqueSlotPageSet.size;
+totalImpactedSlotsRaw = globalSlotsTotal + uniqueSlotPageSet.size;
 
 let dedupedTotalLoss = 0;
 
@@ -1036,7 +1036,6 @@ if (!topSlot) {
   });
 
 }
-document.getElementById('slotCount').textContent = totalImpactedSlots;
 const pageExpectedMap = new Map();
 
 effectiveRows.forEach(r => {
@@ -1069,21 +1068,31 @@ effectiveRows.forEach(r => {
 const expectedSlotsTotal =
   Array.from(pageExpectedMap.values())
     .reduce((a, b) => a + b, 0);
+    
+const totalImpactedSlots = expectedSlotsTotal > 0
+  ? Math.min(totalImpactedSlotsRaw, expectedSlotsTotal)
+  : totalImpactedSlotsRaw;
 
+const deliveringSlots = expectedSlotsTotal > 0
+  ? Math.max(0, expectedSlotsTotal - totalImpactedSlots)
+  : 0;
+
+document.getElementById('slotCount').textContent = totalImpactedSlots;
+    
 let reliability = 100;
 
 if (expectedSlotsTotal > 0) {
   reliability =
-    100 - (totalImpactedSlots / expectedSlotsTotal) * 100;
+    (deliveringSlots / expectedSlotsTotal) * 100;
 }
 
-reliability = Math.max(0, Math.round(reliability));
+reliability = Math.max(0, Math.min(100, Math.round(reliability)));
 
 const reliabilityEl = document.getElementById('reliabilityScore');
 
 reliabilityEl.textContent = reliability + '%';
 document.getElementById('reliabilityDetails').textContent =
-  `${expectedSlotsTotal - totalImpactedSlots} / ${expectedSlotsTotal} slots delivering`;
+  `${deliveringSlots} / ${expectedSlotsTotal} slots delivering`;
 
 reliabilityEl.classList.remove(
   'text-green-600',
