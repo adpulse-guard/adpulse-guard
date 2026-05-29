@@ -190,6 +190,15 @@ if (!token || token === 'undefined') {
 
 const overviewLink = document.getElementById('overviewLink');
 
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxAD4aNij0ApHx21r68hq5TLx2k2r3VT9_obEe7I-EX_l3JGDQSnrY84LcA4QG8Ldf2ig/exec';
+
+let allRows = [];
+const CACHE_KEY = `apg_explorer_cache_${token}`;
+const CACHE_TTL = 5 * 60 * 1000;
+let renderedFromCache = false;
+let currentPageMap = new Map();
+let activeDate = params.get('date') || '';
+let selectedIssue = params.get('issue') || '';
 function syncOverviewLink() {
   if (!overviewLink || !token) return;
 
@@ -212,15 +221,12 @@ function syncOverviewLink() {
   overviewLink.href = url.pathname.split('/').pop() + url.search;
 }
 
-const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxAD4aNij0ApHx21r68hq5TLx2k2r3VT9_obEe7I-EX_l3JGDQSnrY84LcA4QG8Ldf2ig/exec';
+if (overviewLink) {
+  overviewLink.addEventListener('click', () => {
+    syncOverviewLink();
+  });
+}
 
-let allRows = [];
-const CACHE_KEY = `apg_explorer_cache_${token}`;
-const CACHE_TTL = 5 * 60 * 1000;
-let renderedFromCache = false;
-let currentPageMap = new Map();
-let activeDate = params.get('date') || '';
-let selectedIssue = params.get('issue') || '';
 syncOverviewLink();
 const clearIssueFilterBtn = document.getElementById('clearIssueFilter');
 const issueFilterNote = document.getElementById('issueFilterNote');
