@@ -812,7 +812,7 @@ if (!issueDedupeSet.has(dedupeKey)) {
 });
 const isDark = document.documentElement.classList.contains('dark');
 const severityColorMap = {
-  HIGH: isDark ? 'rgba(248,113,113,0.65)' : 'rgba(220,38,38,0.85)',
+  HIGH: isDark ? 'rgba(239,68,68,0.80)' : 'rgba(220,38,38,0.85)',
   MEDIUM: isDark ? 'rgba(251,191,36,0.72)' : APG_BRAND.warning,
   LOW: APG_BRAND.primarySoft,
   INFO: isDark
@@ -1133,7 +1133,8 @@ reliabilityEl.classList.remove(
   'text-red-600',
   'dark:text-green-400',
   'dark:text-orange-400',
-  'dark:text-red-400'
+  'dark:text-red-400',
+  'dark:text-[#ef4444]/80'
 );
 
 if (reliability >= 90) {
@@ -1141,7 +1142,7 @@ if (reliability >= 90) {
 } else if (reliability >= 50) {
   reliabilityEl.classList.add('text-orange-600', 'dark:text-orange-400');
 } else {
-  reliabilityEl.classList.add('text-red-600', 'dark:text-red-400');
+  reliabilityEl.classList.add('text-red-600', 'dark:text-[#ef4444]/80');
 }
 
 const dailyLossEl = document.getElementById('dailyLoss');
