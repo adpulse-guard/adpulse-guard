@@ -206,6 +206,9 @@ if (overviewLink) {
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxAD4aNij0ApHx21r68hq5TLx2k2r3VT9_obEe7I-EX_l3JGDQSnrY84LcA4QG8Ldf2ig/exec';
 
 let allRows = [];
+const CACHE_KEY = `apg_explorer_cache_${token}`;
+const CACHE_TTL = 5 * 60 * 1000;
+let renderedFromCache = false;
 let currentPageMap = new Map();
 let activeDate = params.get('date') || '';
 let selectedIssue = params.get('issue') || '';
@@ -574,27 +577,69 @@ document.getElementById('pageList').innerHTML = `
   </div>
 `;
 
+function hydrateExplorer(rows) {
+  allRows = rows || [];
+
+  if (activeDate) {
+    document.getElementById('dateFilter').value = activeDate;
+  }
+
+  if (selectedIssue) {
+    document.getElementById('issueFilter').value = selectedIssue;
+
+    const label = labelMap[selectedIssue] || selectedIssue;
+    issueFilterNote.textContent = `Showing impact: ${label}`;
+    issueFilterNote.classList.remove('hidden');
+  }
+
+  applyFilters();
+  updateIssueClearVisibility();
+}
+
+const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+
+if (cached && Date.now() - cached.ts < CACHE_TTL) {
+  renderedFromCache = true;
+  hydrateExplorer(cached.data);
+}
+
+const fetchStart = performance.now();
+
 fetch(`${SHEET_URL}?token=${token}`)
   .then(r => r.json())
   .then(j => {
-  console.log('API RESPONSE:', j);
+    console.log(
+      'Explorer fetch + JSON time:',
+      Math.round(performance.now() - fetchStart),
+      'ms'
+    );
 
-  allRows = j.data || [];
+    const freshRows = j.data || [];
 
+    localStorage.setItem(
+      CACHE_KEY,
+      JSON.stringify({
+        ts: Date.now(),
+        data: freshRows
+      })
+    );
 
-if (activeDate) {
-  document.getElementById('dateFilter').value = activeDate;
-}
-if (selectedIssue) {
-  document.getElementById('issueFilter').value = selectedIssue;
+    if (!renderedFromCache) {
+      hydrateExplorer(freshRows);
+    }
+  })
+  .catch(error => {
+    console.error('Explorer fetch error:', error);
 
-  const label = labelMap[selectedIssue] || selectedIssue;
-  issueFilterNote.textContent = `Showing impact: ${label}`;
-  issueFilterNote.classList.remove('hidden');
-}
-  applyFilters();
-updateIssueClearVisibility();
-})
+    if (!renderedFromCache) {
+      document.getElementById('pageList').innerHTML = `
+        <div class="text-sm text-red-400">
+          Failed to load incidents
+        </div>
+      `;
+    }
+  });
+  
 function toggleChecks(id) {
   const el = document.getElementById(`checks-${id}`);
   if (!el) return;
@@ -652,8 +697,10 @@ function renderSidebar(pageMap) {
 
   const container = document.getElementById('pageList');
 
-  const sorted = Array.from(pageMap.entries())
-    .sort((a,b) => b[1].total - a[1].total);
+  const sortedAll = Array.from(pageMap.entries())
+  .sort((a,b) => b[1].total - a[1].total);
+
+const sorted = sortedAll.slice(0, 100);
     if (!sorted.length) {
   container.innerHTML = `
     <div class="text-sm text-gray-400">
@@ -701,6 +748,14 @@ function renderSidebar(pageMap) {
       </div>
     `;
   }).join('');
+  if (sortedAll.length > sorted.length) {
+  container.innerHTML += `
+    <div class="text-xs text-gray-400 text-center py-3">
+      Showing top ${sorted.length} pages by estimated impact out of ${sortedAll.length}.
+      Use date or incident filter to narrow results.
+    </div>
+  `;
+}
 }
 
 function selectPage(encodedPage, el) {
