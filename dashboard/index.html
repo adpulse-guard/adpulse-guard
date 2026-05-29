@@ -159,16 +159,16 @@
   Slots with delivery issues
 </div>
   </div>
-  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center border-l-4 border-red-300 dark:border-red-600">
+  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center border-l-4 border-red-300 dark:border-red-500/60">
     <div class="text-xs uppercase tracking-wide text-gray-500 mb-1 whitespace-nowrap">
   Revenue at Risk
     </div>
     <div id="dailyLoss" 
-     class="text-4xl font-bold text-red-600 whitespace-nowrap">
+     class="text-4xl font-bold text-red-600 dark:text-red-400 whitespace-nowrap">
   $—
 </div>
     <div class="text-xs text-gray-400 mt-1">
-  Calculated based on impacted slots
+  Estimated from expected inventory impact
 </div>
   </div>
 </div>
@@ -812,12 +812,12 @@ if (!issueDedupeSet.has(dedupeKey)) {
 });
 const isDark = document.documentElement.classList.contains('dark');
 const severityColorMap = {
-  HIGH: isDark ? 'rgba(239,68,68,0.85)' : 'rgba(220,38,38,0.85)',
-  MEDIUM: APG_BRAND.warning,
+  HIGH: isDark ? 'rgba(248,113,113,0.65)' : 'rgba(220,38,38,0.85)',
+  MEDIUM: isDark ? 'rgba(251,191,36,0.72)' : APG_BRAND.warning,
   LOW: APG_BRAND.primarySoft,
   INFO: isDark
-  ? '#6b7280'     
-  : '#9ca3af'     
+    ? '#6b7280'
+    : '#9ca3af'
 };
 
 const severityLabels = Object.keys(severities);
@@ -1130,15 +1130,18 @@ document.getElementById('reliabilityDetails').textContent =
 reliabilityEl.classList.remove(
   'text-green-600',
   'text-orange-600',
-  'text-red-600'
+  'text-red-600',
+  'dark:text-green-400',
+  'dark:text-orange-400',
+  'dark:text-red-400'
 );
 
 if (reliability >= 90) {
-  reliabilityEl.classList.add('text-green-600');
+  reliabilityEl.classList.add('text-green-600', 'dark:text-green-400');
 } else if (reliability >= 50) {
-  reliabilityEl.classList.add('text-orange-600');
+  reliabilityEl.classList.add('text-orange-600', 'dark:text-orange-400');
 } else {
-  reliabilityEl.classList.add('text-red-600');
+  reliabilityEl.classList.add('text-red-600', 'dark:text-red-400');
 }
 
 const dailyLossEl = document.getElementById('dailyLoss');
