@@ -1069,21 +1069,54 @@ const expectedSlotsTotal =
   Array.from(pageExpectedMap.values())
     .reduce((a, b) => a + b, 0);
     
-const totalImpactedSlots = expectedSlotsTotal > 0
-  ? Math.min(totalImpactedSlotsRaw, expectedSlotsTotal)
-  : totalImpactedSlotsRaw;
-
-const deliveringSlots = expectedSlotsTotal > 0
-  ? Math.max(0, expectedSlotsTotal - totalImpactedSlots)
-  : 0;
+const totalImpactedSlots = totalImpactedSlotsRaw;
 
 document.getElementById('slotCount').textContent = totalImpactedSlots;
-    
+
+const deliveryAffectedMap = new Map();
+
+effectiveRows.forEach(r => {
+  if (!r || !r.pageUrl || !r.receivedAt) return;
+
+  const dateKey = r.receivedAt.split('T')[0];
+  const key = `${dateKey}__${r.pageUrl}`;
+
+  const expected = Number(r.expectedSlotCount || 0);
+  const affected = Number(r.affectedSlotCount || 0);
+
+  if (!deliveryAffectedMap.has(key)) {
+    deliveryAffectedMap.set(key, {
+      expected: 0,
+      affected: 0
+    });
+  }
+
+  const item = deliveryAffectedMap.get(key);
+
+  item.expected = Math.max(item.expected, expected);
+  item.affected = Math.max(item.affected, affected);
+});
+
+let deliveryExpectedSlotsTotal = 0;
+let deliveryAffectedSlotsTotal = 0;
+
+deliveryAffectedMap.forEach(item => {
+  const expected = Number(item.expected || 0);
+  const affected = Number(item.affected || 0);
+
+  deliveryExpectedSlotsTotal += expected;
+  deliveryAffectedSlotsTotal += Math.min(affected, expected);
+});
+
+const deliveringSlots = deliveryExpectedSlotsTotal > 0
+  ? Math.max(0, deliveryExpectedSlotsTotal - deliveryAffectedSlotsTotal)
+  : 0;
+
 let reliability = 100;
 
-if (expectedSlotsTotal > 0) {
+if (deliveryExpectedSlotsTotal > 0) {
   reliability =
-    (deliveringSlots / expectedSlotsTotal) * 100;
+    (deliveringSlots / deliveryExpectedSlotsTotal) * 100;
 }
 
 reliability = Math.max(0, Math.min(100, Math.round(reliability)));
@@ -1092,7 +1125,7 @@ const reliabilityEl = document.getElementById('reliabilityScore');
 
 reliabilityEl.textContent = reliability + '%';
 document.getElementById('reliabilityDetails').textContent =
-  `${deliveringSlots} / ${expectedSlotsTotal} slots delivering`;
+  `${deliveringSlots} / ${deliveryExpectedSlotsTotal} expected slots delivering`;
 
 reliabilityEl.classList.remove(
   'text-green-600',
