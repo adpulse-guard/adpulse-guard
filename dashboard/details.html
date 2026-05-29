@@ -190,17 +190,26 @@ if (!token || token === 'undefined') {
 
 const overviewLink = document.getElementById('overviewLink');
 
-if (overviewLink) {
+function syncOverviewLink() {
+  if (!overviewLink || !token) return;
 
-  let url = `index.html?token=${token}`;
+  const url = new URL('index.html', window.location.href);
 
-  const date = params.get('date');
-  const issue = params.get('issue');
+  url.searchParams.set('token', token);
 
-  if (date) url += `&date=${date}`;
-  if (issue) url += `&issue=${issue}`;
+  if (activeDate) {
+    url.searchParams.set('date', activeDate);
+  } else {
+    url.searchParams.delete('date');
+  }
 
-  overviewLink.href = url;
+  if (selectedIssue) {
+    url.searchParams.set('issue', selectedIssue);
+  } else {
+    url.searchParams.delete('issue');
+  }
+
+  overviewLink.href = url.pathname.split('/').pop() + url.search;
 }
 
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxAD4aNij0ApHx21r68hq5TLx2k2r3VT9_obEe7I-EX_l3JGDQSnrY84LcA4QG8Ldf2ig/exec';
@@ -212,6 +221,7 @@ let renderedFromCache = false;
 let currentPageMap = new Map();
 let activeDate = params.get('date') || '';
 let selectedIssue = params.get('issue') || '';
+syncOverviewLink();
 const clearIssueFilterBtn = document.getElementById('clearIssueFilter');
 const issueFilterNote = document.getElementById('issueFilterNote');
 
@@ -530,7 +540,7 @@ if (activeDate) {
 }
 
 window.history.replaceState({}, '', url);
-
+syncOverviewLink();
 applyFilters();
   });
 
@@ -542,6 +552,7 @@ clearDate.addEventListener('click', () => {
   url.searchParams.delete('date');
   window.history.replaceState({}, '', url);
   document.getElementById('dateFilter').value = '';
+  syncOverviewLink();
   applyFilters();
 });
 
@@ -558,7 +569,7 @@ if (selectedIssue) {
 }
 
 window.history.replaceState({}, '', url);
-
+syncOverviewLink();
 if (selectedIssue) {
   const label = labelMap[selectedIssue] || selectedIssue;
   issueFilterNote.textContent = `Showing impact: ${label}`;
@@ -684,7 +695,7 @@ clearIssueFilterBtn.addEventListener('click', () => {
   const url = new URL(window.location);
   url.searchParams.delete('issue');
   window.history.replaceState({}, '', url);
-
+  syncOverviewLink();
   document.getElementById('issueFilter').value = '';
   issueFilterNote.classList.add('hidden');
 
