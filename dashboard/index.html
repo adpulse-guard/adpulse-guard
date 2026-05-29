@@ -24,7 +24,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 
 <body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-white font-sans min-h-screen">
@@ -355,7 +354,7 @@ const severityChartEl = document.getElementById('severityChart');
 const lossTrendChartEl = document.getElementById('lossTrendChart');
 
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxAD4aNij0ApHx21r68hq5TLx2k2r3VT9_obEe7I-EX_l3JGDQSnrY84LcA4QG8Ldf2ig/exec';
-const CACHE_KEY = 'apg_cache';
+const CACHE_KEY = `apg_cache_${token}`;
 const CACHE_TTL = 5 * 60 * 1000;
 
 const labelMap = {
@@ -1177,13 +1176,16 @@ if (dedupedTotalLoss === 0) {
   dailyLossEl.classList.remove('text-green-600');
 }
 
-if (isSingleDayView && totalIssues === 0)
- {
-  confetti({
-    particleCount: 120,
-    spread: 70,
-    origin: { y: 0.6 }
-  });
+if (isSingleDayView && totalIssues === 0) {
+  import('https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/+esm')
+    .then(module => {
+      module.default({
+        particleCount: 120,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+    })
+    .catch(() => {});
 }
   const box = document.getElementById('topOffenderBox');
   const globalIssueTypes = [
@@ -1345,9 +1347,12 @@ barEntries.forEach(([label, count]) => {
 const bgColors = labels.map(() => APG_BRAND.primary);
 
 if (issueChart) {
-  issueChart.destroy();
-}
-
+  issueChart.data.labels = labels;
+  issueChart.data.datasets[0].data = values;
+  issueChart.data.datasets[0].backgroundColor = bgColors;
+  issueChart.data.datasets[0].hoverBackgroundColor = bgColors;
+  issueChart.update('none');
+} else {
   issueChart = new Chart(issueChartEl, {
   type: 'bar',
   data: {
@@ -1460,7 +1465,8 @@ requestAnimationFrame(() => {
     }
   }
 });
-  
+}
+    
 if (severityChart) {
 
   severityChart.data.labels = severityLabels;
@@ -1690,17 +1696,23 @@ if (cached && Date.now() - cached.ts < CACHE_TTL) {
 fetch(`${SHEET_URL}?token=${token}`)
   .then(r => r.json())
   .then(j => {
-  allRows = j.data || [];
+    const freshRows = j.data || [];
 
-  localStorage.setItem(
-    CACHE_KEY,
-    JSON.stringify({ ts: Date.now(), data: allRows })
-  );
-  if (activeDate) dateInput.value = activeDate;
-    updateViewModeLabel(cameFromReality ? null : activeDate);
-    requestAnimationFrame(() => {
-    renderDashboard(allRows, activeDate);
-});
+    localStorage.setItem(
+      CACHE_KEY,
+      JSON.stringify({ ts: Date.now(), data: freshRows })
+    );
+
+    allRows = freshRows;
+
+    if (!renderedFromCache) {
+      if (activeDate) dateInput.value = activeDate;
+      updateViewModeLabel(cameFromReality ? null : activeDate);
+
+      requestAnimationFrame(() => {
+        renderDashboard(allRows, activeDate);
+      });
+    }
   })
   .catch((error) => {
     console.error('Error fetching data:', error);
