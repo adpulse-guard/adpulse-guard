@@ -1379,10 +1379,6 @@ if (emptyResponse >= 5) {
   el.quote.innerText += "\n\nAt this point, inventory is just a suggestion.";
 }
 
-if (emptyResponse >= 3) {
-  extraLines.push("At this point, the ad server is ignoring you on purpose.");
-}
-
 if (
   gptScriptMissing > 0 ||
   (gptNotInitialized > 0 && issues > 5)
@@ -1400,10 +1396,6 @@ if (
 
 if (issues > 8) {
   extraLines.push("This isn’t a bug. It’s a lifestyle.");
-}
-
-if (loss > 50) {
-  extraLines.push("That revenue drop had a personality.");
 }
 
 if (phantom > 0 && emptyResponse > 0) {
