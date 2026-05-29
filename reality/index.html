@@ -237,16 +237,17 @@ font-weight:700;
 }
 
 .incident.high {
-  border-left: 3px solid #fb923c;
+  border-left: 3px solid #ef4444;
 }
 
 .incident.medium {
-  border-left: 3px solid #facc15;
+  border-left: 3px solid #fb923c;
 }
 
 .incident.low {
-  border-left: 3px solid #818cf8;
+  border-left: 3px solid #facc15;
 }
+    
   </style>
 </head>
 <body>
@@ -1120,16 +1121,15 @@ Revenue exposure $${loss}/day
 ` : ""}
 `);
 
-    const severityMap = {
+  const severityMap = {
   gptScriptMissing: 'HIGH',
   gptNotInitialized: 'HIGH',
   gptNoSlotRequests: 'HIGH',
-
   wrongNetwork: 'HIGH',
   emptyResponse: 'HIGH',
+  phantom: 'HIGH',
 
   domFail: 'MEDIUM',
-  phantom: 'MEDIUM',
   noDomNoRequest: 'MEDIUM',
 
   neverRequested: 'LOW',
