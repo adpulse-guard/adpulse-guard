@@ -718,21 +718,21 @@ L900 20`
         "GPT initialized and then… did nothing.",
         "Infrastructure without intent."
 ],
-      phantom: [
+      requestedMissingDom: [
         "Defined in GPT. Requested. Nowhere to render. Impressive.",
         "Requested a slot that doesn’t exist. Bold move.",
         "Ad call sent. DOM said ‘who dis?’",
         "You paid for that request. It rendered into vibes.",
         "GPT delivered. The page ghosted it.",
-        "Phantom slot successfully billed to nowhere.",
+        "Slot successfully billed to nowhere.",
         "You paid for an ad call. The page disagreed.",
         "An ad was requested. The page declined the invitation.",
         "Live request. No container. Stunning execution.",
         "Somewhere an ad server tried its best.",
-        "Phantom traffic is still traffic.",
+        "The slot was requested. The container missed the memo.",
         "You’re paying for invisible impressions.",
         "The DOM declined participation.",
-        "Ghost slot energy is strong today.",
+        "GPT knew what it wanted. The DOM did not cooperate.",
         "The ad server delivered into philosophical space.",
         "This slot believes in itself. The page doesn’t.",
         "Ad server delivered. DOM said ‘not my problem.’"
@@ -965,7 +965,7 @@ L900 20`
     const gptNotInitialized = num("gptNotInitialized");
     const gptNoSlotRequests = num("gptNoSlotRequests");
     const domFail = num("domFail");
-    const phantom = num("phantom");
+    const requestedMissingDom = num("requestedMissingDom");
     const noDomNoRequest = num("noDomNoRequest");
     const wrongNetwork = num("wrongNetwork");
     const emptyResponse = num("emptyResponse");
@@ -1026,7 +1026,7 @@ function computePulseScore() {
   if (gptNotInitialized > 0) score -= 30;
   if (gptNoSlotRequests > 0) score -= 35;
 
-  score -= phantom * 10;
+  score -= requestedMissingDom * 8;
   score -= noDomNoRequest * 8;
   score -= domFail * 8;
   score -= wrongNetwork * 12;
@@ -1130,7 +1130,7 @@ Revenue exposure $${loss}/day
   gptNotInitialized: 'HIGH',
   gptNoSlotRequests: 'HIGH',
   wrongNetwork: 'HIGH',
-  phantom: 'HIGH',
+  requestedMissingDom: 'MEDIUM',
 
   domFail: 'MEDIUM',
   noDomNoRequest: 'MEDIUM',
@@ -1223,12 +1223,12 @@ if (domFail > 0) incidentItems.push({
   `
 });
 
-if (phantom > 0) incidentItems.push({
-  severity: severityMap.phantom,
+if (requestedMissingDom > 0) incidentItems.push({
+  severity: severityMap.requestedMissingDom,
   html: `
-  <div class="incident ${severityMap.phantom.toLowerCase()}">
-    <div class="incident-title">👻 ${phantom} Phantom slot</div>
-    <div class="incident-desc">${pick(detailsMessages.phantom)}</div>
+  <div class="incident ${severityMap.requestedMissingDom.toLowerCase()}">
+    <div class="incident-title">🧩 ${requestedMissingDom} Requested slots missing DOM</div>
+    <div class="incident-desc">${pick(detailsMessages.requestedMissingDom)}</div>
   </div>
   `
 });
@@ -1356,7 +1356,7 @@ if (
 }
 
 if (
-  phantom > 0 &&
+  requestedMissingDom > 0 &&
   emptyResponse > 0 &&
   layoutOverlap > 0
 ) {
@@ -1367,7 +1367,7 @@ if (issues > 10) {
   el.quote.innerText += "\n\nThis is no longer debugging. This is archaeology.";
 }
 
-if (phantom > 0 && noDomNoRequest > 0) {
+if (requestedMissingDom > 0 && noDomNoRequest > 0) {
   el.quote.innerText += "\n\nYou're sending ads into the void. Bold strategy.";
 }
 
@@ -1388,7 +1388,7 @@ if (
 
 if (
   gptNoSlotRequests > 0 &&
-  phantom > 0 &&
+  requestedMissingDom > 0 &&
   noDomNoRequest > 0
 ) {
   extraLines.push("Nothing is connected to anything. Love that for you.");
@@ -1398,7 +1398,7 @@ if (issues > 8) {
   extraLines.push("This isn’t a bug. It’s a lifestyle.");
 }
 
-if (phantom > 0 && emptyResponse > 0) {
+if (requestedMissingDom > 0 && emptyResponse > 0) {
   extraLines.push("Half your ads are invisible. The other half gave up.");
 }
 
