@@ -246,7 +246,7 @@ const labelMap = {
   wrong_network: 'Incorrect ad network ID',
   slot_not_registered: 'DOM slot not in GPT',
   defined_without_dom_no_request: 'GPT slot defined without DOM',
-  phantom_slot_requested: 'Phantom slot requested',
+  requested_slot_missing_dom: 'Requested GPT slot missing DOM',
   unexpected_size: 'Unexpected size',
   empty_response: 'No ad response returned',
   slot_never_requested: 'Slot visible but no ad request sent',
@@ -264,7 +264,7 @@ const ISSUE_GROUPS = {
     'gpt_loaded_but_not_initialized',
     'gpt_no_slot_requests',
     'empty_response',
-    'phantom_slot_requested',
+    'requested_slot_missing_dom',
     'defined_without_dom_no_request',
     'slot_not_registered',
     'slot_never_requested',
@@ -283,10 +283,10 @@ const SUGGESTED_CHECKS = {
       'Check that the slot DOM ID exists on the page',
       'Confirm the slot is initialized after GPT loads'
     ],
-    phantom_slot_requested: [
-    'Verify that the slot container exists in the DOM',
-    'Check breakpoint and layout conditions',
-    'Confirm slot ID consistency between GPT and DOM'
+    requested_slot_missing_dom: [
+      'Verify that the slot container exists in the DOM at request time',
+      'Check lazy loading, breakpoint, or dynamic layout conditions',
+      'Confirm slot ID consistency between GPT registration and DOM container'
     ],
     defined_without_dom_no_request: [
     'Check if the slot is breakpoint-specific',
@@ -337,7 +337,7 @@ const SUGGESTED_CHECKS = {
     const ISSUE_LABEL = {
   wrong_network: 'Wrong network · Configuration mismatch',
   slot_not_registered: 'DOM slot not in GPT · No ad request',
-  phantom_slot_requested: 'Slot requested but container missing · Delivery compromised',
+  requested_slot_missing_dom: 'Requested GPT slot missing DOM container · Delivery risk',
   defined_without_dom_no_request: 'Slot defined but not requested · No ad request',
   unexpected_size: 'Unexpected ad size · Creative mismatch',
   empty_response: 'Empty response · No eligible demand',
