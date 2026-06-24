@@ -1696,7 +1696,11 @@ if (cached && Date.now() - cached.ts < CACHE_TTL) {
 fetch(`${SHEET_URL}?token=${token}`)
   .then(r => r.json())
   .then(j => {
-    const freshRows = j.data || [];
+  if (j.error) {
+    throw new Error(j.error);
+  }
+
+  const freshRows = j.data || [];
 
     localStorage.setItem(
       CACHE_KEY,
@@ -1715,12 +1719,48 @@ fetch(`${SHEET_URL}?token=${token}`)
     }
   })
   .catch((error) => {
-    console.error('Error fetching data:', error);
-    document.getElementById('loadingIndicator').style.display = 'none';
-  })
+  console.error('Error fetching data:', error);
+
+  const loading = document.getElementById('loadingIndicator');
+
+  if (error.message === 'invalid_or_expired_token') {
+    loading.innerHTML = `
+      <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 max-w-md text-center">
+        <h2 class="text-lg font-semibold mb-2">
+          Dashboard link expired
+        </h2>
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+          This email link is no longer active. Please open a newer dashboard link.
+        </p>
+      </div>
+    `;
+    loading.style.display = 'flex';
+    return;
+  }
+
+  loading.innerHTML = `
+    <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 max-w-md text-center">
+      <h2 class="text-lg font-semibold mb-2">
+        Unable to load dashboard
+      </h2>
+      <p class="text-sm text-gray-500 dark:text-gray-400">
+        Please try again in a moment.
+      </p>
+    </div>
+  `;
+  loading.style.display = 'flex';
+})
   .finally(() => {
-    document.getElementById('loadingIndicator').style.display = 'none';
-  });
+  const loading = document.getElementById('loadingIndicator');
+
+  if (
+    loading &&
+    !loading.textContent.includes('Dashboard link expired') &&
+    !loading.textContent.includes('Unable to load dashboard')
+  ) {
+    loading.style.display = 'none';
+  }
+});
 
 dateInput.addEventListener('change', () => {
   activeDate = dateInput.value;
