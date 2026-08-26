@@ -472,12 +472,12 @@
           } else {
 
             incidentsHtml = `
-              <div class="section-title">
-                Here's the damage report:
-              </div>
+  <div class="section-title">
+    ${escapeHtml(data.incidentHeader)}
+  </div>
 
-              <div class="incident-list">
-            `;
+  <div class="incident-list">
+`;
 
 
             data.incidents.forEach(
