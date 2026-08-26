@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>AdPulse Guard · Reality Mode™</title>
+</head>
+
+<body>
+
+  <h1>Reality test</h1>
+
+  <pre id="output">
+Loading...
+  </pre>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+
+    const token = params.get('token');
+    const date = params.get('date') || '';
+
+    const APPS_SCRIPT_URL =
+      'https://script.google.com/macros/s/AKfycbxAD4aNij0ApHx21r68hq5TLx2k2r3VT9_obEe7I-EX_l3JGDQSnrY84LcA4QG8Ldf2ig/exec';
+
+    if (!token) {
+      document.getElementById('output').textContent =
+        'Missing token.';
+    } else {
+
+      const realityDataUrl =
+        `${APPS_SCRIPT_URL}` +
+        `?view=reality-data` +
+        `&token=${encodeURIComponent(token)}` +
+        `&date=${encodeURIComponent(date)}`;
+
+      fetch(realityDataUrl)
+        .then(response => response.json())
+        .then(data => {
+
+          document.getElementById('output').textContent =
+            JSON.stringify(data, null, 2);
+
+        })
+        .catch(error => {
+
+          document.getElementById('output').textContent =
+            'Reality data error: ' + error;
+
+        });
+
+    }
+  </script>
+
+</body>
+
+</html>
