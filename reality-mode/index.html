@@ -30,11 +30,41 @@ Loading...
         'Missing token.';
     } else {
 
-      const realityDataUrl =
-        `${APPS_SCRIPT_URL}` +
-        `?view=reality-data` +
-        `&token=${encodeURIComponent(token)}` +
-        `&date=${encodeURIComponent(date)}`;
+      const realityParams = new URLSearchParams();
+
+realityParams.set('view', 'reality-data');
+realityParams.set('token', token);
+realityParams.set('date', date);
+
+const realityKeys = [
+  'slots',
+  'issues',
+  'loss',
+  'gptScriptMissing',
+  'gptNotInitialized',
+  'gptNoSlotRequests',
+  'domFail',
+  'requestedMissingDom',
+  'noDomNoRequest',
+  'neverRequested',
+  'containerCollapsed',
+  'wrongNetwork',
+  'emptyResponse',
+  'unexpectedSize',
+  'layoutOverlap',
+  'visibilityImpaired'
+];
+
+realityKeys.forEach(key => {
+  const value = params.get(key);
+
+  if (value !== null) {
+    realityParams.set(key, value);
+  }
+});
+
+const realityDataUrl =
+  `${APPS_SCRIPT_URL}?${realityParams.toString()}`;
 
       fetch(realityDataUrl)
         .then(response => response.json())
