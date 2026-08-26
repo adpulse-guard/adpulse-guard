@@ -6,78 +6,692 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>AdPulse Guard · Reality Mode™</title>
+
+  <style>
+    :root {
+      --apg-bg: #1e1e2f;
+      --apg-card: #2a2a3b;
+      --apg-primary: #6366f1;
+      --apg-primary-soft: #818cf8;
+      --apg-text: #f3f4f6;
+      --apg-muted: #9ca3af;
+    }
+
+    body {
+      font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        sans-serif;
+
+      background:
+        radial-gradient(
+          1200px 600px at top,
+          #25253a,
+          var(--apg-bg)
+        );
+
+      color: var(--apg-text);
+
+      padding: 24px 20px;
+
+      max-width: 720px;
+
+      margin: auto;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 8px 4px 22px;
+      padding: 8px 12px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .brand-row img {
+      width: 30px;
+      height: 30px;
+      opacity: 0.85;
+
+      filter:
+        drop-shadow(
+          0 0 10px
+          rgba(99,102,241,0.45)
+        )
+        drop-shadow(
+          0 0 24px
+          rgba(99,102,241,0.25)
+        );
+    }
+
+    .box {
+      backdrop-filter: blur(6px);
+
+      background:
+        linear-gradient(
+          180deg,
+          rgba(255,255,255,0.05),
+          rgba(255,255,255,0)
+        );
+
+      background-color: var(--apg-card);
+
+      padding: 28px;
+
+      border-radius: 16px;
+
+      box-shadow:
+        0 10px 30px rgba(0,0,0,0.35),
+        inset 0 1px 0 rgba(255,255,255,0.04);
+
+      border:
+        1px solid rgba(255,255,255,0.05);
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 8px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .title-row {
+      position: relative;
+    }
+
+    .title-row::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 48px;
+
+      background:
+        linear-gradient(
+          rgba(255,255,255,0.04) 1px,
+          transparent 1px
+        );
+
+      background-size: 100% 6px;
+
+      pointer-events: none;
+    }
+
+    .ekg {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 48px;
+      margin-bottom: 14px;
+    }
+
+    .ekg svg {
+      width: 100%;
+      height: 48px;
+      overflow: hidden;
+    }
+
+    .ekg path {
+      fill: none;
+      stroke: #ef4444;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+
+      stroke-dasharray: 1300;
+      stroke-dashoffset: 1300;
+
+      animation:
+        ekgDraw 9s linear infinite;
+
+      filter:
+        drop-shadow(
+          0 0 3px
+          rgba(239,68,68,0.5)
+        )
+        drop-shadow(
+          0 0 8px
+          rgba(239,68,68,0.35)
+        )
+        drop-shadow(
+          0 0 16px
+          rgba(239,68,68,0.15)
+        );
+    }
+
+    @keyframes ekgDraw {
+      from {
+        stroke-dashoffset: 1300;
+      }
+
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    p {
+      margin-bottom: 10px;
+      line-height: 1.65;
+    }
+
+    .highlight {
+      color: var(--apg-primary-soft);
+      font-weight: 600;
+    }
+
+    .section-title {
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--apg-muted);
+      margin-bottom: 8px;
+    }
+
+    .section-divider {
+      border-top:
+        1px solid
+        rgba(255,255,255,0.08);
+
+      margin: 18px 0;
+    }
+
+    .incident-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .incident {
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+      transition: all 0.2s ease;
+    }
+
+    .incident:hover {
+      background: rgba(255,255,255,0.08);
+      transform: translateY(-1px);
+    }
+
+    .incident.high {
+      border-left: 3px solid #ef4444;
+    }
+
+    .incident.medium {
+      border-left: 3px solid #fb923c;
+    }
+
+    .incident.low {
+      border-left: 3px solid #facc15;
+    }
+
+    .incident-title {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 2px;
+    }
+
+    .incident-desc {
+      font-size: 13px;
+      color: var(--apg-muted);
+    }
+
+    .score-good {
+      color: #4ade80;
+      font-weight: 600;
+    }
+
+    .score-mid {
+      color: #facc15;
+      font-weight: 600;
+    }
+
+    .score-bad {
+      color: #fb923c;
+      font-weight: 600;
+    }
+
+    .score-critical {
+      color: #f87171;
+      font-weight: 700;
+    }
+
+    .revenue-badge {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: rgba(239,68,68,0.15);
+      color: #f87171;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+
+    .quote {
+      margin-top: 14px;
+      font-style: italic;
+      color: var(--apg-muted);
+      white-space: pre-line;
+    }
+
+    .dashboard-area {
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--apg-muted);
+    }
+
+    .dashboard-link {
+      color: var(--apg-primary-soft);
+      text-decoration: none;
+
+      border-bottom:
+        1px dashed
+        rgba(129,140,248,0.6);
+    }
+
+    .dashboard-link:hover {
+      color: #c7d2fe;
+      border-bottom-color: #c7d2fe;
+    }
+
+    .footer {
+      margin-top: 28px;
+      opacity: 0.6;
+      text-align: center;
+    }
+
+    .footer hr {
+      border: none;
+
+      border-top:
+        1px solid
+        rgba(255,255,255,0.08);
+
+      margin-bottom: 14px;
+    }
+
+    .fade {
+      font-size: 13px;
+      color: var(--apg-muted);
+    }
+
+    .loading {
+      color: var(--apg-muted);
+      text-align: center;
+      padding: 40px 0;
+    }
+  </style>
 </head>
 
 <body>
 
-  <h1>Reality test</h1>
+  <div id="app">
+    <div class="loading">
+      Loading Reality Mode™...
+    </div>
+  </div>
 
-  <pre id="output">
-Loading...
-  </pre>
 
   <script>
-    const params = new URLSearchParams(window.location.search);
+    const params =
+      new URLSearchParams(window.location.search);
 
-    const token = params.get('token');
-    const date = params.get('date') || '';
+    const token =
+      params.get('token');
+
+    const date =
+      params.get('date') || '';
 
     const APPS_SCRIPT_URL =
       'https://script.google.com/macros/s/AKfycbxAD4aNij0ApHx21r68hq5TLx2k2r3VT9_obEe7I-EX_l3JGDQSnrY84LcA4QG8Ldf2ig/exec';
 
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+
     if (!token) {
-      document.getElementById('output').textContent =
-        'Missing token.';
+
+      document.getElementById('app').innerHTML = `
+        <div class="box">
+          Missing or invalid Reality token.
+        </div>
+      `;
+
     } else {
 
-      const realityParams = new URLSearchParams();
+      const realityParams =
+        new URLSearchParams();
 
-realityParams.set('view', 'reality-data');
-realityParams.set('token', token);
-realityParams.set('date', date);
+      realityParams.set(
+        'view',
+        'reality-data'
+      );
 
-const realityKeys = [
-  'slots',
-  'issues',
-  'loss',
-  'gptScriptMissing',
-  'gptNotInitialized',
-  'gptNoSlotRequests',
-  'domFail',
-  'requestedMissingDom',
-  'noDomNoRequest',
-  'neverRequested',
-  'containerCollapsed',
-  'wrongNetwork',
-  'emptyResponse',
-  'unexpectedSize',
-  'layoutOverlap',
-  'visibilityImpaired'
-];
+      realityParams.set(
+        'token',
+        token
+      );
 
-realityKeys.forEach(key => {
-  const value = params.get(key);
+      realityParams.set(
+        'date',
+        date
+      );
 
-  if (value !== null) {
-    realityParams.set(key, value);
-  }
-});
 
-const realityDataUrl =
-  `${APPS_SCRIPT_URL}?${realityParams.toString()}`;
+      const realityKeys = [
+        'slots',
+        'issues',
+        'loss',
+        'gptScriptMissing',
+        'gptNotInitialized',
+        'gptNoSlotRequests',
+        'domFail',
+        'requestedMissingDom',
+        'noDomNoRequest',
+        'neverRequested',
+        'containerCollapsed',
+        'wrongNetwork',
+        'emptyResponse',
+        'unexpectedSize',
+        'layoutOverlap',
+        'visibilityImpaired'
+      ];
+
+
+      realityKeys.forEach(key => {
+
+        const value =
+          params.get(key);
+
+        if (value !== null) {
+          realityParams.set(
+            key,
+            value
+          );
+        }
+
+      });
+
+
+      const realityDataUrl =
+        `${APPS_SCRIPT_URL}?${realityParams.toString()}`;
+
 
       fetch(realityDataUrl)
-        .then(response => response.json())
+
+        .then(response =>
+          response.json()
+        )
+
         .then(data => {
 
-          document.getElementById('output').textContent =
-            JSON.stringify(data, null, 2);
+          if (!data.ok) {
+            throw new Error(
+              data.error ||
+              'Reality data unavailable'
+            );
+          }
+
+
+          let incidentsHtml = '';
+
+
+          if (
+            !data.incidents ||
+            data.incidents.length === 0
+          ) {
+
+            incidentsHtml = `
+              <div class="section-title">
+                All quiet... suspiciously.
+              </div>
+
+              <div class="incident">
+
+                <div class="incident-title">
+                  😌 No incidents detected
+                </div>
+
+                <div class="incident-desc">
+                  Enjoy it while it lasts.
+                </div>
+
+              </div>
+            `;
+
+          } else {
+
+            incidentsHtml = `
+              <div class="section-title">
+                Here's the damage report:
+              </div>
+
+              <div class="incident-list">
+            `;
+
+
+            data.incidents.forEach(
+              incident => {
+
+                incidentsHtml += `
+                  <div
+                    class="incident ${escapeHtml(incident.severity)}"
+                  >
+
+                    <div class="incident-title">
+
+                      ${escapeHtml(incident.emoji)}
+
+                      ${escapeHtml(incident.count)}
+
+                      ${escapeHtml(incident.title)}
+
+                    </div>
+
+                    <div class="incident-desc">
+
+                      ${escapeHtml(incident.message)}
+
+                    </div>
+
+                  </div>
+                `;
+
+              }
+            );
+
+
+            incidentsHtml += `
+              </div>
+            `;
+          }
+
+
+          const revenueHtml =
+            Number(data.loss) > 0
+              ? `
+                <div class="revenue-badge">
+                  Revenue exposure
+                  $${Number(data.loss).toFixed(2)}/day
+                </div>
+              `
+              : '';
+
+
+          const moodHtml =
+            Number(data.issues) > 0
+              ? `
+                <div class="section-divider">
+                </div>
+
+                <p style="opacity:0.85;">
+                  AdPulse mood today:
+                  ${escapeHtml(data.mood)}
+                </p>
+              `
+              : '';
+
+
+          document
+            .getElementById('app')
+            .innerHTML = `
+
+              <div class="brand-row">
+
+                <img
+                  src="${escapeHtml(data.logoUrl)}"
+                  alt="AdPulse Guard"
+                />
+
+                <span>
+
+                  <strong>
+                    AdPulse Guard
+                  </strong>
+
+                  <span style="opacity:0.6;">
+                    · Reality Mode™
+                  </span>
+
+                </span>
+
+              </div>
+
+
+              <div class="box">
+
+                <div class="title-row">
+
+                  <h1>
+                    ${escapeHtml(data.title)}
+                  </h1>
+
+                  <div class="ekg">
+
+                    <svg
+                      viewBox="0 0 900 40"
+                      preserveAspectRatio="none"
+                    >
+
+                      <path
+                        d="${escapeHtml(data.ekgPath)}"
+                      />
+
+                    </svg>
+
+                  </div>
+
+                </div>
+
+
+                <p>
+                  ${data.summaryHtml}
+                </p>
+
+
+                ${incidentsHtml}
+
+
+                <div class="section-divider">
+                </div>
+
+
+                <div class="section-title">
+                  System vitals
+                </div>
+
+
+                <div style="margin-top:6px;">
+
+                  Pulse:
+
+                  <span
+                    class="score-${escapeHtml(data.scoreClass)}"
+                  >
+
+                    ${escapeHtml(data.pulseLabel)}
+                    ·
+                    ${escapeHtml(data.pulseScore)}%
+
+                  </span>
+
+                </div>
+
+
+                ${revenueHtml}
+
+                ${moodHtml}
+
+              </div>
+
+
+              <p class="quote">
+                ${escapeHtml(data.quote)}
+              </p>
+
+
+              <div class="dashboard-area">
+
+                ${escapeHtml(
+                  data.dashboardCTA?.before || ''
+                )}
+
+                <a
+                  class="dashboard-link"
+                  href="${escapeHtml(data.dashboardLink)}"
+                >
+
+                  ${escapeHtml(
+                    data.dashboardCTA?.link ||
+                    'Open dashboard.'
+                  )}
+
+                </a>
+
+              </div>
+
+
+              <div class="footer">
+
+                <hr>
+
+                <span class="fade">
+                  Never Miss a Beat.
+                </span>
+
+              </div>
+            `;
 
         })
+
         .catch(error => {
 
-          document.getElementById('output').textContent =
-            'Reality data error: ' + error;
+          document
+            .getElementById('app')
+            .innerHTML = `
+
+              <div class="box">
+
+                <strong>
+                  Reality Mode unavailable.
+                </strong>
+
+                <p>
+                  ${escapeHtml(error.message)}
+                </p>
+
+              </div>
+            `;
 
         });
 
