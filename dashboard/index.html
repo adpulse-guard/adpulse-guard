@@ -2643,16 +2643,19 @@ if (loading) {
 
       requestAnimationFrame(() => {
 
-        renderDashboard(
-          allRows,
-          activeDate,
-          '',
-          animateMetrics
-        );
-        renderOverviewData(
-  j,
-  animateMetrics
-);
+  /*
+  renderDashboard(
+    allRows,
+    activeDate,
+    '',
+    animateMetrics
+  );
+  */
+
+  renderOverviewData(
+    j,
+    animateMetrics
+  );
 
         // Dropdown counts moraju da ostanu
         // server-side counts pre issue filtera
