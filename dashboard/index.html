@@ -2364,6 +2364,147 @@ if (severityChart) {
     }
   );
 }
+  // -------------------------
+// REVENUE AT RISK TREND
+// -------------------------
+
+const revenueTrendData =
+  data.revenueTrendChart || {
+    labels: [],
+    values: []
+  };
+
+const trendLabels =
+  Array.isArray(revenueTrendData.labels)
+    ? revenueTrendData.labels
+    : [];
+
+const trendValues =
+  Array.isArray(revenueTrendData.values)
+    ? revenueTrendData.values
+    : [];
+
+const isSingleDayView =
+  !!activeDate;
+
+if (isSingleDayView) {
+
+  if (lossTrendChart) {
+    lossTrendChart.destroy();
+    lossTrendChart = null;
+  }
+
+  lossChartWrapper.style.display = 'none';
+
+} else {
+
+  lossChartWrapper.style.display = 'block';
+
+  if (lossTrendChart) {
+
+    lossTrendChart.data.labels =
+      trendLabels;
+
+    lossTrendChart.data.datasets[0].data =
+      trendValues;
+
+    lossTrendChart.update();
+
+  } else {
+
+    lossTrendChart = new Chart(
+      lossTrendChartEl,
+      {
+        type: 'line',
+
+        data: {
+          labels: trendLabels,
+
+          datasets: [{
+            data: trendValues,
+            borderColor: '#6366f1',
+            backgroundColor:
+              'rgba(99,102,241,0.04)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 4
+          }]
+        },
+
+        options: {
+          maintainAspectRatio: false,
+
+          animation: {
+            duration: 400,
+            easing: 'easeOutQuart'
+          },
+
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+
+          plugins: {
+
+            tooltip: {
+              backgroundColor:
+                document.documentElement
+                  .classList.contains('dark')
+                  ? '#2a2a3b'
+                  : '#111827',
+
+              titleColor: '#ffffff',
+              bodyColor: '#e5e7eb',
+              borderColor: '#6366f1',
+              borderWidth: 1,
+              padding: 10,
+              cornerRadius: 6,
+              displayColors: false,
+              caretPadding: 8,
+
+              callbacks: {
+
+                title: items =>
+                  `Date: ${items[0].label}`,
+
+                label: ctx =>
+                  `Estimated risk: $${Number(
+                    ctx.raw || 0
+                  ).toLocaleString()}`
+              }
+            },
+
+            legend: {
+              display: false
+            },
+
+            datalabels: {
+              align: 'top',
+              anchor: 'end',
+              offset: 6,
+
+              font: {
+                size: 11,
+                weight: '400'
+              },
+
+              color: () =>
+                document.documentElement
+                  .classList.contains('dark')
+                  ? '#9ca3af'
+                  : '#6b7280',
+
+              formatter: value =>
+                `$${Number(
+                  value || 0
+                ).toLocaleString()}`
+            }
+          }
+        }
+      }
+    );
+  }
+}
 }
 function loadOverviewData(animateMetrics = true) {
 const loading =
