@@ -1791,6 +1791,35 @@ function renderOverviewData(data, animateMetrics = true) {
   }
 
   // -------------------------
+// ZERO-ISSUE CONFETTI
+// -------------------------
+
+const totalIssues =
+  (data.incidentTypesChart?.values || [])
+    .reduce(
+      (sum, value) =>
+        sum + Number(value || 0),
+      0
+    );
+
+if (activeDate && totalIssues === 0) {
+
+  import(
+    'https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/+esm'
+  )
+    .then(module => {
+
+      module.default({
+        particleCount: 120,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+
+    })
+    .catch(() => {});
+}
+
+  // -------------------------
 // IMPACTED SLOTS FILTERED VIEW
 // -------------------------
 
