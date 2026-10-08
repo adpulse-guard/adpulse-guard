@@ -1681,99 +1681,129 @@ darkModeBtn.addEventListener('click', () => {
   if (lossTrendChart) lossTrendChart.update();
 });
 
-let renderedFromCache = false;
-const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
-if (cached && Date.now() - cached.ts < CACHE_TTL) {
-  allRows = cached.data;
-  renderedFromCache = true;
+function loadOverviewData(animateMetrics = true) {
 
-  if (activeDate) dateInput.value = activeDate;
-  updateViewModeLabel(cameFromReality ? null : activeDate);
-  requestAnimationFrame(() => {
-  renderDashboard(allRows, activeDate, '', false);
-});
-}
-const overviewParams = new URLSearchParams({
-  token: token,
-  view: 'dashboard-overview-data'
-});
+  const overviewParams = new URLSearchParams({
+    token: token,
+    view: 'dashboard-overview-data'
+  });
 
-if (activeDate) {
-  overviewParams.set('date', activeDate);
-}
-
-if (selectedIssueFilter) {
-  overviewParams.set('issue', selectedIssueFilter);
-}
-
-fetch(`${SHEET_URL}?${overviewParams.toString()}`)
-  .then(r => r.json())
-  .then(j => {
-  if (j.error) {
-    throw new Error(j.error);
+  if (activeDate) {
+    overviewParams.set('date', activeDate);
   }
 
-  const freshRows = j.data || [];
+  if (selectedIssueFilter) {
+    overviewParams.set('issue', selectedIssueFilter);
+  }
 
-    localStorage.setItem(
-      CACHE_KEY,
-      JSON.stringify({ ts: Date.now(), data: freshRows })
-    );
+  fetch(`${SHEET_URL}?${overviewParams.toString()}`)
+    .then(r => r.json())
+    .then(j => {
 
-    allRows = freshRows;
+      if (j.error) {
+        throw new Error(j.error);
+      }
 
-    if (!renderedFromCache) {
-      if (activeDate) dateInput.value = activeDate;
-      updateViewModeLabel(cameFromReality ? null : activeDate);
+      allRows = j.data || [];
+
+      if (activeDate) {
+        dateInput.value = activeDate;
+      }
+
+      updateViewModeLabel(
+        cameFromReality ? null : activeDate
+      );
 
       requestAnimationFrame(() => {
-        renderDashboard(allRows, activeDate);
+
+        renderDashboard(
+          allRows,
+          activeDate,
+          '',
+          animateMetrics
+        );
+
+        // Dropdown counts moraju da ostanu
+        // server-side counts pre issue filtera
+        const serverIssueCounts = {};
+
+        Object.entries(j.issueCounts || {})
+          .forEach(([issueKey, count]) => {
+
+            const label =
+              labelMap[issueKey] || issueKey;
+
+            serverIssueCounts[label] = count;
+          });
+
+        buildIssueDropdown(serverIssueCounts);
+        updateIssueClearVisibility();
       });
-    }
-  })
-  .catch((error) => {
-  console.error('Error fetching data:', error);
 
-  const loading = document.getElementById('loadingIndicator');
+    })
+    .catch(error => {
 
-  if (error.message === 'invalid_or_expired_token') {
-    loading.innerHTML = `
-      <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 max-w-md text-center">
-        <h2 class="text-lg font-semibold mb-2">
-          Dashboard link expired
-        </h2>
-        <p class="text-sm text-gray-500 dark:text-gray-400">
-          This email link is no longer active. Please open a newer dashboard link.
-        </p>
-      </div>
-    `;
-    loading.style.display = 'flex';
-    return;
-  }
+      console.error(
+        'Error fetching dashboard data:',
+        error
+      );
 
-  loading.innerHTML = `
-    <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 max-w-md text-center">
-      <h2 class="text-lg font-semibold mb-2">
-        Unable to load dashboard
-      </h2>
-      <p class="text-sm text-gray-500 dark:text-gray-400">
-        Please try again in a moment.
-      </p>
-    </div>
-  `;
-  loading.style.display = 'flex';
-})
-  .finally(() => {
-  const loading = document.getElementById('loadingIndicator');
+      const loading =
+        document.getElementById('loadingIndicator');
 
-  if (
-    loading &&
-    !loading.textContent.includes('Dashboard link expired') &&
-    !loading.textContent.includes('Unable to load dashboard')
-  ) {
-    loading.style.display = 'none';
-  }
-});
+      if (
+        error.message ===
+        'invalid_or_expired_token'
+      ) {
+
+        loading.innerHTML = `
+          <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 max-w-md text-center">
+            <h2 class="text-lg font-semibold mb-2">
+              Dashboard link expired
+            </h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              This email link is no longer active. Please open a newer dashboard link.
+            </p>
+          </div>
+        `;
+
+        loading.style.display = 'flex';
+        return;
+      }
+
+      loading.innerHTML = `
+        <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 max-w-md text-center">
+          <h2 class="text-lg font-semibold mb-2">
+            Unable to load dashboard
+          </h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            Please try again in a moment.
+          </p>
+        </div>
+      `;
+
+      loading.style.display = 'flex';
+    })
+    .finally(() => {
+
+      const loading =
+        document.getElementById('loadingIndicator');
+
+      if (
+        loading &&
+        !loading.textContent.includes(
+          'Dashboard link expired'
+        ) &&
+        !loading.textContent.includes(
+          'Unable to load dashboard'
+        )
+      ) {
+        loading.style.display = 'none';
+      }
+    });
+}
+
+loadOverviewData(false);
 
 dateInput.addEventListener('change', () => {
   activeDate = dateInput.value;
