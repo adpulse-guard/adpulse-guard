@@ -1789,6 +1789,55 @@ function renderOverviewData(data, animateMetrics = true) {
       'text-green-600'
     );
   }
+
+  // -------------------------
+// IMPACTED SLOTS FILTERED VIEW
+// -------------------------
+
+const affectedSlots =
+  Array.isArray(data.affectedSlots)
+    ? data.affectedSlots
+    : [];
+
+const isGlobalSelectedIssue =
+  data.isGlobalSelectedIssue === true;
+
+if (!selectedIssueFilter) {
+
+  affectedSlotsPanel.classList.add('hidden');
+  affectedSlotsList.innerHTML = '';
+
+} else if (isGlobalSelectedIssue) {
+
+  affectedSlotsPanel.classList.remove('hidden');
+
+  affectedSlotsList.innerHTML = `
+    <li class="text-xs text-gray-600 dark:text-gray-400 italic">
+      This incident impacts all ad slots on the page.
+    </li>
+  `;
+
+} else if (affectedSlots.length) {
+
+  affectedSlotsPanel.classList.remove('hidden');
+
+  affectedSlotsList.innerHTML =
+    affectedSlots.map(slot => `
+      <li class="font-sans text-xs tracking-tight
+                 text-gray-700 dark:text-gray-300
+                 leading-relaxed">
+        <span class="text-gray-400 dark:text-gray-500 mr-1">
+          •
+        </span>${slot}
+      </li>
+    `).join('');
+
+} else {
+
+  affectedSlotsPanel.classList.add('hidden');
+  affectedSlotsList.innerHTML = '';
+}
+  
   // -------------------------
 // HIGHEST IMPACT INCIDENT
 // -------------------------
