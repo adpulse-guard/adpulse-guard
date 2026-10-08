@@ -1405,9 +1405,7 @@ issueFilterNote.textContent =
   `Showing impact related to: ${fullLabel}`;
 issueFilterNote.classList.remove('hidden');
 
-requestAnimationFrame(() => {
-  renderDashboard(allRows, activeDate);
-});
+loadOverviewData();
 },
 
     plugins: {
@@ -1820,9 +1818,7 @@ if (fromParam) {
   window.history.replaceState({}, '', url);
   syncExplorerLink();
   updateViewModeLabel(cameFromReality ? null : activeDate);
-  requestAnimationFrame(() => {
-  renderDashboard(allRows, activeDate);
-});
+  loadOverviewData();
 });
 
 clearDate.addEventListener('click', () => {
@@ -1838,9 +1834,7 @@ if (fromParam) {
 window.history.replaceState({}, '', url);
   syncExplorerLink();
   updateViewModeLabel(cameFromReality ? null : '');
-  requestAnimationFrame(() => {
-  renderDashboard(allRows, '');
-});
+  loadOverviewData();
 });
 
   issueFilter.addEventListener('change', () => {
@@ -1864,9 +1858,7 @@ syncExplorerLink();
     issueFilterNote.classList.add('hidden');
   }
   updateIssueClearVisibility();
-  requestAnimationFrame(() => {
-  renderDashboard(allRows, activeDate);
-});
+  loadOverviewData();
 });
   clearIssueFilterBtn.addEventListener('click', () => {
   const url = new URL(window.location);
@@ -1878,9 +1870,7 @@ syncExplorerLink();
   issueFilterNote.classList.add('hidden');
   issueFilter.blur();
   updateIssueClearVisibility();
-  requestAnimationFrame(() => {
-  renderDashboard(allRows, activeDate);
-});
+  loadOverviewData();
 });
   updateIssueClearVisibility();
 syncExplorerLink();
