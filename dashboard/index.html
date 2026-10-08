@@ -1896,6 +1896,55 @@ if (offender && offender.slotId) {
 
   box.classList.add('hidden');
 }
+
+  // -------------------------
+// SECURITY & ACCESS SIGNALS
+// -------------------------
+
+const securityWidget =
+  document.getElementById('securityWidget');
+
+const securityList =
+  document.getElementById('securityList');
+
+const securityCountEl =
+  document.getElementById('securityCount');
+
+const securityCounts =
+  data.securityCounts || {};
+
+const totalSecurity =
+  Object.values(securityCounts)
+    .reduce((a, b) => a + Number(b || 0), 0);
+
+if (totalSecurity > 0) {
+
+  securityWidget.classList.remove('hidden');
+
+  securityCountEl.textContent =
+    `${totalSecurity} signal${totalSecurity > 1 ? 's' : ''}`;
+
+  securityList.innerHTML =
+    Object.entries(securityCounts)
+      .map(([issueKey, count]) => {
+
+        const label =
+          labelMap[issueKey] || issueKey;
+
+        return `
+          <li class="flex justify-between items-center">
+            <span>${label}</span>
+            <span class="text-gray-500">${count}</span>
+          </li>
+        `;
+      })
+      .join('');
+
+} else {
+
+  securityWidget.classList.add('hidden');
+  securityList.innerHTML = '';
+}
 }
 function loadOverviewData(animateMetrics = true) {
 const loading =
