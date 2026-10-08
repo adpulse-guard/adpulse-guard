@@ -1945,6 +1945,247 @@ if (totalSecurity > 0) {
   securityWidget.classList.add('hidden');
   securityList.innerHTML = '';
 }
+  // -------------------------
+// INCIDENT TYPES CHART
+// -------------------------
+
+const incidentChartData =
+  data.incidentTypesChart || {
+    labels: [],
+    values: []
+  };
+
+const fullLabels =
+  Array.isArray(incidentChartData.labels)
+    ? incidentChartData.labels
+    : [];
+
+const values =
+  Array.isArray(incidentChartData.values)
+    ? incidentChartData.values
+    : [];
+
+const labels =
+  fullLabels.map(label =>
+    shortLabelMap[label] || label
+  );
+
+const issueKeys =
+  fullLabels.map(label =>
+    Object.entries(labelMap)
+      .find(([key, value]) =>
+        value === label
+      )?.[0] || ''
+  );
+
+const bgColors =
+  labels.map(() => APG_BRAND.primary);
+
+if (issueChart) {
+
+  issueChart.data.labels = labels;
+  issueChart.data.datasets[0].data =
+    values;
+
+  issueChart.data.datasets[0]
+    .backgroundColor = bgColors;
+
+  issueChart.data.datasets[0]
+    .hoverBackgroundColor = bgColors;
+
+  issueChart.update('none');
+
+} else {
+
+  issueChart = new Chart(
+    issueChartEl,
+    {
+      type: 'bar',
+
+      data: {
+        labels: labels,
+        datasets: [{
+          data: values,
+          backgroundColor: bgColors,
+          hoverBackgroundColor: bgColors
+        }]
+      },
+
+      options: {
+        maintainAspectRatio: false,
+
+        hover: {
+          mode: 'index',
+          intersect: false
+        },
+
+        animation: {
+          duration: 300,
+          easing: 'easeOutCubic'
+        },
+
+        onClick: (evt, elements) => {
+
+          if (!elements.length) return;
+
+          const index =
+            elements[0].index;
+
+          const issueKey =
+            issueKeys[index];
+
+          const fullLabel =
+            fullLabels[index];
+
+          if (!issueKey) return;
+
+          selectedIssueFilter =
+            issueKey;
+
+          issueFilter.value =
+            issueKey;
+
+          const url =
+            new URL(window.location);
+
+          url.searchParams.set(
+            'issue',
+            issueKey
+          );
+
+          if (activeDate) {
+            url.searchParams.set(
+              'date',
+              activeDate
+            );
+          }
+
+          if (fromParam) {
+            url.searchParams.set(
+              'from',
+              fromParam
+            );
+          }
+
+          window.history.replaceState(
+            {},
+            '',
+            url
+          );
+
+          syncExplorerLink();
+          updateIssueClearVisibility();
+
+          issueFilterNote.textContent =
+            `Showing impact related to: ${fullLabel}`;
+
+          issueFilterNote
+            .classList.remove('hidden');
+
+          loadOverviewData();
+        },
+
+        plugins: {
+
+          tooltip: {
+            backgroundColor:
+              document.documentElement
+                .classList.contains('dark')
+                ? '#2a2a3b'
+                : '#111827',
+
+            titleColor: '#ffffff',
+            bodyColor: '#e5e7eb',
+            borderColor: '#6366f1',
+            borderWidth: 1,
+            padding: 10,
+            cornerRadius: 6,
+            displayColors: false,
+            caretPadding: 8,
+
+            callbacks: {
+
+              title: items =>
+                fullLabels[
+                  items[0].dataIndex
+                ],
+
+              label: ctx => {
+
+                const value =
+                  ctx.raw;
+
+                const total =
+                  ctx.dataset.data
+                    .reduce(
+                      (a, b) => a + b,
+                      0
+                    );
+
+                const pct =
+                  total
+                    ? Math.round(
+                        (value / total) * 100
+                      )
+                    : 0;
+
+                return [
+                  `${value} incidents`,
+                  `~${pct}% of all incidents`
+                ];
+              }
+            }
+          },
+
+          legend: {
+            display: false
+          },
+
+          datalabels: {
+            color: '#ffffff',
+            anchor: 'center',
+            align: 'center',
+
+            font: {
+              weight: 'bold',
+              size: 12
+            }
+          }
+        },
+
+        scales: {
+
+          x: {
+            ticks: {
+              color: '#9ca3af',
+              autoSkip: false,
+              maxRotation: 0,
+              font: {
+                size: 11
+              }
+            }
+          },
+
+          y: {
+            beginAtZero: true,
+
+            ticks: {
+              color: '#9ca3af',
+              font: {
+                size: 11
+              }
+            },
+
+            grid: {
+              color:
+                'rgba(156,163,175,0.2)'
+            }
+          }
+        }
+      }
+    }
+  );
+}
 }
 function loadOverviewData(animateMetrics = true) {
 const loading =
