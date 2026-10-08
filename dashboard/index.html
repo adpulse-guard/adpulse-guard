@@ -2505,6 +2505,54 @@ if (isSingleDayView) {
     );
   }
 }
+  // -------------------------
+// SYSTEM VITALS
+// -------------------------
+
+const systemVitals =
+  data.systemVitals || {};
+
+const statusEl =
+  document.getElementById('lastUpdated');
+
+if (statusEl) {
+
+  statusEl.textContent =
+    systemVitals.statusText ||
+    'System Status: Operational';
+
+  statusEl.classList.remove(
+    'text-indigo-600',
+    'text-indigo-500',
+    'text-indigo-400',
+    'dark:text-indigo-300',
+    'dark:text-indigo-400',
+    'text-gray-400',
+    'dark:text-gray-500'
+  );
+
+  const minutesAgo =
+    Number(systemVitals.minutesAgo);
+
+  if (
+    !systemVitals.lastIncidentAt ||
+    !Number.isFinite(minutesAgo) ||
+    minutesAgo < 1440
+  ) {
+
+    statusEl.classList.add(
+      'text-indigo-500',
+      'dark:text-indigo-400'
+    );
+
+  } else {
+
+    statusEl.classList.add(
+      'text-gray-400',
+      'dark:text-gray-500'
+    );
+  }
+}
 }
 function loadOverviewData(animateMetrics = true) {
 const loading =
