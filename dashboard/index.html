@@ -1693,7 +1693,20 @@ if (cached && Date.now() - cached.ts < CACHE_TTL) {
   renderDashboard(allRows, activeDate, '', false);
 });
 }
-fetch(`${SHEET_URL}?token=${token}`)
+const overviewParams = new URLSearchParams({
+  token: token,
+  view: 'dashboard-overview-data'
+});
+
+if (activeDate) {
+  overviewParams.set('date', activeDate);
+}
+
+if (selectedIssueFilter) {
+  overviewParams.set('issue', selectedIssueFilter);
+}
+
+fetch(`${SHEET_URL}?${overviewParams.toString()}`)
   .then(r => r.json())
   .then(j => {
   if (j.error) {
