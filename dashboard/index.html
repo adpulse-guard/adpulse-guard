@@ -1756,7 +1756,12 @@ function renderOverviewData(data, animateMetrics = true) {
 
   const revenueAtRisk =
     Number(data.revenueAtRisk || 0);
+  dailyLossEl.style.transform = 'scale(1.08)';
+dailyLossEl.style.transition = 'transform 0.25s ease';
 
+setTimeout(() => {
+  dailyLossEl.style.transform = 'scale(1)';
+}, 250);
   if (animateMetrics) {
 
     animateCurrency(
@@ -1777,19 +1782,30 @@ function renderOverviewData(data, animateMetrics = true) {
       )}`;
   }
 
-  if (revenueAtRisk === 0) {
+  dailyLossEl.classList.remove(
+  'text-green-600',
+  'text-red-600',
+  'dark:text-[#ef4444]/80',
+  'bg-gradient-to-r',
+  'from-red-600',
+  'to-red-500',
+  'bg-clip-text',
+  'text-transparent'
+);
 
-    dailyLossEl.classList.add(
-      'text-green-600'
-    );
+if (revenueAtRisk === 0) {
 
-  } else {
+  dailyLossEl.classList.add(
+    'text-green-600'
+  );
 
-    dailyLossEl.classList.remove(
-      'text-green-600'
-    );
-  }
+} else {
 
+  dailyLossEl.classList.add(
+    'text-red-600',
+    'dark:text-[#ef4444]/80'
+  );
+}
   // -------------------------
 // ZERO-ISSUE CONFETTI
 // -------------------------
