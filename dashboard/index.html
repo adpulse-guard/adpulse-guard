@@ -2186,6 +2186,184 @@ if (issueChart) {
     }
   );
 }
+  // -------------------------
+// SEVERITY BREAKDOWN CHART
+// -------------------------
+
+const severityChartData =
+  data.severityChart || {
+    labels: [],
+    values: []
+  };
+
+const severityLabels =
+  Array.isArray(severityChartData.labels)
+    ? severityChartData.labels
+    : [];
+
+const severityValues =
+  Array.isArray(severityChartData.values)
+    ? severityChartData.values
+    : [];
+
+const isDark =
+  document.documentElement
+    .classList.contains('dark');
+
+const severityColorMap = {
+  HIGH: isDark
+    ? 'rgba(239,68,68,0.80)'
+    : 'rgba(220,38,38,0.85)',
+
+  MEDIUM: isDark
+    ? 'rgba(251,191,36,0.72)'
+    : APG_BRAND.warning,
+
+  LOW: APG_BRAND.primarySoft,
+
+  INFO: isDark
+    ? '#6b7280'
+    : '#9ca3af'
+};
+
+const severityColors =
+  severityLabels.map(
+    severity =>
+      severityColorMap[severity] ||
+      '#9ca3af'
+  );
+
+if (severityChart) {
+
+  severityChart.data.labels =
+    severityLabels;
+
+  severityChart.data.datasets[0].data =
+    severityValues;
+
+  severityChart.data.datasets[0]
+    .backgroundColor =
+      severityColors;
+
+  severityChart.update();
+
+} else {
+
+  severityChart = new Chart(
+    severityChartEl,
+    {
+      type: 'pie',
+
+      data: {
+        labels: severityLabels,
+
+        datasets: [{
+          data: severityValues,
+          backgroundColor:
+            severityColors,
+
+          borderColor:
+            '#ffffff',
+
+          borderWidth: 1.4
+        }]
+      },
+
+      options: {
+        maintainAspectRatio: false,
+
+        plugins: {
+
+          tooltip: {
+            backgroundColor:
+              document.documentElement
+                .classList.contains('dark')
+                ? '#2a2a3b'
+                : '#111827',
+
+            titleColor: '#ffffff',
+            bodyColor: '#e5e7eb',
+            borderColor: '#6366f1',
+            borderWidth: 1,
+            padding: 10,
+            cornerRadius: 6,
+            displayColors: false,
+            caretPadding: 8,
+
+            callbacks: {
+
+              title: () => null,
+
+              label: ctx => {
+
+                const value =
+                  Number(ctx.raw || 0);
+
+                const total =
+                  ctx.dataset.data.reduce(
+                    (a, b) =>
+                      a + Number(b || 0),
+                    0
+                  );
+
+                const pct =
+                  total
+                    ? Math.round(
+                        (value / total) * 100
+                      )
+                    : 0;
+
+                return [
+                  `${value} incidents`,
+                  `~${pct}% of all incidents`
+                ];
+              }
+            }
+          },
+
+          legend: {
+            position: 'bottom',
+
+            labels: {
+              boxWidth: 12,
+              padding: 18,
+
+              font: {
+                size: 11,
+                weight: '500'
+              }
+            }
+          },
+
+          datalabels: {
+            color: '#ffffff',
+
+            font: {
+              weight: '600',
+              size: 12
+            },
+
+            formatter: (value, ctx) => {
+
+              const total =
+                ctx.dataset.data.reduce(
+                  (a, b) =>
+                    a + Number(b || 0),
+                  0
+                );
+
+              return total
+                ? Math.round(
+                    (value / total) * 100
+                  ) + '%'
+                : '';
+            }
+          }
+        }
+      }
+    }
+  );
+}
 }
 function loadOverviewData(animateMetrics = true) {
 const loading =
