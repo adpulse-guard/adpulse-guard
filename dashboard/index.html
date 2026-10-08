@@ -1789,6 +1789,113 @@ function renderOverviewData(data, animateMetrics = true) {
       'text-green-600'
     );
   }
+  // -------------------------
+// HIGHEST IMPACT INCIDENT
+// -------------------------
+
+const box =
+  document.getElementById('topOffenderBox');
+
+const offender = data.topOffender;
+
+if (offender && offender.slotId) {
+
+  box.classList.remove('hidden');
+
+  const offenderSlotEl =
+    document.getElementById('offenderSlot');
+
+  const offenderSlotLabelEl =
+    document.querySelector(
+      '#topOffenderBox strong'
+    );
+
+  const isGlobalSlot =
+    offender.slotId === '__global__';
+
+  if (isGlobalSlot) {
+
+    offenderSlotLabelEl.textContent =
+      'Scope:';
+
+    offenderSlotEl.textContent =
+      'Page-level impact (all ad slots)';
+
+  } else {
+
+    offenderSlotLabelEl.textContent =
+      'Slot:';
+
+    offenderSlotEl.textContent =
+      offender.slotId;
+  }
+
+  document.getElementById(
+    'offenderLoss'
+  ).textContent =
+    `$${Number(
+      offender.revenue || 0
+    ).toLocaleString(
+      undefined,
+      {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }
+    )}`;
+
+  const pages =
+    Array.isArray(offender.pages)
+      ? offender.pages
+      : [];
+
+  document.getElementById(
+    'offenderPage'
+  ).innerHTML = pages.length
+    ? `
+      <div class="max-h-40 overflow-auto pr-1">
+        <ul class="list-disc list-inside space-y-1 text-xs">
+          ${pages.map(p => `
+            <li>
+              <a
+                href="${p}"
+                target="_blank"
+                class="text-indigo-400 hover:text-indigo-300 no-underline hover:underline break-all"
+              >
+                ${p}
+              </a>
+            </li>
+          `).join('')}
+        </ul>
+      </div>
+    `
+    : `
+      <span class="text-xs text-gray-400 italic">
+        No page URLs available
+      </span>
+    `;
+
+  const issues =
+    Array.isArray(offender.issues)
+      ? offender.issues
+      : [];
+
+  document.getElementById(
+    'offenderIssue'
+  ).innerHTML =
+    issues.map(issue => `
+      <span class="inline-flex items-center
+             bg-indigo-50 text-indigo-600
+             dark:bg-indigo-900/30 dark:text-indigo-300
+             text-xs px-2 py-0.5 rounded
+             font-medium tracking-tight mr-1">
+        ${labelMap[issue] || issue}
+      </span>
+    `).join('');
+
+} else {
+
+  box.classList.add('hidden');
+}
 }
 function loadOverviewData(animateMetrics = true) {
 const loading =
