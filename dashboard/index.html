@@ -1685,7 +1685,9 @@ function renderOverviewData(data, animateMetrics = true) {
   // -------------------------
 
   const reliability =
-    Number(data.deliveryHealth || 0);
+  data.deliveryHealth === null
+    ? null
+    : Number(data.deliveryHealth);
 
   const deliveringSlots =
     Number(data.deliveringSlots || 0);
@@ -1696,6 +1698,17 @@ function renderOverviewData(data, animateMetrics = true) {
   const reliabilityEl =
     document.getElementById('reliabilityScore');
 
+  if (reliability === null) {
+
+  reliabilityEl.textContent = 'N/A';
+
+  document.getElementById(
+    'reliabilityDetails'
+  ).textContent =
+    'Expected slot data unavailable';
+
+} else {
+
   reliabilityEl.textContent =
     reliability + '%';
 
@@ -1703,6 +1716,7 @@ function renderOverviewData(data, animateMetrics = true) {
     'reliabilityDetails'
   ).textContent =
     `${deliveringSlots} / ${expectedSlots} expected slots delivering`;
+}
 
   reliabilityEl.classList.remove(
     'text-green-600',
@@ -1710,31 +1724,34 @@ function renderOverviewData(data, animateMetrics = true) {
     'text-red-600',
     'dark:text-green-400',
     'dark:text-orange-400',
-    'dark:text-red-400',
-    'dark:text-[#ef4444]/80'
+    'dark:text-red-400',if (reliability === null) {
+
+  reliabilityEl.classList.add(
+    'text-gray-400',
+    'dark:text-gray-500'
   );
 
-  if (reliability >= 90) {
+} else if (reliability >= 90) {
 
-    reliabilityEl.classList.add(
-      'text-green-600',
-      'dark:text-green-400'
-    );
+  reliabilityEl.classList.add(
+    'text-green-600',
+    'dark:text-green-400'
+  );
 
-  } else if (reliability >= 50) {
+} else if (reliability >= 50) {
 
-    reliabilityEl.classList.add(
-      'text-orange-600',
-      'dark:text-orange-400'
-    );
+  reliabilityEl.classList.add(
+    'text-orange-600',
+    'dark:text-orange-400'
+  );
 
-  } else {
+} else {
 
-    reliabilityEl.classList.add(
-      'text-red-600',
-      'dark:text-[#ef4444]/80'
-    );
-  }
+  reliabilityEl.classList.add(
+    'text-red-600',
+    'dark:text-[#ef4444]/80'
+  );
+}
 
 
   // -------------------------
