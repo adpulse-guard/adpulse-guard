@@ -1681,30 +1681,32 @@ darkModeBtn.addEventListener('click', () => {
 function renderOverviewData(data, animateMetrics = true) {
 
   // -------------------------
-  // AD DELIVERY HEALTH
-  // -------------------------
+// AD DELIVERY HEALTH
+// -------------------------
 
-  const reliability =
+const reliability =
   data.deliveryHealth === null
     ? null
     : Number(data.deliveryHealth);
 
-  const deliveringSlots =
-    Number(data.deliveringSlots || 0);
+const deliveringSlots =
+  Number(data.deliveringSlots || 0);
 
-  const expectedSlots =
-    Number(data.deliveryExpectedSlots || 0);
+const expectedSlots =
+  Number(data.deliveryExpectedSlots || 0);
 
-  const reliabilityEl =
-    document.getElementById('reliabilityScore');
+const reliabilityEl =
+  document.getElementById('reliabilityScore');
 
-  if (reliability === null) {
+const reliabilityDetailsEl =
+  document.getElementById('reliabilityDetails');
+
+
+if (reliability === null) {
 
   reliabilityEl.textContent = 'N/A';
 
-  document.getElementById(
-    'reliabilityDetails'
-  ).textContent =
+  reliabilityDetailsEl.textContent =
     'Expected slot data unavailable';
 
 } else {
@@ -1712,19 +1714,25 @@ function renderOverviewData(data, animateMetrics = true) {
   reliabilityEl.textContent =
     reliability + '%';
 
-  document.getElementById(
-    'reliabilityDetails'
-  ).textContent =
+  reliabilityDetailsEl.textContent =
     `${deliveringSlots} / ${expectedSlots} expected slots delivering`;
 }
 
-  reliabilityEl.classList.remove(
-    'text-green-600',
-    'text-orange-600',
-    'text-red-600',
-    'dark:text-green-400',
-    'dark:text-orange-400',
-    'dark:text-red-400',if (reliability === null) {
+
+reliabilityEl.classList.remove(
+  'text-green-600',
+  'text-orange-600',
+  'text-red-600',
+  'dark:text-green-400',
+  'dark:text-orange-400',
+  'dark:text-red-400',
+  'dark:text-[#ef4444]/80',
+  'text-gray-400',
+  'dark:text-gray-500'
+);
+
+
+if (reliability === null) {
 
   reliabilityEl.classList.add(
     'text-gray-400',
@@ -1752,7 +1760,6 @@ function renderOverviewData(data, animateMetrics = true) {
     'dark:text-[#ef4444]/80'
   );
 }
-
 
   // -------------------------
   // REVENUE-IMPACTING SLOTS
