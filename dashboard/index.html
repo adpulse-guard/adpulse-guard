@@ -1733,27 +1733,25 @@ console.time('APG_RENDER');
         cameFromReality ? null : activeDate
       );
 
-      requestAnimationFrame(() => {
+      renderOverviewData(
+  j,
+  animateMetrics
+);
 
-  renderOverviewData(
-    j,
-    animateMetrics
-  );
-console.timeEnd('APG_RENDER');
-        const serverIssueCounts = {};
+const serverIssueCounts = {};
 
-        Object.entries(j.issueCounts || {})
-          .forEach(([issueKey, count]) => {
+Object.entries(j.issueCounts || {})
+  .forEach(([issueKey, count]) => {
 
-            const label =
-              labelMap[issueKey] || issueKey;
+    const label =
+      labelMap[issueKey] || issueKey;
 
-            serverIssueCounts[label] = count;
-          });
+    serverIssueCounts[label] =
+      count;
+  });
 
-        buildIssueDropdown(serverIssueCounts);
-        updateIssueClearVisibility();
-      });
+buildIssueDropdown(serverIssueCounts);
+updateIssueClearVisibility();
 
     })
     .catch(error => {
