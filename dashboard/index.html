@@ -1715,7 +1715,7 @@ function loadOverviewData(animateMetrics = true) {
   fetch(`${SHEET_URL}?${overviewParams.toString()}`)
     .then(r => r.json())
     .then(j => {
-
+console.time('APG_RENDER');
       if (j.error) {
         throw new Error(j.error);
       }
@@ -1736,9 +1736,7 @@ function loadOverviewData(animateMetrics = true) {
     j,
     animateMetrics
   );
-
-        // Dropdown counts moraju da ostanu
-        // server-side counts pre issue filtera
+console.timeEnd('APG_RENDER');
         const serverIssueCounts = {};
 
         Object.entries(j.issueCounts || {})
