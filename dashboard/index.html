@@ -511,8 +511,7 @@ select.appendChild(groupHeader);
 };
 
 let issueChart, severityChart, lossTrendChart;
-let allRows = [];
-
+    
 const dateInput = document.getElementById('dateFilter');
 const clearDate = document.getElementById('clearDate');
 const viewModeLabel = document.getElementById('viewModeLabel');
@@ -570,23 +569,6 @@ function updateViewModeLabel(selectedDate) {
   }
 }
   updateViewModeLabel(cameFromReality ? null : activeDate);
-function getLastIssueTimestamp(rows) {
-  if (!rows || !rows.length) return null;
-
-  const timestamps = rows
-    .map(r => new Date(r.receivedAt).getTime())
-    .filter(ts => !isNaN(ts));
-
-  return timestamps.length ? Math.max(...timestamps) : null;
-}
-function incidentKey(r) {
-  const dateKey = (r.receivedAt || '').split('T')[0] || '';
-  const slot = r.slotId || '__global__';
-  const page = r.pageUrl || '';
-  return r.pageLoadId
-    ? `${r.pageLoadId}__${r.issueType}__${slot}`
-    : `${dateKey}__${page}__${r.issueType}__${slot}`;
-}
 
 const darkModeBtn = document.getElementById('darkModeBtn');
 const modeLabel = document.getElementById('modeLabel');
@@ -1651,8 +1633,6 @@ if (loading) {
       if (j.error) {
         throw new Error(j.error);
       }
-
-      allRows = j.data || [];
 
       if (activeDate) {
         dateInput.value = activeDate;
