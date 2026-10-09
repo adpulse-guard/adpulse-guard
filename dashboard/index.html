@@ -354,8 +354,6 @@ const severityChartEl = document.getElementById('severityChart');
 const lossTrendChartEl = document.getElementById('lossTrendChart');
 
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxAD4aNij0ApHx21r68hq5TLx2k2r3VT9_obEe7I-EX_l3JGDQSnrY84LcA4QG8Ldf2ig/exec';
-const CACHE_KEY = `apg_cache_${token}`;
-const CACHE_TTL = 5 * 60 * 1000;
 
 const labelMap = {
   gpt_script_missing: 'GPT script missing',
@@ -391,12 +389,6 @@ const labelMap = {
   'Ad visibility impaired': 'Visibility',
   'Slot container collapsed': 'Collapsed'
 };
-  const SECURITY_ISSUES = [
-  'token_invalid',
-  'clientId_mismatch',
-  'expectedNetworkId_mismatch',
-  'unauthorized_domain'
-];
   const ISSUE_GROUPS = {
   DELIVERY: [
     'gpt_script_missing',
