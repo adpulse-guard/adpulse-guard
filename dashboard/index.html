@@ -1711,11 +1711,9 @@ function loadOverviewData(animateMetrics = true) {
   if (selectedIssueFilter) {
     overviewParams.set('issue', selectedIssueFilter);
   }
-console.time('APG_FETCH_TOTAL');
   fetch(`${SHEET_URL}?${overviewParams.toString()}`)
     .then(r => r.json())
     .then(j => {
-  console.timeEnd('APG_FETCH_TOTAL');
 
   if (j.error) {
         throw new Error(j.error);
