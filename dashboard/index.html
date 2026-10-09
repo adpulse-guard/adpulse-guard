@@ -1715,7 +1715,6 @@ console.time('APG_FETCH_TOTAL');
   fetch(`${SHEET_URL}?${overviewParams.toString()}`)
     .then(r => r.json())
     .then(j => {
-console.time('APG_RENDER');
   console.timeEnd('APG_FETCH_TOTAL');
 
   if (j.error) {
