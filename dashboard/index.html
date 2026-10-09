@@ -354,7 +354,54 @@ const severityChartEl = document.getElementById('severityChart');
 const lossTrendChartEl = document.getElementById('lossTrendChart');
 
 const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxAD4aNij0ApHx21r68hq5TLx2k2r3VT9_obEe7I-EX_l3JGDQSnrY84LcA4QG8Ldf2ig/exec';
+const OVERVIEW_CACHE_TTL = 5 * 60 * 1000;
 
+function getOverviewCacheKey() {
+  const dateKey = activeDate || 'summary';
+  const issueKey = selectedIssueFilter || 'all';
+
+  return `apg_overview_${token}_${dateKey}_${issueKey}`;
+}
+
+function getCachedOverview() {
+  try {
+    const raw = sessionStorage.getItem(
+      getOverviewCacheKey()
+    );
+
+    if (!raw) return null;
+
+    const cached = JSON.parse(raw);
+
+    if (
+      !cached.timestamp ||
+      Date.now() - cached.timestamp > OVERVIEW_CACHE_TTL
+    ) {
+      sessionStorage.removeItem(
+        getOverviewCacheKey()
+      );
+
+      return null;
+    }
+
+    return cached.data || null;
+
+  } catch {
+    return null;
+  }
+}
+
+function setCachedOverview(data) {
+  try {
+    sessionStorage.setItem(
+      getOverviewCacheKey(),
+      JSON.stringify({
+        timestamp: Date.now(),
+        data: data
+      })
+    );
+  } catch {}
+}
 const labelMap = {
   gpt_script_missing: 'GPT script missing',
   gpt_loaded_but_not_initialized: 'GPT loaded but not initialized',
@@ -1599,12 +1646,59 @@ if (statusEl) {
 }
 }
 function loadOverviewData(animateMetrics = true) {
-const loading =
-  document.getElementById('loadingIndicator');
 
-if (loading) {
-  loading.style.display = 'flex';
-}
+  const loading =
+    document.getElementById('loadingIndicator');
+
+  const cachedData =
+    getCachedOverview();
+
+  if (cachedData) {
+
+    renderOverviewData(
+      cachedData,
+      false
+    );
+
+    const serverIssueCounts = {};
+
+    Object.entries(
+      cachedData.issueCounts || {}
+    ).forEach(([issueKey, count]) => {
+
+      const label =
+        labelMap[issueKey] || issueKey;
+
+      serverIssueCounts[label] =
+        count;
+    });
+
+    buildIssueDropdown(
+      serverIssueCounts
+    );
+
+    updateIssueClearVisibility();
+
+    if (activeDate) {
+      dateInput.value = activeDate;
+    }
+
+    updateViewModeLabel(
+      cameFromReality
+        ? null
+        : activeDate
+    );
+
+    if (loading) {
+      loading.style.display = 'none';
+    }
+
+    return;
+  }
+
+  if (loading) {
+    loading.style.display = 'flex';
+  }
   const overviewParams = new URLSearchParams({
     token: token,
     view: 'dashboard-overview-data'
@@ -1625,7 +1719,9 @@ if (loading) {
       if (j.error) {
         throw new Error(j.error);
       }
-
+      
+      setCachedOverview(j);
+      
       if (activeDate) {
         dateInput.value = activeDate;
       }
