@@ -396,62 +396,6 @@ if (groupKey === 'LAYOUT') {
   });
 }
 
-function renderList(rows) {
-
-  const container = document.getElementById('incidentList');
-
-  if (!rows.length) {
-  container.innerHTML = `
-    <div class="text-sm text-gray-400 dark:text-gray-400">
-      No incidents found
-    </div>
-  `;
-  return;
-}
-
-  container.innerHTML = rows.map(r => {
-
-  const severity = (r.severity || 'INFO').toUpperCase();
-
-  return `
-    <div class="bg-white dark:bg-darkcard rounded-xl shadow-sm border border-gray-200 dark:border-gray-600/30
-            hover:shadow-md hover:border-indigo-300
-            transition-all duration-200">
-
-      <!-- PAGE -->
-      <div class="text-xs text-gray-400 dark:text-gray-400 mb-1 break-all">
-        ${r.pageUrl || '—'}
-      </div>
-
-      <!-- ISSUE -->
-      <div class="text-sm font-semibold ${color}">
-        ${labelMap[r.issueType] || r.issueType}
-      </div>
-
-      <!-- SLOT -->
-      <div class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-        Slot: ${r.slotId || '—'}
-      </div>
-
-      <!-- FOOTER -->
-      <div class="flex justify-between items-center mt-3">
-
-        <div class="text-sm font-medium text-gray-700 dark:text-gray-200">
-          $${Number(r.estimatedDailyRevenueRisk || 0).toFixed(2)}
-        </div>
-
-        <div class="text-xs text-gray-400 dark:text-gray-400">
-          ${new Date(r.receivedAt).toLocaleTimeString()}
-        </div>
-
-      </div>
-
-    </div>
-  `;
-}).join('');
-
-}
-
 document.getElementById('dateFilter')
   .addEventListener('change', e => {
     activeDate = e.target.value;
@@ -605,20 +549,6 @@ function toggleChecks(id) {
   const el = document.getElementById(`checks-${id}`);
   if (!el) return;
   el.classList.toggle('hidden');
-}
-function togglePage(id) {
-  const el = document.getElementById(`group-${id}`);
-  const arrow = document.getElementById(`arrow-${id}`);
-
-  if (!el) return;
-
-  const isHidden = el.classList.contains('hidden');
-
-  el.classList.toggle('hidden');
-
-  if (arrow) {
-    arrow.textContent = isHidden ? '▼' : '▶';
-  }
 }
 
 const darkModeBtn = document.getElementById('darkModeBtn');
