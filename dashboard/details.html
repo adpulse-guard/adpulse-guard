@@ -547,7 +547,7 @@ if (activeDate) {
 
 window.history.replaceState({}, '', url);
 syncOverviewLink();
-applyFilters();
+loadExplorerData();
   });
 
 const clearDate = document.getElementById('clearDate');
@@ -559,7 +559,7 @@ clearDate.addEventListener('click', () => {
   window.history.replaceState({}, '', url);
   document.getElementById('dateFilter').value = '';
   syncOverviewLink();
-  applyFilters();
+  loadExplorerData();
 });
 
 document.getElementById('issueFilter')
@@ -585,7 +585,7 @@ if (selectedIssue) {
 }
 
 updateIssueClearVisibility();
-applyFilters();
+loadExplorerData();
   });
 
 document.getElementById('pageList').innerHTML = `
@@ -609,7 +609,7 @@ function hydrateExplorer(rows) {
     issueFilterNote.classList.remove('hidden');
   }
 
-  applyFilters();
+  loadExplorerData();
   updateIssueClearVisibility();
 }
 
@@ -694,6 +694,10 @@ function loadExplorerData() {
       `;
     });
 }
+  
+if (activeDate) {
+  document.getElementById('dateFilter').value = activeDate;
+}
 
 loadExplorerData();
   
@@ -746,7 +750,7 @@ clearIssueFilterBtn.addEventListener('click', () => {
   issueFilterNote.classList.add('hidden');
 
   updateIssueClearVisibility();
-  applyFilters();
+  loadExplorerData();
 
 });
 
@@ -853,189 +857,198 @@ setTimeout(() => {
 }
 function renderDetails(page, data) {
 
-  const container = document.getElementById('detailsContent');
+  const container =
+    document.getElementById('detailsContent');
 
-  const issueMap = new Map();
+  const pageRevenue =
+    Number(data.totalImpact || 0);
 
-  const pageRevenue = Math.max(
-    ...data.incidents.map(r => Number(r.estimatedDailyRevenueRisk || 0))
-  );
-
-  const totalPageRevenue = pageRevenue || 1;
-
-  const uniqueSlots = new Set(
-    data.incidents.map(r => r.slotId).filter(Boolean)
-  );
-
-  const slotCount = uniqueSlots.size || 1;
-  const valuePerSlot = pageRevenue / slotCount;
-
-  data.incidents.forEach(r => {
-
-    const issue = r.issueType || 'unknown';
-
-    if (!issueMap.has(issue)) {
-      issueMap.set(issue, {
-        slots: new Set(),
-        total: 0,
-        severity: r.severity
-      });
-    }
-
-    if (!issueMap.get(issue).slots.has(r.slotId)) {
-      issueMap.get(issue).slots.add(r.slotId);
-      issueMap.get(issue).total += valuePerSlot;
-    }
-
-  });
+  const issues =
+    Array.isArray(data.issues)
+      ? data.issues
+      : [];
 
   container.innerHTML = `
     <div class="flex justify-between items-start mb-6">
 
-  <div>
-    <div class="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium">
-      Page
-    </div>
+      <div>
+        <div class="text-[11px] text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium">
+          Page
+        </div>
 
-    <a href="${page}" target="_blank"
-       class="text-sm font-semibold text-indigo-600 hover:text-indigo-700 hover:underline break-all">
-      ${page}
-    </a>
-  </div>
-
-  <div class="flex items-start gap-4">
-
-    <div class="text-right">
-      <div class="text-xs text-gray-400 uppercase tracking-wide">
-        Total impact
+        <a href="${page}" target="_blank"
+           class="text-sm font-semibold text-indigo-600 hover:text-indigo-700 hover:underline break-all">
+          ${page}
+        </a>
       </div>
-      <div class="text-2xl font-semibold text-red-600 dark:text-[#ef4444]/80 tabular-nums">
-  $${pageRevenue.toFixed(2)}
-</div>
-    </div>
 
-    <button onclick="closePanel()"
-            class="text-gray-400 hover:text-gray-600 text-lg mt-1">
-      ✕
-    </button>
+      <div class="flex items-start gap-4">
 
-  </div>
+        <div class="text-right">
+          <div class="text-xs text-gray-400 uppercase tracking-wide">
+            Total impact
+          </div>
 
-</div>
+          <div class="text-2xl font-semibold text-red-600 dark:text-[#ef4444]/80 tabular-nums">
+            $${pageRevenue.toFixed(2)}
+          </div>
+        </div>
 
-    ${Array.from(issueMap.entries())
-      .sort((a,b) => b[1].total - a[1].total)
-      .map(([issue, obj], index) => {
-        const percent = Math.round((obj.total / totalPageRevenue) * 100);
-        const severity = (obj.severity || 'INFO').toUpperCase();
+        <button onclick="closePanel()"
+                class="text-gray-400 hover:text-gray-600 text-lg mt-1">
+          ✕
+        </button>
 
-        return `
-          <div class="mb-5 p-4 rounded-xl border-l-4
-            ${severity === 'HIGH' ? 'border-l-red-500/80' :
-              severity === 'MEDIUM' ? 'border-l-orange-400/80' :
-              'border-l-gray-400/60'}
-              border-gray-200 dark:border-gray-700/50
-              hover:shadow-md transition">
-
-            <div class="flex justify-between items-start">
-
-              <div class="flex items-start gap-2">
-                  <div>
-                    ${(() => {
-
-  const fullLabel = ISSUE_LABEL[issue] || labelMap[issue] || issue;
-
-  const [title, ...rest] = fullLabel.split('·');
-  const subtext = rest.join('·').trim();
-
-  return `
-    <div>
-
-      <div class="flex items-center justify-between gap-2">
-
-  <div class="font-semibold text-gray-900 dark:text-gray-100 text-[15px]">
-    ${title.trim()}
-  </div>
-<span class="text-[11px] px-2 py-0.5 rounded
-  ${severity === 'HIGH'
-    ? 'bg-red-500/10 text-red-500'
-    : severity === 'MEDIUM'
-    ? 'bg-orange-400/10 text-orange-400'
-    : 'bg-gray-500/10 text-gray-400'}
-">
-  ${percent}%
-</span>
-</div>
-
-      ${
-        subtext
-          ? `<div class="text-sm text-gray-500 dark:text-gray-400">
-               ${subtext}
-             </div>`
-          : ''
-      }
+      </div>
 
     </div>
-  `;
-})()}
 
-                  <div class="text-sm text-gray-500 mt-1">
-                    ${Array.from(obj.slots).length} affected slots
+    ${issues.map(issueData => {
+
+      const issue =
+        issueData.issueType || 'unknown';
+
+      const severity =
+        String(
+          issueData.severity || 'INFO'
+        ).toUpperCase();
+
+      const percent =
+        Number(issueData.percent || 0);
+
+      const impact =
+        Number(issueData.impact || 0);
+
+      const slots =
+        Array.isArray(issueData.slots)
+          ? issueData.slots
+          : [];
+
+      const suggestedChecks =
+        Array.isArray(issueData.suggestedChecks)
+          ? issueData.suggestedChecks
+          : [];
+
+      const fullLabel =
+        ISSUE_LABEL[issue] ||
+        labelMap[issue] ||
+        issue;
+
+      const [title, ...rest] =
+        fullLabel.split('·');
+
+      const subtext =
+        rest.join('·').trim();
+
+      const checksId =
+        btoa(issue + page);
+
+      return `
+        <div class="mb-5 p-4 rounded-xl border-l-4
+          ${severity === 'HIGH'
+            ? 'border-l-red-500/80'
+            : severity === 'MEDIUM'
+            ? 'border-l-orange-400/80'
+            : 'border-l-gray-400/60'}
+          border-gray-200 dark:border-gray-700/50
+          hover:shadow-md transition">
+
+          <div class="flex justify-between items-start">
+
+            <div class="flex items-start gap-2">
+              <div>
+
+                <div>
+                  <div class="flex items-center justify-between gap-2">
+
+                    <div class="font-semibold text-gray-900 dark:text-gray-100 text-[15px]">
+                      ${title.trim()}
+                    </div>
+
+                    <span class="text-[11px] px-2 py-0.5 rounded
+                      ${severity === 'HIGH'
+                        ? 'bg-red-500/10 text-red-500'
+                        : severity === 'MEDIUM'
+                        ? 'bg-orange-400/10 text-orange-400'
+                        : 'bg-gray-500/10 text-gray-400'}">
+                      ${percent}%
+                    </span>
+
                   </div>
 
-                  <div class="mt-2 text-xs text-gray-500">
-                    <ul class="space-y-1">
-                      ${Array.from(obj.slots).map(s => `<li>• ${s}</li>`).join('')}
-                    </ul>
-                  </div>
+                  ${
+                    subtext
+                      ? `
+                        <div class="text-sm text-gray-500 dark:text-gray-400">
+                          ${subtext}
+                        </div>
+                      `
+                      : ''
+                  }
+
+                </div>
+
+                <div class="text-sm text-gray-500 mt-1">
+                  ${slots.length} affected slots
+                </div>
+
+                <div class="mt-2 text-xs text-gray-500">
+                  <ul class="space-y-1">
+                    ${slots
+                      .map(s => `<li>• ${s}</li>`)
+                      .join('')}
+                  </ul>
+                </div>
+
               </div>
             </div>
-              <div class="text-right">
+
+            <div class="text-right">
 
               <div class="text-xs text-gray-400 uppercase tracking-wide">
-              Impact
+                Impact
               </div>
 
               <div class="text-xl font-semibold text-red-600 dark:text-[#ef4444]/80 tabular-nums">
-  $${obj.total.toFixed(2)}
-</div>
-          </div>
+                $${impact.toFixed(2)}
+              </div>
 
             </div>
 
+          </div>
+
           <div class="mt-4">
 
-  <button
-    onclick="toggleChecks('${btoa(issue + page)}')"
-    class="text-sm font-medium
-         text-indigo-400 hover:text-indigo-300
-         transition">
-  🔎 Show suggested checks
-</button>
+            <button
+              onclick="toggleChecks('${checksId}')"
+              class="text-sm font-medium
+                     text-indigo-400 hover:text-indigo-300
+                     transition">
+              🔎 Show suggested checks
+            </button>
 
-  <div id="checks-${btoa(issue + page)}"
-       class="hidden mt-2 bg-gray-50 dark:bg-gray-800/40
-              border border-gray-200 dark:border-gray-700
-              rounded-lg p-3.5">
+            <div id="checks-${checksId}"
+                 class="hidden mt-2 bg-gray-50 dark:bg-gray-800/40
+                        border border-gray-200 dark:border-gray-700
+                        rounded-lg p-3.5">
 
-    <div class="text-gray-500 dark:text-gray-400 text-[11px] mb-2 font-semibold uppercase tracking-wide">
-      💡 Suggested checks:
-    </div>
+              <div class="text-gray-500 dark:text-gray-400 text-[11px] mb-2 font-semibold uppercase tracking-wide">
+                💡 Suggested checks:
+              </div>
 
-    <ul class="space-y-1 text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
-      ${
-        (SUGGESTED_CHECKS[issue] || [])
-          .map(c => `<li>• ${c}</li>`)
-          .join('')
-      }
-    </ul>
+              <ul class="space-y-1 text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+                ${suggestedChecks
+                  .map(c => `<li>• ${c}</li>`)
+                  .join('')}
+              </ul>
 
-  </div>
+            </div>
 
-</div>
           </div>
-        `;
-      }).join('')}
+
+        </div>
+      `;
+    }).join('')}
   `;
 }
 function closePanel() {
