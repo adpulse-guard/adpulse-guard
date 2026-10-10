@@ -696,17 +696,6 @@ function loadExplorerData() {
 }
 
 loadExplorerData();
-  .catch(error => {
-    console.error('Explorer fetch error:', error);
-
-    if (!renderedFromCache) {
-      document.getElementById('pageList').innerHTML = `
-        <div class="text-sm text-red-400">
-          Failed to load incidents
-        </div>
-      `;
-    }
-  });
   
 function toggleChecks(id) {
   const el = document.getElementById(`checks-${id}`);
@@ -766,21 +755,24 @@ function renderSidebar(pageMap) {
   const container = document.getElementById('pageList');
 
   const sortedAll = Array.from(pageMap.entries())
-  .sort((a,b) => b[1].total - a[1].total);
+    .sort(
+      (a, b) =>
+        Number(b[1].sidebarTotal || 0) -
+        Number(a[1].sidebarTotal || 0)
+    );
 
-const sorted = sortedAll.slice(0, 100);
-    if (!sorted.length) {
-  container.innerHTML = `
-    <div class="text-sm text-gray-400">
-      No pages with incidents
-    </div>
-  `;
-  return;
-}
+  const sorted = sortedAll.slice(0, 100);
+
+  if (!sorted.length) {
+    container.innerHTML = `
+      <div class="text-sm text-gray-400">
+        No pages with incidents
+      </div>
+    `;
+    return;
+  }
 
   container.innerHTML = sorted.map(([page, data]) => {
-    const hasHigh = data.incidents.some(r => r.severity === 'HIGH');
-    const hasMedium = data.incidents.some(r => r.severity === 'MEDIUM');
 
     const displayPage = page
       .replace(/^https?:\/\/(www\.)?/, '')
@@ -788,7 +780,6 @@ const sorted = sortedAll.slice(0, 100);
       .slice(0, 50);
 
     return `
-    
       <div onclick="selectPage('${btoa(page)}', this)"
            class="cursor-pointer p-3.5 rounded-xl
                   bg-white dark:bg-darkcard
@@ -805,25 +796,26 @@ const sorted = sortedAll.slice(0, 100);
         <div class="text-sm
                     text-indigo-400 hover:text-indigo-300
                     break-all transition"
-              title="${page}">
-            ${displayPage}
+             title="${page}">
+          ${displayPage}
         </div>
 
         <div class="text-sm mt-1 font-semibold text-red-500 dark:text-[#ef4444]/80 tabular-nums">
-  $${data.total.toFixed(2)}
-</div>
+          $${Number(data.sidebarTotal || 0).toFixed(2)}
+        </div>
 
       </div>
     `;
   }).join('');
+
   if (sortedAll.length > sorted.length) {
-  container.innerHTML += `
-    <div class="text-xs text-gray-400 text-center py-3">
-      Showing top ${sorted.length} pages by estimated impact out of ${sortedAll.length}.
-      Use date or incident filter to narrow results.
-    </div>
-  `;
-}
+    container.innerHTML += `
+      <div class="text-xs text-gray-400 text-center py-3">
+        Showing top ${sorted.length} pages by estimated impact out of ${sortedAll.length}.
+        Use date or incident filter to narrow results.
+      </div>
+    `;
+  }
 }
 
 function selectPage(encodedPage, el) {
