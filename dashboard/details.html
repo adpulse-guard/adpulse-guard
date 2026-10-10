@@ -691,7 +691,12 @@ function renderDetails(page, data) {
         Array.isArray(issueData.slots)
           ? issueData.slots
           : [];
-
+      
+      const affectedSlotCount =
+  Number(
+    issueData.affectedSlotCount ??
+    slots.length
+  );
       const suggestedChecks =
         Array.isArray(issueData.suggestedChecks)
           ? issueData.suggestedChecks
@@ -757,7 +762,7 @@ function renderDetails(page, data) {
                 </div>
 
                 <div class="text-sm text-gray-500 mt-1">
-                  ${slots.length} affected slots
+                  ${affectedSlotCount} affected slots
                 </div>
 
                 <div class="mt-2 text-xs text-gray-500">
