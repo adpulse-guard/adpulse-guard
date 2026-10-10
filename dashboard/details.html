@@ -273,62 +273,6 @@ const ISSUE_GROUPS = {
     'slot_container_collapsed'
   ]
 };
-const SUGGESTED_CHECKS = {
-    slot_not_registered: [
-      'Verify that the ad slot is registered in GPT',
-      'Check that the slot DOM ID exists on the page',
-      'Confirm the slot is initialized after GPT loads'
-    ],
-    requested_slot_missing_dom: [
-      'Verify that the slot container exists in the DOM at request time',
-      'Check lazy loading, breakpoint, or dynamic layout conditions',
-      'Confirm slot ID consistency between GPT registration and DOM container'
-    ],
-    defined_without_dom_no_request: [
-    'Check if the slot is breakpoint-specific',
-    'Verify conditional display() execution',
-    'Confirm that refresh() is triggered when expected'
-    ],
-    wrong_network: [
-      'Verify the network code used for this ad request',
-      'Check for conflicting GPT initializations on the page'
-    ],
-    unexpected_size: [
-      'Verify the slot sizes defined in GPT',
-      'Check that the slot renders at the expected size',
-      'Confirm line item eligibility for this slot size'
-    ],
-    empty_response: [
-      'Check line item targeting and pacing',
-      'Verify that the ad unit is active and eligible for delivery',
-      'Review frequency caps or delivery limits on active campaigns'
-    ],
-    gpt_script_missing: [
-    'Verify that the GPT script is included on the page',
-    'Check for script blocking by CSP or consent tools',
-    'Confirm no JS errors are preventing GPT load'
-  ],
-    gpt_loaded_but_not_initialized: [
-    'Verify that googletag.cmd.push() executes correctly',
-    'Check for JS errors before GPT initialization',
-    'Confirm consent or CMP does not block GPT activation'
-  ],
-    gpt_no_slot_requests: [
-    'Verify that display() or refresh() is executed',
-    'Check conditional slot rendering logic',
-    'Confirm slots are not blocked by breakpoint conditions'
-  ],
-  slot_container_collapsed: [
-    'Verify CSS rules affecting slot container height',
-    'Check for layout shifts collapsing the ad div',
-    'Confirm slot is not hidden by conditional styling'
-  ],
-  slot_never_requested: [
-  'Verify that googletag.display() is executed for this slot',
-  'Check lazy loading or scroll trigger logic',
-  'Confirm that no JS errors prevent slot request'
-],
-  };
 
     const ISSUE_LABEL = {
   wrong_network: 'Wrong network · Configuration mismatch',
