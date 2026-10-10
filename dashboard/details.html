@@ -613,38 +613,89 @@ function hydrateExplorer(rows) {
   updateIssueClearVisibility();
 }
 
-const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+function loadExplorerData() {
 
-if (cached && Date.now() - cached.ts < CACHE_TTL) {
-  renderedFromCache = true;
-  hydrateExplorer(cached.data);
+  document.getElementById('pageList').innerHTML = `
+    <div class="text-sm text-gray-400">
+      Loading incidents...
+    </div>
+  `;
+
+  const explorerParams = new URLSearchParams({
+    token: token,
+    view: 'dashboard-explorer-data'
+  });
+
+  if (activeDate) {
+    explorerParams.set('date', activeDate);
+  }
+
+  if (selectedIssue) {
+    explorerParams.set('issue', selectedIssue);
+  }
+
+  fetch(`${SHEET_URL}?${explorerParams.toString()}`)
+    .then(r => r.json())
+    .then(j => {
+
+      if (j.error) {
+        throw new Error(j.error);
+      }
+
+      buildIssueDropdown(j.issueCounts || {});
+
+      if (
+        selectedIssue &&
+        !(j.issueCounts || {})[selectedIssue]
+      ) {
+        selectedIssue = '';
+        document.getElementById('issueFilter').value = '';
+      }
+
+      if (selectedIssue) {
+        document.getElementById('issueFilter').value = selectedIssue;
+
+        const label =
+          labelMap[selectedIssue] || selectedIssue;
+
+        issueFilterNote.textContent =
+          `Showing impact: ${label}`;
+
+        issueFilterNote.classList.remove('hidden');
+      } else {
+        issueFilterNote.classList.add('hidden');
+      }
+
+      document.getElementById('issueFilter').disabled =
+        Object.keys(j.issueCounts || {}).length === 0;
+
+      currentPageMap = new Map(
+        (j.pages || []).map(page => [
+          page.pageUrl,
+          page
+        ])
+      );
+
+      renderSidebar(currentPageMap);
+
+      updateIssueClearVisibility();
+    })
+    .catch(error => {
+
+      console.error(
+        'Explorer fetch error:',
+        error
+      );
+
+      document.getElementById('pageList').innerHTML = `
+        <div class="text-sm text-red-400">
+          Failed to load incidents
+        </div>
+      `;
+    });
 }
 
-const fetchStart = performance.now();
-
-fetch(`${SHEET_URL}?token=${token}`)
-  .then(r => r.json())
-  .then(j => {
-    console.log(
-      'Explorer fetch + JSON time:',
-      Math.round(performance.now() - fetchStart),
-      'ms'
-    );
-
-    const freshRows = j.data || [];
-
-    localStorage.setItem(
-      CACHE_KEY,
-      JSON.stringify({
-        ts: Date.now(),
-        data: freshRows
-      })
-    );
-
-    if (!renderedFromCache) {
-      hydrateExplorer(freshRows);
-    }
-  })
+loadExplorerData();
   .catch(error => {
     console.error('Explorer fetch error:', error);
 
