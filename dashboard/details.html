@@ -452,83 +452,6 @@ function renderList(rows) {
 
 }
 
-function applyFilters() {
-
-  let rows = allRows;
-
-  if (activeDate) {
-    rows = rows.filter(r =>
-      r.receivedAt.startsWith(activeDate)
-    );
-  }
-
-  // ✅ COUNT IZ NEFILTRIRANIH (po issue)
-  const issueCounts = {};
-  const uniqueIssues = new Set();
-
-  rows.forEach(r => {
-    if (!r.issueType) return;
-
-    const key = `${r.pageUrl}__${r.issueType}`;
-
-    if (!uniqueIssues.has(key)) {
-      uniqueIssues.add(key);
-
-      issueCounts[r.issueType] =
-        (issueCounts[r.issueType] || 0) + 1;
-    }
-  });
-
-  if (selectedIssue) {
-    rows = rows.filter(r =>
-      r.issueType === selectedIssue
-    );
-  }
-
-  buildIssueDropdown(issueCounts);
-  if (selectedIssue && !issueCounts[selectedIssue]) {
-  selectedIssue = '';
-}
-  if (selectedIssue) {
-    document.getElementById('issueFilter').value = selectedIssue;
-  }
-
-  document.getElementById('issueFilter').disabled =
-    Object.keys(issueCounts).length === 0;
-
-  renderGrouped(rows);
-}
-
-function renderGrouped(rows) {
-
-  const pageMap = new Map();
-
-  rows.forEach(r => {
-
-    const page = r.pageUrl || 'Unknown page';
-
-    if (!pageMap.has(page)) {
-      pageMap.set(page, {
-        incidents: [],
-        total: 0
-      });
-    }
-
-    pageMap.get(page).incidents.push(r);
-
-    if (!pageMap.get(page).totalSet) {
-      pageMap.get(page).total =
-        Number(r.estimatedDailyRevenueRisk || 0);
-      pageMap.get(page).totalSet = true;
-    }
-
-  });
-
-  currentPageMap = pageMap;
-
-  renderSidebar(pageMap);
-}
-
 document.getElementById('dateFilter')
   .addEventListener('change', e => {
     activeDate = e.target.value;
@@ -589,25 +512,6 @@ document.getElementById('pageList').innerHTML = `
     Loading incidents...
   </div>
 `;
-
-function hydrateExplorer(rows) {
-  allRows = rows || [];
-
-  if (activeDate) {
-    document.getElementById('dateFilter').value = activeDate;
-  }
-
-  if (selectedIssue) {
-    document.getElementById('issueFilter').value = selectedIssue;
-
-    const label = labelMap[selectedIssue] || selectedIssue;
-    issueFilterNote.textContent = `Showing impact: ${label}`;
-    issueFilterNote.classList.remove('hidden');
-  }
-
-  loadExplorerData();
-  updateIssueClearVisibility();
-}
 
 function loadExplorerData() {
 
