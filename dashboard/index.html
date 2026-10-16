@@ -1,0 +1,1891 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AdPulse Guard</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: { 
+            darkcard: '#2a2a3b',
+            darkbg: '#1e1e2f'
+          }
+        }
+      }
+    };
+  </script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+</head>
+
+<body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-white font-sans min-h-screen">
+
+<div id="loadingIndicator" class="fixed inset-0 z-50 flex items-center justify-center bg-white/70 dark:bg-darkbg/70 text-sm text-gray-500">
+  <div class="flex flex-col items-center">
+    <svg class="animate-spin h-6 w-6 text-indigo-500 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+    </svg>
+    Loading monitoring data…
+  </div>
+</div>
+
+<header class="bg-white dark:bg-darkcard shadow-sm">
+  <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+    
+    <div class="flex items-center gap-8">
+
+  <!-- BRAND -->
+  <div class="flex items-center gap-2">
+    <img src="Logo Shield.png" class="h-7 w-7" />
+    <span class="text-sm font-semibold tracking-wide">
+      AdPulse Guard
+    </span>
+  </div>
+
+  <!-- NAV -->
+  <nav class="flex items-center gap-4 text-sm">
+
+    <a href="index.html"
+       class="px-2 py-1 rounded
+              text-indigo-600 font-medium
+              border-b-2 border-indigo-600
+              dark:text-indigo-300 dark:border-indigo-300">
+      Overview
+    </a>
+
+    <a id="explorerLink" href="details.html"
+       class="px-2 py-1 rounded
+              text-gray-500 hover:text-indigo-600 hover:bg-gray-100
+              dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-indigo-300">
+      Incident Explorer
+    </a>
+
+  </nav>
+
+</div>
+
+    <div class="flex flex-wrap items-center gap-2 text-xs md:flex-nowrap">
+
+      <span
+  id="viewModeLabel"
+  class="px-2 py-0.5 rounded bg-indigo-50 text-indigo-600
+         dark:bg-indigo-900/30 dark:text-indigo-300
+         uppercase tracking-wide"
+>
+  Summary view
+</span>
+
+      <div class="flex items-center gap-2">
+        <input
+          type="date"
+          id="dateFilter"
+          class="px-2 py-1 border rounded dark:bg-darkcard"
+        />
+        <button id="clearDate" class="text-indigo-500 hover:underline">
+          Clear
+        </button>
+      </div>
+
+      <button
+        id="darkModeBtn"
+        class="ml-2 px-2 py-1 rounded bg-gray-200 dark:bg-gray-700"
+      >
+        <span id="modeLabel">🌙</span>
+      </button>
+
+    </div>
+  </div>
+</header>
+
+<div id="dashboardContent" class="max-w-6xl mx-auto py-8 px-4">
+
+  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-4 mb-4 flex flex-wrap items-center gap-3">
+  <span class="text-xs uppercase tracking-wide text-gray-500">
+    Filter by Incident Type
+  </span>
+  <select
+  id="issueFilter"
+  class="px-2 py-1 text-sm border rounded dark:bg-darkcard"
+>
+  <option value="">All Incident Types</option>
+</select>
+  <button
+  id="clearIssueFilter"
+  class="hidden inline-flex items-center justify-center
+         w-5 h-5 rounded-full
+         bg-indigo-50 text-indigo-600
+         hover:bg-indigo-100 hover:text-indigo-700
+         dark:bg-indigo-900/30 dark:text-indigo-300
+         dark:hover:bg-indigo-900/50
+         text-xs leading-none"
+  title="Clear incident filter"
+  aria-label="Clear incident filter"
+>
+  ✕
+</button>
+  <span
+    id="issueFilterNote"
+    class="text-xs text-gray-400 hidden"
+  ></span>
+</div>
+
+<div class="bg-gray-100 dark:bg-[#232334] 
+            rounded-2xl p-6 mb-10 
+            grid grid-cols-1 sm:grid-cols-3 gap-6">
+  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center flex flex-col justify-center">
+  <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">
+    Ad Delivery Health
+  </div>
+  <div id="reliabilityScore" class="text-4xl font-bold">—</div>
+  <div id="reliabilityDetails" class="text-xs text-gray-400 mt-1">
+</div>
+</div>
+  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center flex flex-col justify-center">
+    <div class="text-xs uppercase tracking-wide text-gray-500 mb-1">
+      Revenue-Impacting Slots
+    </div>
+    <div id="slotCount" class="text-4xl font-bold">—</div>
+    <div class="text-xs text-gray-400 mt-1">
+  Slots with delivery issues
+</div>
+  </div>
+  <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 text-center border-l-4 border-red-300 dark:border-red-500/60">
+    <div class="text-xs uppercase tracking-wide text-gray-500 mb-1 whitespace-nowrap">
+  Revenue at Risk
+    </div>
+    <div id="dailyLoss" 
+     class="text-4xl font-bold text-red-600 dark:text-[#ef4444]/80 whitespace-nowrap">
+  $—
+</div>
+    <div class="text-xs text-gray-400 mt-1">
+  Estimated from expected inventory impact
+</div>
+  </div>
+</div>
+
+<div
+  id="affectedSlotsPanel"
+  class="hidden bg-white dark:bg-darkcard rounded-xl shadow p-4 mb-6"
+>
+  <div class="flex items-center justify-between mb-3">
+    <h3 class="text-sm font-semibold">
+      🎯 Impacted Slots (Filtered View)
+    </h3>
+
+    <button
+      id="copySlotsBtn"
+      class="text-xs text-indigo-600 hover:underline dark:text-indigo-300"
+    >
+      Copy list
+    </button>
+  </div>
+
+  <ul
+    id="affectedSlotsList"
+    class="text-xs space-y-1 max-h-48 overflow-auto"
+  ></ul>
+
+  <p class="text-[11px] text-gray-400 mt-4 opacity-80">
+    Showing slots impacted by selected incident type
+  </p>
+</div>
+
+  <div id="topOffenderBox"
+     class="hidden bg-white dark:bg-darkcard
+            rounded-xl shadow p-5 mb-6
+            border border-gray-200 dark:border-gray-700">
+
+    <h2 class="text-lg font-semibold mb-2">
+  🚨 Highest Impact Incident
+<span class="text-red-600 text-sm font-medium">Action recommended</span>
+</h2>
+    <p><strong>Slot:</strong> <span id="offenderSlot"></span></p>
+    <p><strong>Estimated Impact:</strong> <span id="offenderLoss"></span></p>
+    <p><strong>Page:</strong></p>
+      <div id="offenderPage" class="mt-1"></div>
+    <p><strong>Incident:</strong></p>
+      <div id="offenderIssue" class="mt-1 flex flex-wrap gap-1"></div>
+  </div>
+
+<div id="securityWidget"
+     class="hidden bg-gray-50 dark:bg-darkcard
+            rounded-xl shadow p-5 mb-8
+            border-l-4 border-gray-300 dark:border-gray-600">
+
+  <div class="flex items-center justify-between mb-3">
+    <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+      🔐 Security & Access Signals
+    </h2>
+    <span id="securityCount"
+          class="text-xs px-2 py-1 rounded bg-gray-100 text-gray-600
+                 dark:bg-gray-700 dark:text-gray-300">
+    </span>
+  </div>
+
+  <ul id="securityList"
+      class="text-xs space-y-2 text-gray-600 dark:text-gray-400">
+  </ul>
+
+</div>
+  
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="bg-white dark:bg-darkcard rounded-xl shadow p-4">
+      <h2 class="text-xs uppercase tracking-wide text-gray-500 mb-2">Incident Types</h2>
+      <div class="h-64">
+        <canvas id="issueChart"></canvas>
+      </div>
+    </div>
+
+    <div class="bg-white dark:bg-darkcard rounded-xl shadow p-4">
+      <h2 class="text-xs uppercase tracking-wide text-gray-500 mb-2">Severity Breakdown</h2>
+      <div class="h-64">
+        <canvas id="severityChart"></canvas>
+      </div>
+    </div>
+
+    <div id="lossChartWrapper" class="bg-white dark:bg-darkcard rounded-xl shadow p-4 md:col-span-2">
+      <h2 class="text-xs uppercase tracking-wide text-gray-500 mb-2">Revenue at Risk Trend</h2>
+      <div class="h-64">
+        <canvas id="lossTrendChart"></canvas>
+      </div>
+    </div>
+  </div>
+<p class="text-xs mt-6 text-right">
+    <span id="lastUpdated" class="text-indigo-600 dark:text-indigo-300">—</span>
+  </p>
+</div> 
+
+  <script>
+
+const params = new URLSearchParams(window.location.search);
+const fromParam = params.get('from');
+const token = params.get('token');
+let activeDate = params.get('date') || '';
+let selectedIssueFilter = params.get('issue') || '';
+const cameFromReality = fromParam === 'reality';
+function syncExplorerLink() {
+  const explorerLink = document.getElementById('explorerLink');
+  if (!explorerLink || !token) return;
+
+  const url = new URL('details.html', window.location.href);
+
+  url.searchParams.set('token', token);
+
+  if (activeDate) {
+    url.searchParams.set('date', activeDate);
+  } else {
+    url.searchParams.delete('date');
+  }
+
+  if (selectedIssueFilter) {
+    url.searchParams.set('issue', selectedIssueFilter);
+  } else {
+    url.searchParams.delete('issue');
+  }
+
+  if (fromParam) {
+    url.searchParams.set('from', fromParam);
+  }
+
+  explorerLink.href = url.pathname.split('/').pop() + url.search;
+}
+const affectedSlotsPanel = document.getElementById('affectedSlotsPanel');
+const affectedSlotsList = document.getElementById('affectedSlotsList');
+const copySlotsBtn = document.getElementById('copySlotsBtn');
+copySlotsBtn.addEventListener('click', () => {
+  const text = Array.from(
+    affectedSlotsList.querySelectorAll('li')
+  )
+    .map(li => li.textContent.replace('• ', ''))
+    .join('\n');
+
+  navigator.clipboard.writeText(text);
+});
+function animateCurrency(el, target, duration = 1200) {
+
+  if (el._animationFrame) {
+    cancelAnimationFrame(el._animationFrame);
+  }
+
+  const start = 0;
+  const startTime = performance.now();
+
+  function frame(now) {
+
+    const progress = Math.min((now - startTime) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 4);
+
+    const value = start + (target - start) * eased;
+
+    el.textContent =
+      `$${value.toLocaleString(undefined,{
+        minimumFractionDigits:2,
+        maximumFractionDigits:2
+      })}`;
+
+    if (progress < 1) {
+      el._animationFrame = requestAnimationFrame(frame);
+    }
+  }
+
+  el._animationFrame = requestAnimationFrame(frame);
+}
+if (!token) {
+  document.body.innerHTML = `
+    <div style="padding:40px;font-family:Inter,sans-serif">
+      <h2>Access denied</h2>
+      <p>This dashboard link is client-specific.</p>
+    </div>
+  `;
+  throw new Error('Missing dashboard token');
+}
+Chart.register(ChartDataLabels);
+const issueChartEl = document.getElementById('issueChart');
+const severityChartEl = document.getElementById('severityChart');
+const lossTrendChartEl = document.getElementById('lossTrendChart');
+
+const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxAD4aNij0ApHx21r68hq5TLx2k2r3VT9_obEe7I-EX_l3JGDQSnrY84LcA4QG8Ldf2ig/exec';
+const OVERVIEW_CACHE_TTL = 5 * 60 * 1000;
+
+function getOverviewCacheKey() {
+  const dateKey = activeDate || 'summary';
+  const issueKey = selectedIssueFilter || 'all';
+
+  return `apg_overview_${token}_${dateKey}_${issueKey}`;
+}
+
+function getCachedOverview() {
+  try {
+    const raw = sessionStorage.getItem(
+      getOverviewCacheKey()
+    );
+
+    if (!raw) return null;
+
+    const cached = JSON.parse(raw);
+
+    if (
+      !cached.timestamp ||
+      Date.now() - cached.timestamp > OVERVIEW_CACHE_TTL
+    ) {
+      sessionStorage.removeItem(
+        getOverviewCacheKey()
+      );
+
+      return null;
+    }
+
+    return cached.data || null;
+
+  } catch {
+    return null;
+  }
+}
+
+function setCachedOverview(data) {
+  try {
+    sessionStorage.setItem(
+      getOverviewCacheKey(),
+      JSON.stringify({
+        timestamp: Date.now(),
+        data: data
+      })
+    );
+  } catch {}
+}
+const labelMap = {
+  gpt_script_missing: 'GPT script missing',
+  gpt_loaded_but_not_initialized: 'GPT loaded but not initialized',
+  gpt_no_slot_requests: 'No GPT slot requests',
+  wrong_network: 'Incorrect ad network ID',
+  slot_not_registered: 'DOM slot not in GPT',
+  defined_without_dom_no_request: 'GPT slot defined without DOM',
+  requested_slot_missing_dom: 'Requested GPT slot missing DOM',
+  unexpected_size: 'Unexpected size',
+  empty_response: 'No ad response returned',
+  slot_never_requested: 'Slot visible but no ad request sent',
+  layout_overlap: 'Layout overlap',
+  ad_visibility_impaired: 'Ad visibility impaired',
+  slot_container_collapsed: 'Slot container collapsed',
+  token_invalid: 'Invalid security token',
+  clientId_mismatch: 'Client ID mismatch',
+  expectedNetworkId_mismatch: 'Network configuration mismatch',
+  unauthorized_domain: 'Unauthorized domain access'
+};
+  const shortLabelMap = {
+  'GPT script missing': 'GPT script',
+  'GPT loaded but not initialized': 'GPT init',
+  'No GPT slot requests': 'No requests',
+  'Incorrect ad network ID': 'Network',
+  'DOM slot not in GPT': 'No GPT',
+  'GPT slot defined without DOM': 'No DOM',
+  'Requested GPT slot missing DOM': 'Req/no DOM',
+  'Slot visible but no ad request sent': 'Never requested',
+  'Unexpected size': 'Size',
+  'No ad response returned': 'Empty',
+  'Layout overlap': 'Overlap',
+  'Ad visibility impaired': 'Visibility',
+  'Slot container collapsed': 'Collapsed'
+};
+  const ISSUE_GROUPS = {
+  DELIVERY: [
+    'gpt_script_missing',
+    'gpt_loaded_but_not_initialized',
+    'gpt_no_slot_requests',
+    'empty_response',
+    'requested_slot_missing_dom',
+    'defined_without_dom_no_request',
+    'slot_not_registered',
+    'slot_never_requested',
+    'wrong_network'
+  ],
+  LAYOUT: [
+    'unexpected_size',
+    'layout_overlap',
+    'ad_visibility_impaired',
+    'slot_container_collapsed'
+  ],
+  SECURITY: [
+    'token_invalid',
+    'clientId_mismatch',
+    'expectedNetworkId_mismatch',
+    'unauthorized_domain'
+  ]
+};  
+
+function buildIssueDropdown(issueCounts) {
+  const select = document.getElementById('issueFilter');
+  const currentValue = selectedIssueFilter;
+
+  select.innerHTML = `
+    <option value="">All Incident Types</option>
+  `;
+
+  const groupTitles = {
+    DELIVERY: '— Delivery & Rendering —',
+    LAYOUT: '— Layout & Visibility —',
+    SECURITY: '— Security & Access —'
+  };
+
+  Object.entries(ISSUE_GROUPS).forEach(([groupKey, issues]) => {
+
+  const enriched = issues.map(issueKey => {
+    const label = labelMap[issueKey];
+    if (!label) return null;
+
+    return {
+      key: issueKey,
+      label,
+      count: issueCounts[label] || 0
+    };
+  }).filter(Boolean);
+
+  enriched.sort((a, b) => b.count - a.count);
+
+  if (enriched.every(e => e.count === 0)) return;
+
+  const groupHeader = document.createElement('option');
+  groupHeader.textContent = groupTitles[groupKey];
+  groupHeader.disabled = true;
+
+if (groupKey === 'DELIVERY') {
+  groupHeader.style.color = '#6366f1'; 
+  groupHeader.style.fontWeight = '600';
+}
+
+if (groupKey === 'LAYOUT') {
+  groupHeader.style.color = '#d97706'; 
+  groupHeader.style.fontWeight = '600';
+}
+
+if (groupKey === 'SECURITY') {
+  groupHeader.style.color = '#64748b'; 
+  groupHeader.style.fontWeight = '600';
+}
+
+select.appendChild(groupHeader);
+
+  enriched.forEach(({ key, label, count }) => {
+
+    const option = document.createElement('option');
+    option.value = key;
+    option.textContent = `${label} (${count})`;
+
+    if (count === 0) {
+      option.disabled = true;
+      option.style.color = '#9ca3af';
+    }
+
+    select.appendChild(option);
+  });
+});
+
+  select.value = currentValue || '';
+}
+  const APG_BRAND = {
+  primary: '#6366f1',        
+  primarySoft: '#818cf8',
+
+  danger: '#c2410c',
+  warning: '#d97706',
+  success: '#15803d',
+
+  textMuted: '#6b7280',
+  textMutedDark: '#c7c9d1',
+
+  chartBorderLight: 'rgba(255,255,255,0.35)',
+  chartBorderDark: 'rgba(0,0,0,0.25)',
+
+  bgInfoLight: '#eef2ff',
+  bgInfoDark: 'rgba(99,102,241,0.2)'
+};
+
+let issueChart, severityChart, lossTrendChart;
+    
+const dateInput = document.getElementById('dateFilter');
+const clearDate = document.getElementById('clearDate');
+const viewModeLabel = document.getElementById('viewModeLabel');
+const issueFilter = document.getElementById('issueFilter');
+const issueFilterNote = document.getElementById('issueFilterNote');
+const clearIssueFilterBtn = document.getElementById('clearIssueFilter');
+const lossChartWrapper = document.getElementById('lossChartWrapper');
+if (selectedIssueFilter) {
+  issueFilter.value = selectedIssueFilter;
+}
+function updateIssueClearVisibility() {
+  if (selectedIssueFilter) {
+    clearIssueFilterBtn.classList.remove('hidden');
+  } else {
+    clearIssueFilterBtn.classList.add('hidden');
+  }
+}
+function updateViewModeLabel(selectedDate) {
+  viewModeLabel.className =
+    'px-2 py-0.5 rounded uppercase tracking-wide text-xs';
+
+  if (cameFromReality) {
+    viewModeLabel.textContent = '🎭 Entered via Reality Mode™';
+    viewModeLabel.title = 'This session was entered from Reality Mode™';
+    viewModeLabel.classList.add(
+      'cursor-help',
+      'font-medium',
+      'bg-purple-100',
+      'text-purple-700',
+      'dark:bg-purple-900/30',
+      'dark:text-purple-300'
+    );
+    viewModeLabel.classList.remove('uppercase');
+    return;
+  }
+
+  if (selectedDate) {
+    viewModeLabel.textContent = 'Daily view';
+    viewModeLabel.title = '';
+    viewModeLabel.classList.add(
+      'bg-indigo-100',
+      'text-indigo-700',
+      'dark:bg-indigo-900/30',
+      'dark:text-indigo-300'
+    );
+  } else {
+    viewModeLabel.textContent = 'Summary view';
+    viewModeLabel.title = '';
+    viewModeLabel.classList.add(
+      'bg-gray-100',
+      'text-gray-600',
+      'dark:bg-gray-700',
+      'dark:text-gray-300'
+    );
+  }
+}
+  updateViewModeLabel(cameFromReality ? null : activeDate);
+
+const darkModeBtn = document.getElementById('darkModeBtn');
+const modeLabel = document.getElementById('modeLabel');
+if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
+modeLabel.textContent = document.documentElement.classList.contains('dark') ? 'Light Mode' : 'Dark Mode';
+darkModeBtn.addEventListener('click', () => {
+  const isDark = document.documentElement.classList.toggle('dark');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+  modeLabel.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+
+  if (issueChart) issueChart.update();
+  if (severityChart) severityChart.update();
+  if (lossTrendChart) lossTrendChart.update();
+});
+function renderOverviewData(data, animateMetrics = true) {
+
+  // -------------------------
+// AD DELIVERY HEALTH
+// -------------------------
+
+const reliability =
+  data.deliveryHealth === null
+    ? null
+    : Number(data.deliveryHealth);
+
+const deliveringSlots =
+  Number(data.deliveringSlots || 0);
+
+const expectedSlots =
+  Number(data.deliveryExpectedSlots || 0);
+
+const reliabilityEl =
+  document.getElementById('reliabilityScore');
+
+const reliabilityDetailsEl =
+  document.getElementById('reliabilityDetails');
+
+
+if (reliability === null) {
+
+  reliabilityEl.textContent = 'N/A';
+
+  reliabilityDetailsEl.textContent =
+    'Expected slot data unavailable';
+
+} else {
+
+  reliabilityEl.textContent =
+    reliability + '%';
+
+  reliabilityDetailsEl.textContent =
+    `${deliveringSlots} / ${expectedSlots} expected slots delivering`;
+}
+
+
+reliabilityEl.classList.remove(
+  'text-green-600',
+  'text-orange-600',
+  'text-red-600',
+  'dark:text-green-400',
+  'dark:text-orange-400',
+  'dark:text-red-400',
+  'dark:text-[#ef4444]/80',
+  'text-gray-400',
+  'dark:text-gray-500'
+);
+
+
+if (reliability === null) {
+
+  reliabilityEl.classList.add(
+    'text-gray-400',
+    'dark:text-gray-500'
+  );
+
+} else if (reliability >= 90) {
+
+  reliabilityEl.classList.add(
+    'text-green-600',
+    'dark:text-green-400'
+  );
+
+} else if (reliability >= 50) {
+
+  reliabilityEl.classList.add(
+    'text-orange-600',
+    'dark:text-orange-400'
+  );
+
+} else {
+
+  reliabilityEl.classList.add(
+    'text-red-600',
+    'dark:text-[#ef4444]/80'
+  );
+}
+
+  // -------------------------
+  // REVENUE-IMPACTING SLOTS
+  // -------------------------
+
+  document.getElementById(
+    'slotCount'
+  ).textContent =
+    Number(data.totalImpactedSlots || 0);
+
+
+  // -------------------------
+  // REVENUE AT RISK
+  // -------------------------
+
+  const dailyLossEl =
+    document.getElementById('dailyLoss');
+
+  const revenueAtRisk =
+    Number(data.revenueAtRisk || 0);
+  dailyLossEl.style.transform = 'scale(1.08)';
+dailyLossEl.style.transition = 'transform 0.25s ease';
+
+setTimeout(() => {
+  dailyLossEl.style.transform = 'scale(1)';
+}, 250);
+  if (animateMetrics) {
+
+    animateCurrency(
+      dailyLossEl,
+      revenueAtRisk,
+      700
+    );
+
+  } else {
+
+    dailyLossEl.textContent =
+      `$${revenueAtRisk.toLocaleString(
+        undefined,
+        {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }
+      )}`;
+  }
+
+  dailyLossEl.classList.remove(
+  'text-green-600',
+  'text-red-600',
+  'dark:text-[#ef4444]/80',
+  'bg-gradient-to-r',
+  'from-red-600',
+  'to-red-500',
+  'bg-clip-text',
+  'text-transparent'
+);
+
+if (revenueAtRisk === 0) {
+
+  dailyLossEl.classList.add(
+    'text-green-600'
+  );
+
+} else {
+
+  dailyLossEl.classList.add(
+    'text-red-600',
+    'dark:text-[#ef4444]/80'
+  );
+}
+  // -------------------------
+// ZERO-ISSUE CONFETTI
+// -------------------------
+
+const totalIssues =
+  (data.incidentTypesChart?.values || [])
+    .reduce(
+      (sum, value) =>
+        sum + Number(value || 0),
+      0
+    );
+  
+if (activeDate && totalIssues === 0) {
+
+  import(
+    'https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/+esm'
+  )
+    .then(module => {
+
+      module.default({
+        particleCount: 120,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+
+    })
+    .catch(() => {});
+}
+
+  // -------------------------
+// IMPACTED SLOTS FILTERED VIEW
+// -------------------------
+
+const affectedSlots =
+  Array.isArray(data.affectedSlots)
+    ? data.affectedSlots
+    : [];
+
+const isGlobalSelectedIssue =
+  data.isGlobalSelectedIssue === true;
+
+if (!selectedIssueFilter) {
+
+  affectedSlotsPanel.classList.add('hidden');
+  affectedSlotsList.innerHTML = '';
+
+} else if (isGlobalSelectedIssue) {
+
+  affectedSlotsPanel.classList.remove('hidden');
+
+  affectedSlotsList.innerHTML = `
+    <li class="text-xs text-gray-600 dark:text-gray-400 italic">
+      This incident impacts all ad slots on the page.
+    </li>
+  `;
+
+} else if (affectedSlots.length) {
+
+  affectedSlotsPanel.classList.remove('hidden');
+
+  affectedSlotsList.innerHTML =
+    affectedSlots.map(slot => `
+      <li class="font-sans text-xs tracking-tight
+                 text-gray-700 dark:text-gray-300
+                 leading-relaxed">
+        <span class="text-gray-400 dark:text-gray-500 mr-1">
+          •
+        </span>${slot}
+      </li>
+    `).join('');
+
+} else {
+
+  affectedSlotsPanel.classList.add('hidden');
+  affectedSlotsList.innerHTML = '';
+}
+  
+  // -------------------------
+// HIGHEST IMPACT INCIDENT
+// -------------------------
+
+const box =
+  document.getElementById('topOffenderBox');
+
+const offender = data.topOffender;
+
+if (offender && offender.slotId) {
+
+  box.classList.remove('hidden');
+
+  const offenderSlotEl =
+    document.getElementById('offenderSlot');
+
+  const offenderSlotLabelEl =
+    document.querySelector(
+      '#topOffenderBox strong'
+    );
+
+  const isGlobalSlot =
+    offender.slotId === '__global__';
+
+  if (isGlobalSlot) {
+
+    offenderSlotLabelEl.textContent =
+      'Scope:';
+
+    offenderSlotEl.textContent =
+      'Page-level impact (all ad slots)';
+
+  } else {
+
+    offenderSlotLabelEl.textContent =
+      'Slot:';
+
+    offenderSlotEl.textContent =
+      offender.slotId;
+  }
+
+  document.getElementById(
+    'offenderLoss'
+  ).textContent =
+    `$${Number(
+      offender.revenue || 0
+    ).toLocaleString(
+      undefined,
+      {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }
+    )}`;
+
+  const pages =
+    Array.isArray(offender.pages)
+      ? offender.pages
+      : [];
+
+  document.getElementById(
+    'offenderPage'
+  ).innerHTML = pages.length
+    ? `
+      <div class="max-h-40 overflow-auto pr-1">
+        <ul class="list-disc list-inside space-y-1 text-xs">
+          ${pages.map(p => `
+            <li>
+              <a
+                href="${p}"
+                target="_blank"
+                class="text-indigo-400 hover:text-indigo-300 no-underline hover:underline break-all"
+              >
+                ${p}
+              </a>
+            </li>
+          `).join('')}
+        </ul>
+      </div>
+    `
+    : `
+      <span class="text-xs text-gray-400 italic">
+        No page URLs available
+      </span>
+    `;
+
+  const issues =
+    Array.isArray(offender.issues)
+      ? offender.issues
+      : [];
+
+  document.getElementById(
+    'offenderIssue'
+  ).innerHTML =
+    issues.map(issue => `
+      <span class="inline-flex items-center
+             bg-indigo-50 text-indigo-600
+             dark:bg-indigo-900/30 dark:text-indigo-300
+             text-xs px-2 py-0.5 rounded
+             font-medium tracking-tight mr-1">
+        ${labelMap[issue] || issue}
+      </span>
+    `).join('');
+
+} else {
+
+  box.classList.add('hidden');
+}
+
+  // -------------------------
+// SECURITY & ACCESS SIGNALS
+// -------------------------
+
+const securityWidget =
+  document.getElementById('securityWidget');
+
+const securityList =
+  document.getElementById('securityList');
+
+const securityCountEl =
+  document.getElementById('securityCount');
+
+const securityCounts =
+  data.securityCounts || {};
+
+const totalSecurity =
+  Object.values(securityCounts)
+    .reduce((a, b) => a + Number(b || 0), 0);
+
+if (totalSecurity > 0) {
+
+  securityWidget.classList.remove('hidden');
+
+  securityCountEl.textContent =
+    `${totalSecurity} signal${totalSecurity > 1 ? 's' : ''}`;
+
+  securityList.innerHTML =
+    Object.entries(securityCounts)
+      .map(([issueKey, count]) => {
+
+        const label =
+          labelMap[issueKey] || issueKey;
+
+        return `
+          <li class="flex justify-between items-center">
+            <span>${label}</span>
+            <span class="text-gray-500">${count}</span>
+          </li>
+        `;
+      })
+      .join('');
+
+} else {
+
+  securityWidget.classList.add('hidden');
+  securityList.innerHTML = '';
+}
+// -------------------------
+// INCIDENT TYPES CHART
+// -------------------------
+
+const incidentChartData =
+  data.incidentTypesChart || {
+    labels: [],
+    values: []
+  };
+
+const fullLabels =
+  Array.isArray(incidentChartData.labels)
+    ? incidentChartData.labels
+    : [];
+
+const values =
+  Array.isArray(incidentChartData.values)
+    ? incidentChartData.values
+    : [];
+
+const labels =
+  fullLabels.map(label =>
+    shortLabelMap[label] || label
+  );
+
+const issueKeys =
+  fullLabels.map(label =>
+    Object.entries(labelMap)
+      .find(([key, value]) =>
+        value === label
+      )?.[0] || ''
+  );
+
+const bgColors =
+  labels.map(() => APG_BRAND.primary);
+
+
+const handleIssueChartClick = (evt, elements) => {
+
+  if (!elements.length) return;
+
+  const index =
+    elements[0].index;
+
+  const issueKey =
+    issueKeys[index];
+
+  const fullLabel =
+    fullLabels[index];
+
+  if (!issueKey) return;
+
+  selectedIssueFilter =
+    issueKey;
+
+  issueFilter.value =
+    issueKey;
+
+  const url =
+    new URL(window.location);
+
+  url.searchParams.set(
+    'issue',
+    issueKey
+  );
+
+  if (activeDate) {
+    url.searchParams.set(
+      'date',
+      activeDate
+    );
+  }
+
+  if (fromParam) {
+    url.searchParams.set(
+      'from',
+      fromParam
+    );
+  }
+
+  window.history.replaceState(
+    {},
+    '',
+    url
+  );
+
+  syncExplorerLink();
+  updateIssueClearVisibility();
+
+  issueFilterNote.textContent =
+    `Showing impact related to: ${fullLabel}`;
+
+  issueFilterNote
+    .classList.remove('hidden');
+
+  loadOverviewData();
+};
+
+
+const issueTooltipTitle = items =>
+  fullLabels[
+    items[0].dataIndex
+  ];
+
+
+if (issueChart) {
+
+  issueChart.data.labels =
+    labels;
+
+  issueChart.data.datasets[0].data =
+    values;
+
+  issueChart.data.datasets[0]
+    .backgroundColor =
+      bgColors;
+
+  issueChart.data.datasets[0]
+    .hoverBackgroundColor =
+      bgColors;
+
+  issueChart.options.onClick =
+    handleIssueChartClick;
+
+  issueChart.options.plugins
+    .tooltip.callbacks.title =
+      issueTooltipTitle;
+
+  issueChart.update('none');
+
+} else {
+
+  issueChart = new Chart(
+    issueChartEl,
+    {
+      type: 'bar',
+
+      data: {
+        labels: labels,
+
+        datasets: [{
+          data: values,
+          backgroundColor: bgColors,
+          hoverBackgroundColor: bgColors
+        }]
+      },
+
+      options: {
+
+        maintainAspectRatio: false,
+
+        hover: {
+          mode: 'index',
+          intersect: false
+        },
+
+        animation: {
+          duration: 300,
+          easing: 'easeOutCubic'
+        },
+
+        onClick:
+          handleIssueChartClick,
+
+        plugins: {
+
+          tooltip: {
+
+            backgroundColor:
+              document.documentElement
+                .classList.contains('dark')
+                ? '#2a2a3b'
+                : '#111827',
+
+            titleColor: '#ffffff',
+            bodyColor: '#e5e7eb',
+            borderColor: '#6366f1',
+            borderWidth: 1,
+            padding: 10,
+            cornerRadius: 6,
+            displayColors: false,
+            caretPadding: 8,
+
+            callbacks: {
+
+              title:
+                issueTooltipTitle,
+
+              label: ctx => {
+
+                const value =
+                  Number(ctx.raw || 0);
+
+                const total =
+                  ctx.dataset.data
+                    .reduce(
+                      (a, b) =>
+                        a + Number(b || 0),
+                      0
+                    );
+
+                const pct =
+                  total
+                    ? Math.round(
+                        (value / total) * 100
+                      )
+                    : 0;
+
+                return [
+                  `${value} incidents`,
+                  `~${pct}% of all incidents`
+                ];
+              }
+            }
+          },
+
+          legend: {
+            display: false
+          },
+
+          datalabels: {
+
+            color: '#ffffff',
+            anchor: 'center',
+            align: 'center',
+
+            font: {
+              weight: 'bold',
+              size: 12
+            }
+          }
+        },
+
+        scales: {
+
+          x: {
+
+            ticks: {
+              color: '#9ca3af',
+              autoSkip: false,
+              maxRotation: 0,
+
+              font: {
+                size: 11
+              }
+            }
+          },
+
+          y: {
+
+            beginAtZero: true,
+
+            ticks: {
+              color: '#9ca3af',
+
+              font: {
+                size: 11
+              }
+            },
+
+            grid: {
+              color:
+                'rgba(156,163,175,0.2)'
+            }
+          }
+        }
+      }
+    }
+  );
+}
+  // -------------------------
+// SEVERITY BREAKDOWN CHART
+// -------------------------
+
+const severityChartData =
+  data.severityChart || {
+    labels: [],
+    values: []
+  };
+
+const severityLabels =
+  Array.isArray(severityChartData.labels)
+    ? severityChartData.labels
+    : [];
+
+const severityValues =
+  Array.isArray(severityChartData.values)
+    ? severityChartData.values
+    : [];
+
+const isDark =
+  document.documentElement
+    .classList.contains('dark');
+
+const severityColorMap = {
+  HIGH: isDark
+    ? 'rgba(239,68,68,0.80)'
+    : 'rgba(220,38,38,0.85)',
+
+  MEDIUM: isDark
+    ? 'rgba(251,191,36,0.72)'
+    : APG_BRAND.warning,
+
+  LOW: APG_BRAND.primarySoft,
+
+  INFO: isDark
+    ? '#6b7280'
+    : '#9ca3af'
+};
+
+const severityColors =
+  severityLabels.map(
+    severity =>
+      severityColorMap[severity] ||
+      '#9ca3af'
+  );
+
+if (severityChart) {
+
+  severityChart.data.labels =
+    severityLabels;
+
+  severityChart.data.datasets[0].data =
+    severityValues;
+
+  severityChart.data.datasets[0]
+    .backgroundColor =
+      severityColors;
+
+  severityChart.update();
+
+} else {
+
+  severityChart = new Chart(
+    severityChartEl,
+    {
+      type: 'pie',
+
+      data: {
+        labels: severityLabels,
+
+        datasets: [{
+          data: severityValues,
+          backgroundColor:
+            severityColors,
+
+          borderColor:
+            '#ffffff',
+
+          borderWidth: 1.4
+        }]
+      },
+
+      options: {
+        maintainAspectRatio: false,
+
+        plugins: {
+
+          tooltip: {
+            backgroundColor:
+              document.documentElement
+                .classList.contains('dark')
+                ? '#2a2a3b'
+                : '#111827',
+
+            titleColor: '#ffffff',
+            bodyColor: '#e5e7eb',
+            borderColor: '#6366f1',
+            borderWidth: 1,
+            padding: 10,
+            cornerRadius: 6,
+            displayColors: false,
+            caretPadding: 8,
+
+            callbacks: {
+
+              title: () => null,
+
+              label: ctx => {
+
+                const value =
+                  Number(ctx.raw || 0);
+
+                const total =
+                  ctx.dataset.data.reduce(
+                    (a, b) =>
+                      a + Number(b || 0),
+                    0
+                  );
+
+                const pct =
+                  total
+                    ? Math.round(
+                        (value / total) * 100
+                      )
+                    : 0;
+
+                return [
+                  `${value} incidents`,
+                  `~${pct}% of all incidents`
+                ];
+              }
+            }
+          },
+
+          legend: {
+            position: 'bottom',
+
+            labels: {
+              boxWidth: 12,
+              padding: 18,
+
+              font: {
+                size: 11,
+                weight: '500'
+              }
+            }
+          },
+
+          datalabels: {
+            color: '#ffffff',
+
+            font: {
+              weight: '600',
+              size: 12
+            },
+
+            formatter: (value, ctx) => {
+
+              const total =
+                ctx.dataset.data.reduce(
+                  (a, b) =>
+                    a + Number(b || 0),
+                  0
+                );
+
+              return total
+                ? Math.round(
+                    (value / total) * 100
+                  ) + '%'
+                : '';
+            }
+          }
+        }
+      }
+    }
+  );
+}
+  // -------------------------
+// REVENUE AT RISK TREND
+// -------------------------
+
+const revenueTrendData =
+  data.revenueTrendChart || {
+    labels: [],
+    values: []
+  };
+
+const trendLabels =
+  Array.isArray(revenueTrendData.labels)
+    ? revenueTrendData.labels
+    : [];
+
+const trendValues =
+  Array.isArray(revenueTrendData.values)
+    ? revenueTrendData.values
+    : [];
+
+const isSingleDayView =
+  !!activeDate;
+
+if (isSingleDayView) {
+
+  if (lossTrendChart) {
+    lossTrendChart.destroy();
+    lossTrendChart = null;
+  }
+
+  lossChartWrapper.style.display = 'none';
+
+} else {
+
+  lossChartWrapper.style.display = 'block';
+
+  if (lossTrendChart) {
+
+    lossTrendChart.data.labels =
+      trendLabels;
+
+    lossTrendChart.data.datasets[0].data =
+      trendValues;
+
+    lossTrendChart.update();
+
+  } else {
+
+    lossTrendChart = new Chart(
+      lossTrendChartEl,
+      {
+        type: 'line',
+
+        data: {
+          labels: trendLabels,
+
+          datasets: [{
+            data: trendValues,
+            borderColor: '#6366f1',
+            backgroundColor:
+              'rgba(99,102,241,0.04)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 4
+          }]
+        },
+
+        options: {
+          maintainAspectRatio: false,
+
+          animation: {
+            duration: 400,
+            easing: 'easeOutQuart'
+          },
+
+          interaction: {
+            mode: 'index',
+            intersect: false
+          },
+
+          plugins: {
+
+            tooltip: {
+              backgroundColor:
+                document.documentElement
+                  .classList.contains('dark')
+                  ? '#2a2a3b'
+                  : '#111827',
+
+              titleColor: '#ffffff',
+              bodyColor: '#e5e7eb',
+              borderColor: '#6366f1',
+              borderWidth: 1,
+              padding: 10,
+              cornerRadius: 6,
+              displayColors: false,
+              caretPadding: 8,
+
+              callbacks: {
+
+                title: items =>
+                  `Date: ${items[0].label}`,
+
+                label: ctx =>
+                  `Estimated risk: $${Number(
+                    ctx.raw || 0
+                  ).toLocaleString()}`
+              }
+            },
+
+            legend: {
+              display: false
+            },
+
+            datalabels: {
+              align: 'top',
+              anchor: 'end',
+              offset: 6,
+
+              font: {
+                size: 11,
+                weight: '400'
+              },
+
+              color: () =>
+                document.documentElement
+                  .classList.contains('dark')
+                  ? '#9ca3af'
+                  : '#6b7280',
+
+              formatter: value =>
+                `$${Number(
+                  value || 0
+                ).toLocaleString()}`
+            }
+          }
+        }
+      }
+    );
+  }
+}
+  // -------------------------
+// SYSTEM VITALS
+// -------------------------
+
+const systemVitals =
+  data.systemVitals || {};
+
+const statusEl =
+  document.getElementById('lastUpdated');
+
+if (statusEl) {
+
+  statusEl.textContent =
+    systemVitals.statusText ||
+    'System Status: Operational';
+
+  statusEl.classList.remove(
+    'text-indigo-600',
+    'text-indigo-500',
+    'text-indigo-400',
+    'dark:text-indigo-300',
+    'dark:text-indigo-400',
+    'text-gray-400',
+    'dark:text-gray-500'
+  );
+
+  const minutesAgo =
+    Number(systemVitals.minutesAgo);
+
+  if (
+    !systemVitals.lastIncidentAt ||
+    !Number.isFinite(minutesAgo) ||
+    minutesAgo < 1440
+  ) {
+
+    statusEl.classList.add(
+      'text-indigo-500',
+      'dark:text-indigo-400'
+    );
+
+  } else {
+
+    statusEl.classList.add(
+      'text-gray-400',
+      'dark:text-gray-500'
+    );
+  }
+}
+}
+function loadOverviewData(animateMetrics = true) {
+
+  const loading =
+    document.getElementById('loadingIndicator');
+
+  const cachedData =
+    getCachedOverview();
+
+  if (cachedData) {
+
+    renderOverviewData(
+      cachedData,
+      false
+    );
+
+    const serverIssueCounts = {};
+
+    Object.entries(
+      cachedData.issueCounts || {}
+    ).forEach(([issueKey, count]) => {
+
+      const label =
+        labelMap[issueKey] || issueKey;
+
+      serverIssueCounts[label] =
+        count;
+    });
+
+    buildIssueDropdown(
+      serverIssueCounts
+    );
+
+    updateIssueClearVisibility();
+
+    if (activeDate) {
+      dateInput.value = activeDate;
+    }
+
+    updateViewModeLabel(
+      cameFromReality
+        ? null
+        : activeDate
+    );
+
+    if (loading) {
+      loading.style.display = 'none';
+    }
+
+    return;
+  }
+
+  if (loading) {
+    loading.style.display = 'flex';
+  }
+  const overviewParams = new URLSearchParams({
+    token: token,
+    view: 'dashboard-overview-data'
+  });
+
+  if (activeDate) {
+    overviewParams.set('date', activeDate);
+  }
+
+  if (selectedIssueFilter) {
+    overviewParams.set('issue', selectedIssueFilter);
+  }
+  fetch(`${SHEET_URL}?${overviewParams.toString()}`)
+    .then(r => r.json())
+    .then(j => {
+
+  if (j.error) {
+        throw new Error(j.error);
+      }
+      
+      setCachedOverview(j);
+      
+      if (activeDate) {
+        dateInput.value = activeDate;
+      }
+
+      updateViewModeLabel(
+        cameFromReality ? null : activeDate
+      );
+
+      renderOverviewData(
+  j,
+  animateMetrics
+);
+
+const serverIssueCounts = {};
+
+Object.entries(j.issueCounts || {})
+  .forEach(([issueKey, count]) => {
+
+    const label =
+      labelMap[issueKey] || issueKey;
+
+    serverIssueCounts[label] =
+      count;
+  });
+
+buildIssueDropdown(serverIssueCounts);
+updateIssueClearVisibility();
+
+    })
+    .catch(error => {
+
+      console.error(
+        'Error fetching dashboard data:',
+        error
+      );
+
+      const loading =
+        document.getElementById('loadingIndicator');
+
+      if (
+        error.message ===
+        'invalid_or_expired_token'
+      ) {
+
+        loading.innerHTML = `
+          <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 max-w-md text-center">
+            <h2 class="text-lg font-semibold mb-2">
+              Dashboard link expired
+            </h2>
+            <p class="text-sm text-gray-500 dark:text-gray-400">
+              This email link is no longer active. Please open a newer dashboard link.
+            </p>
+          </div>
+        `;
+
+        loading.style.display = 'flex';
+        return;
+      }
+
+      loading.innerHTML = `
+        <div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 max-w-md text-center">
+          <h2 class="text-lg font-semibold mb-2">
+            Unable to load dashboard
+          </h2>
+          <p class="text-sm text-gray-500 dark:text-gray-400">
+            Please try again in a moment.
+          </p>
+        </div>
+      `;
+
+      loading.style.display = 'flex';
+    })
+    .finally(() => {
+
+      const loading =
+        document.getElementById('loadingIndicator');
+
+      if (
+        loading &&
+        !loading.textContent.includes(
+          'Dashboard link expired'
+        ) &&
+        !loading.textContent.includes(
+          'Unable to load dashboard'
+        )
+      ) {
+        loading.style.display = 'none';
+      }
+    });
+}
+
+loadOverviewData(false);
+
+dateInput.addEventListener('change', () => {
+  activeDate = dateInput.value;
+  const url = new URL(window.location);
+  if (activeDate) {
+  url.searchParams.set('date', activeDate);
+} else {
+  url.searchParams.delete('date');
+}
+
+if (fromParam) {
+  url.searchParams.set('from', fromParam);
+}
+  window.history.replaceState({}, '', url);
+  syncExplorerLink();
+  updateViewModeLabel(cameFromReality ? null : activeDate);
+  loadOverviewData();
+});
+
+clearDate.addEventListener('click', () => {
+  activeDate = '';
+  dateInput.value = '';
+  const url = new URL(window.location);
+url.searchParams.delete('date');
+
+if (fromParam) {
+  url.searchParams.set('from', fromParam);
+}
+
+window.history.replaceState({}, '', url);
+  syncExplorerLink();
+  updateViewModeLabel(cameFromReality ? null : '');
+  loadOverviewData();
+});
+
+  issueFilter.addEventListener('change', () => {
+  selectedIssueFilter = issueFilter.value;
+  const url = new URL(window.location);
+
+if (selectedIssueFilter) {
+  url.searchParams.set('issue', selectedIssueFilter);
+} else {
+  url.searchParams.delete('issue');
+}
+
+window.history.replaceState({}, '', url);
+syncExplorerLink();
+
+  if (selectedIssueFilter) {
+    const label = labelMap[selectedIssueFilter] || selectedIssueFilter;
+    issueFilterNote.textContent = `Showing impact related to: ${label}`;
+    issueFilterNote.classList.remove('hidden');
+  } else {
+    issueFilterNote.classList.add('hidden');
+  }
+  updateIssueClearVisibility();
+  loadOverviewData();
+});
+  clearIssueFilterBtn.addEventListener('click', () => {
+  const url = new URL(window.location);
+  url.searchParams.delete('issue');
+  window.history.replaceState({}, '', url);
+  selectedIssueFilter = '';
+  issueFilter.value = '';
+  syncExplorerLink();
+  issueFilterNote.classList.add('hidden');
+  issueFilter.blur();
+  updateIssueClearVisibility();
+  loadOverviewData();
+});
+  updateIssueClearVisibility();
+syncExplorerLink();
+</script>
+
+</body>
+</html>
