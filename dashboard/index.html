@@ -266,6 +266,8 @@
 
   <script>
 
+function apgEscapeHtml(value) {return String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function apgSafeHref(value) {try {const url=new URL(String(value));return ['http:','https:'].includes(url.protocol)?apgEscapeHtml(url.href):'#';}catch{return '#';}}
 const params = new URLSearchParams(window.location.search);
 const fromParam = params.get('from');
 const token = params.get('token');
@@ -841,7 +843,7 @@ if (!selectedIssueFilter) {
                  leading-relaxed">
         <span class="text-gray-400 dark:text-gray-500 mr-1">
           •
-        </span>${slot}
+        </span>${apgEscapeHtml(slot)}
       </li>
     `).join('');
 
@@ -919,11 +921,11 @@ if (offender && offender.slotId) {
           ${pages.map(p => `
             <li>
               <a
-                href="${p}"
+                href="${apgSafeHref(p)}" rel="noopener noreferrer"
                 target="_blank"
                 class="text-indigo-400 hover:text-indigo-300 no-underline hover:underline break-all"
               >
-                ${p}
+                ${apgEscapeHtml(p)}
               </a>
             </li>
           `).join('')}
@@ -950,7 +952,7 @@ if (offender && offender.slotId) {
              dark:bg-indigo-900/30 dark:text-indigo-300
              text-xs px-2 py-0.5 rounded
              font-medium tracking-tight mr-1">
-        ${labelMap[issue] || issue}
+        ${apgEscapeHtml(labelMap[issue] || issue)}
       </span>
     `).join('');
 
@@ -995,7 +997,7 @@ if (totalSecurity > 0) {
 
         return `
           <li class="flex justify-between items-center">
-            <span>${label}</span>
+            <span>${apgEscapeHtml(label)}</span>
             <span class="text-gray-500">${count}</span>
           </li>
         `;
