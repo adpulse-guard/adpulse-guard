@@ -180,6 +180,8 @@
 </div>
 
 <script>
+function apgEscapeHtml(value) {return String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function apgSafeHref(value) {try {const url=new URL(String(value));return ['http:','https:'].includes(url.protocol)?apgEscapeHtml(url.href):'#';}catch{return '#';}}
 const params = new URLSearchParams(window.location.search);
 const token = params.get('token');
 
@@ -568,8 +570,8 @@ function renderSidebar(pageMap) {
         <div class="text-sm
                     text-indigo-400 hover:text-indigo-300
                     break-all transition"
-             title="${page}">
-          ${displayPage}
+             title="${apgEscapeHtml(page)}">
+          ${apgEscapeHtml(displayPage)}
         </div>
 
         <div class="text-sm mt-1 font-semibold text-red-500 dark:text-[#ef4444]/80 tabular-nums">
@@ -644,9 +646,9 @@ function renderDetails(page, data) {
           Page
         </div>
 
-        <a href="${page}" target="_blank"
+        <a href="${apgSafeHref(page)}" rel="noopener noreferrer" target="_blank"
            class="text-sm font-semibold text-indigo-600 hover:text-indigo-700 hover:underline break-all">
-          ${page}
+          ${apgEscapeHtml(page)}
         </a>
       </div>
 
