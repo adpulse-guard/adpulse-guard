@@ -716,7 +716,7 @@ function renderDetails(page, data) {
         rest.join('·').trim();
 
       const checksId =
-        btoa(issue + page);
+        btoa(issue + '|' + severity + '|' + page);
 
       return `
         <div class="mb-5 p-4 rounded-xl border-l-4
