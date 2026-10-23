@@ -404,7 +404,7 @@ function apgRenderDatePanel() {
   document.getElementById('apgCalendarHint').textContent=apgDraftMode==='single'
     ? 'Choose one date, then Apply.'
     : apgSelectSecond ? 'Choose the end date.' : 'Click a start date, then an end date.';
-  document.getElementById('apgDateApply').disabled=!apgDraftStart || !apgDraftEnd;
+  document.getElementById('apgDateApply').disabled=!apgDraftStart;
 }
 function apgCloseDatePanel() {
   document.getElementById('apgDatePanel').classList.add('hidden');
@@ -480,8 +480,8 @@ function apgInitDateRangePicker() {
     apgRenderDatePanel();
   });
   document.getElementById('apgDateApply').addEventListener('click',()=>{
-    if(!apgDraftStart||!apgDraftEnd)return;
-    if(apgDraftMode==='single') {
+    if(!apgDraftStart)return;
+    if(apgDraftMode==='single' || !apgDraftEnd || apgDraftStart===apgDraftEnd) {
       selectedRangePreset='single';
       activeDate=apgDraftStart;
       rangeStart='';rangeEnd='';
