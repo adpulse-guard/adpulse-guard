@@ -65,6 +65,23 @@
 .dark #detailsContent .apg-incident-card[data-severity="INFO"] {
   border-left-color: #6b7280;
 }
+  /* Single-menu date picker, native light/dark, keyboard accessible. */
+  .apg-date-panel { z-index: 70; }
+  .apg-preset { display:block; width:100%; text-align:left; padding:10px 12px; border-radius:7px; font-size:12px; transition:background .12s; }
+  .apg-preset:hover, .apg-preset:focus-visible { background:rgba(99,102,241,.10); outline:none; }
+  .apg-preset.is-selected { background:rgba(99,102,241,.15); color:#4f46e5; font-weight:600; }
+  .dark .apg-preset.is-selected { background:rgba(129,140,248,.20); color:#c7d2fe; }
+  .apg-day { display:flex; justify-content:center; align-items:center; aspect-ratio:1/1; width:100%; border-radius:7px; font-size:12px; transition:background .12s; }
+  .apg-day:hover, .apg-day:focus-visible { background:rgba(99,102,241,.17); outline:2px solid #818cf8; outline-offset:-2px; }
+  .apg-day.apg-other-month { color:#9ca3af; }
+  .apg-day.apg-today { box-shadow:inset 0 0 0 1px #818cf8; }
+  .apg-day.apg-in-range { background:rgba(99,102,241,.13); border-radius:0; }
+  .dark .apg-day.apg-in-range { background:rgba(129,140,248,.20); }
+  .apg-day.apg-range-edge { background:#4f46e5; color:white; border-radius:7px; font-weight:600; }
+  .dark .apg-day.apg-range-edge { background:#818cf8; color:#151528; }
+  @media(max-width:767px) {
+    .apg-date-panel { position:fixed !important; left:12px !important; right:12px !important; top:75px !important; width:auto !important; max-height:calc(100vh - 90px); overflow-y:auto; }
+  }
 </style>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -117,18 +134,57 @@
         Explorer view
       </span>
 
-      <div class="flex items-center gap-2">
-        <input
-          type="date"
-          id="dateFilter"
-          class="px-2 py-1 border rounded
-                 bg-white text-gray-900
-                 dark:bg-darkcard dark:text-white"
-        />
-        <button id="clearDate" class="text-indigo-500 hover:underline">
-          Clear
+      <div id="apgDatePicker" class="relative">
+        <button id="apgDateTrigger" type="button" aria-label="Choose reporting period"
+                aria-haspopup="dialog" aria-expanded="false" aria-controls="apgDatePanel"
+                class="flex min-w-0 items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-xs text-gray-800 hover:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 dark:border-gray-600 dark:bg-darkcard dark:text-gray-100">
+          <span id="apgDateTriggerName" class="font-semibold whitespace-nowrap">Today</span>
+          <span id="apgDateTriggerRange" class="text-gray-500 dark:text-gray-300 whitespace-nowrap"></span>
+          <svg class="h-3.5 w-3.5 text-indigo-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
         </button>
+        <div id="apgDatePanel" role="dialog" aria-label="Choose reporting dates"
+             class="apg-date-panel hidden absolute right-0 top-full mt-2 w-[min(735px,calc(100vw-2rem))] overflow-hidden rounded-xl border border-gray-200 bg-white text-gray-800 shadow-2xl dark:border-gray-600 dark:bg-darkcard dark:text-gray-100">
+          <div class="flex flex-col md:flex-row">
+            <div class="w-full shrink-0 border-b border-gray-200 p-2 md:w-44 md:border-b-0 md:border-r dark:border-gray-700">
+              <div class="px-3 py-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400">Quick select</div>
+              <div class="grid grid-cols-2 gap-0.5 md:block max-h-80 overflow-y-auto" id="apgPresetList">
+                <button class="apg-preset" data-period="today" type="button">Today</button>
+                <button class="apg-preset" data-period="yesterday" type="button">Yesterday</button>
+                <button class="apg-preset" data-period="last7" type="button">Last 7 days</button>
+                <button class="apg-preset" data-period="last30" type="button">Last 30 days</button>
+                <button class="apg-preset" data-period="mtd" type="button">Month to date</button>
+                <button class="apg-preset" data-period="lastmonth" type="button">Last month</button>
+                <button class="apg-preset" data-period="qtd" type="button">Quarter to date</button>
+                <button class="apg-preset" data-period="ytd" type="button">Year to date</button>
+                <button class="apg-preset" data-period="all" type="button">All time</button>
+                <button class="apg-preset" data-period="single" type="button">Single day</button>
+                <button class="apg-preset" data-period="custom" type="button">Custom range</button>
+              </div>
+            </div>
+            <div class="min-w-0 flex-1 p-3 sm:p-4">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                <div class="min-w-0">
+                  <div class="text-[10px] uppercase tracking-wider text-gray-400">Start date → End date</div>
+                  <div id="apgDraftDateLabel" aria-live="polite" class="text-xs font-semibold mt-1">Select dates</div>
+                </div>
+                <div class="flex gap-1">
+                  <button id="apgPrevMonth" type="button" aria-label="Previous month" class="rounded-md p-2 hover:bg-gray-100 dark:hover:bg-gray-700">‹</button>
+                  <button id="apgNextMonth" type="button" aria-label="Next month" class="rounded-md p-2 hover:bg-gray-100 dark:hover:bg-gray-700">›</button>
+                </div>
+              </div>
+              <div id="apgCalendarMonths" class="grid grid-cols-1 gap-4 sm:grid-cols-2"></div>
+              <div class="mt-4 flex items-center justify-between gap-3 border-t border-gray-200 pt-3 dark:border-gray-700">
+                <span id="apgCalendarHint" class="text-[11px] text-gray-500 dark:text-gray-400">Click a start date, then an end date.</span>
+                <div class="flex shrink-0 gap-2">
+                  <button id="apgDateCancel" type="button" class="rounded-md border border-gray-200 px-3 py-1.5 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-700">Cancel</button>
+                  <button id="apgDateApply" type="button" class="rounded-md bg-indigo-600 px-3 py-1.5 font-semibold text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-40">Apply</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
+
 
       <button
         id="darkModeBtn"
@@ -216,9 +272,246 @@ let currentPageMap = new Map();
 let activeDate = params.get('date') || '';
 let rangeStart = activeDate ? '' : (params.get('start') || '');
 let rangeEnd = activeDate ? '' : (params.get('end') || '');
+const APG_RANGE_PRESETS = new Set(['all','single','today','yesterday','last7','last30','mtd','lastmonth','qtd','ytd','custom']);
+let selectedRangePreset = activeDate
+  ? (['today','yesterday'].includes(params.get('period')) ? params.get('period') : 'single')
+  : (rangeStart && rangeEnd && APG_RANGE_PRESETS.has(params.get('period'))
+    ? params.get('period') : rangeStart && rangeEnd ? 'custom'
+    : params.get('period') === 'all' ? 'all' : 'today');
+if (!activeDate && !rangeStart && !rangeEnd && selectedRangePreset === 'today') {
+  activeDate = apgTodayUtc();
+}
 let selectedIssue = params.get('issue') || '';
 // Consume one page deep-link after the Explorer data loads.
 let pendingExplorerPage = params.get('page') || '';
+function apgUtcDate(y,m,d) { return new Date(Date.UTC(y,m,d)).toISOString().slice(0,10); }
+function apgTodayUtc() { return new Date().toISOString().slice(0,10); }
+function apgPeriodWindow(key) {
+  const today = new Date(apgTodayUtc() + 'T00:00:00Z');
+  const y=today.getUTCFullYear(), m=today.getUTCMonth(), d=today.getUTCDate();
+  const end=apgUtcDate(y,m,d);
+  if (key==='today') return [end,end];
+  if (key==='yesterday') {const date=apgUtcDate(y,m,d-1);return [date,date];}
+  if (key==='last7') return [apgUtcDate(y,m,d-6),end];
+  if (key==='last30') return [apgUtcDate(y,m,d-29),end];
+  if (key==='mtd') return [apgUtcDate(y,m,1),end];
+  if (key==='lastmonth') return [apgUtcDate(y,m-1,1),apgUtcDate(y,m,0)];
+  if (key==='qtd') return [apgUtcDate(y,Math.floor(m/3)*3,1),end];
+  if (key==='ytd') return [apgUtcDate(y,0,1),end];
+  return ['', ''];
+}
+function apgSyncDateWindowToUrl() {
+  const url = new URL(window.location);
+  ['date','start','end','period'].forEach(key=>url.searchParams.delete(key));
+  if (activeDate) url.searchParams.set('date',activeDate);
+  else if (rangeStart && rangeEnd) {
+    url.searchParams.set('start',rangeStart);
+    url.searchParams.set('end',rangeEnd);
+    url.searchParams.set('period',selectedRangePreset);
+  } else if (selectedRangePreset === 'all') {
+    url.searchParams.set('period','all');
+  }
+  if (activeDate && ['today','yesterday'].includes(selectedRangePreset))
+    url.searchParams.set('period',selectedRangePreset);
+  window.history.replaceState({},'',url);
+}
+// Dates are displayed independently from native date inputs to avoid empty
+// "mm/dd/yyyy" placeholders for Today/Yesterday and preset ranges.
+function apgFormatDate(dateKey, showYear = true) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateKey || '')) return '';
+  const date = new Date(dateKey + 'T00:00:00Z');
+  if (Number.isNaN(date.getTime())) return '';
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    ...(showYear ? {year: 'numeric'} : {}),
+    timeZone: 'UTC'
+  }).format(date);
+}
+function apgFormatRange(start, end) {
+  if (!start || !end) return '';
+  if (start === end) return apgFormatDate(start);
+  const commonYear = start.slice(0,4) === end.slice(0,4);
+  return apgFormatDate(start, !commonYear) + ' – ' + apgFormatDate(end);
+}
+const APG_PRESET_TITLES = {
+  today:'Today', yesterday:'Yesterday',last7:'Last 7 days',
+  last30:'Last 30 days',mtd:'Month to date',lastmonth:'Last month',
+  qtd:'Quarter to date',ytd:'Year to date',all:'All time',
+  single:'Single day',custom:'Custom range'
+};
+let apgDraftStart = '';
+let apgDraftEnd = '';
+let apgDraftMode = 'range';
+let apgSelectSecond = false;
+let apgCalendarBase = null;
+
+function apgUpdateDateControls() {
+  const title = document.getElementById('apgDateTriggerName');
+  const subtitle = document.getElementById('apgDateTriggerRange');
+  title.textContent = APG_PRESET_TITLES[selectedRangePreset] || 'Custom range';
+  subtitle.textContent = activeDate ? apgFormatDate(activeDate) :
+    rangeStart && rangeEnd ? apgFormatRange(rangeStart,rangeEnd) : '';
+  document.querySelectorAll('#apgPresetList [data-period]').forEach(button => {
+    const selected = button.dataset.period === selectedRangePreset;
+    button.classList.toggle('is-selected',selected);
+    button.setAttribute('aria-pressed',String(selected));
+  });
+}
+function apgMonthAnchor(key) {
+  const d = new Date((key || apgTodayUtc()).slice(0,7) + '-01T00:00:00Z');
+  return new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth()-1,1));
+}
+function apgDateKey(year,month,day) {
+  return new Date(Date.UTC(year,month,day)).toISOString().slice(0,10);
+}
+function apgRenderOneMonth(monthOffset) {
+  const base=apgCalendarBase;
+  const month=new Date(Date.UTC(base.getUTCFullYear(),base.getUTCMonth()+monthOffset,1));
+  const y=month.getUTCFullYear(),m=month.getUTCMonth();
+  const firstDow=new Date(Date.UTC(y,m,1)).getUTCDay();
+  const heading=new Intl.DateTimeFormat('en-GB',{month:'short',year:'numeric',timeZone:'UTC'}).format(month);
+  const weekdays=['S','M','T','W','T','F','S'].map(d =>
+    '<span class="text-center text-[10px] text-gray-400">'+d+'</span>').join('');
+  // Render only the weeks touched by this month (4–6 rows), not a fixed six weeks.
+  // Keep the few adjacent-month dates needed to complete the final Sunday–Saturday row.
+  const daysInMonth=new Date(Date.UTC(y,m+1,0)).getUTCDate();
+  const visibleCells=Math.ceil((firstDow+daysInMonth)/7)*7;
+  let days='';
+  for(let cell=0;cell<visibleCells;cell++){
+    const day=cell-firstDow+1;
+    const key=apgDateKey(y,m,day);
+    const inMonth=key.slice(0,7)===apgDateKey(y,m,1).slice(0,7);
+    const start=apgDraftStart,end=apgDraftEnd;
+    const lo=start && end ? (start<end?start:end) : start;
+    const hi=start && end ? (start>end?start:end) : end;
+    const inRange=lo && hi && key>=lo && key<=hi;
+    const edge=key===start || key===end;
+    const isToday=key===apgTodayUtc();
+    const classes=['apg-day',!inMonth?'apg-other-month':'',inRange?'apg-in-range':'',edge?'apg-range-edge':'',isToday?'apg-today':''].filter(Boolean).join(' ');
+    days+='<button type="button" class="'+classes+'" data-apg-date="'+key+'" aria-label="'+apgFormatDate(key)+'" aria-pressed="'+String(Boolean(edge))+'">'+Number(key.slice(-2))+'</button>';
+  }
+  return '<section><h3 class="mb-3 text-center text-xs font-semibold text-gray-700 dark:text-gray-200">'+heading+'</h3><div class="grid grid-cols-7 gap-1 mb-1">'+weekdays+'</div><div class="grid grid-cols-7 gap-1">'+days+'</div></section>';
+}
+function apgRenderDatePanel() {
+  if (!apgCalendarBase) apgCalendarBase=apgMonthAnchor(apgDraftStart);
+  document.getElementById('apgCalendarMonths').innerHTML=apgRenderOneMonth(0)+apgRenderOneMonth(1);
+  const dateTitle=apgDraftStart
+    ? (apgDraftEnd ? apgFormatRange(apgDraftStart,apgDraftEnd) :
+       apgFormatDate(apgDraftStart) + ' → Select end date')
+    : 'Select dates';
+  document.getElementById('apgDraftDateLabel').textContent=dateTitle;
+  document.getElementById('apgCalendarHint').textContent=apgDraftMode==='single'
+    ? 'Choose one date, then Apply.'
+    : apgSelectSecond ? 'Choose the end date.' : 'Click a start date, then an end date.';
+  document.getElementById('apgDateApply').disabled=!apgDraftStart || !apgDraftEnd;
+}
+function apgCloseDatePanel() {
+  document.getElementById('apgDatePanel').classList.add('hidden');
+  document.getElementById('apgDateTrigger').setAttribute('aria-expanded','false');
+}
+function apgOpenDatePanel() {
+  apgDraftStart=activeDate || rangeStart || apgTodayUtc();
+  apgDraftEnd=activeDate || rangeEnd || apgDraftStart;
+  apgDraftMode='range';
+  apgSelectSecond=false;
+  apgCalendarBase=apgMonthAnchor(apgDraftStart);
+  document.getElementById('apgDatePanel').classList.remove('hidden');
+  document.getElementById('apgDateTrigger').setAttribute('aria-expanded','true');
+  apgRenderDatePanel();
+}
+function apgSelectReportPreset(period) {
+  selectedRangePreset=period;
+  if(period==='all'){activeDate='';rangeStart='';rangeEnd='';}
+  else if(period==='today'||period==='yesterday'){
+    [activeDate]=apgPeriodWindow(period);
+    rangeStart='';rangeEnd='';
+  } else {
+    activeDate='';
+    [rangeStart,rangeEnd]=apgPeriodWindow(period);
+  }
+  apgApplyDateSelection();
+  apgCloseDatePanel();
+}
+function apgInitDateRangePicker() {
+  const trigger=document.getElementById('apgDateTrigger');
+  const panel=document.getElementById('apgDatePanel');
+  trigger.addEventListener('click',()=>{
+    if(panel.classList.contains('hidden')) apgOpenDatePanel();
+    else apgCloseDatePanel();
+  });
+  document.getElementById('apgDateCancel').addEventListener('click',apgCloseDatePanel);
+  document.getElementById('apgPrevMonth').addEventListener('click',()=>{
+    apgCalendarBase=new Date(Date.UTC(apgCalendarBase.getUTCFullYear(),apgCalendarBase.getUTCMonth()-1,1));
+    apgRenderDatePanel();
+  });
+  document.getElementById('apgNextMonth').addEventListener('click',()=>{
+    apgCalendarBase=new Date(Date.UTC(apgCalendarBase.getUTCFullYear(),apgCalendarBase.getUTCMonth()+1,1));
+    apgRenderDatePanel();
+  });
+  document.getElementById('apgPresetList').addEventListener('click',e=>{
+    const choice=e.target.closest('button[data-period]');
+    if(!choice)return;
+    const period=choice.dataset.period;
+    if(period==='single'||period==='custom'){
+      apgDraftMode=period==='single'?'single':'range';
+      apgDraftStart=activeDate || rangeStart || apgTodayUtc();
+      apgDraftEnd=period==='single'?apgDraftStart:(rangeEnd || apgDraftStart);
+      apgSelectSecond=false;
+      apgCalendarBase=apgMonthAnchor(apgDraftStart);
+      apgRenderDatePanel();
+      return;
+    }
+    apgSelectReportPreset(period);
+  });
+  document.getElementById('apgCalendarMonths').addEventListener('click',e=>{
+    const day=e.target.closest('button[data-apg-date]');
+    if(!day)return;
+    const key=day.dataset.apgDate;
+    if(apgDraftMode==='single'){
+      apgDraftStart=key;apgDraftEnd=key;apgSelectSecond=false;
+    }else if(!apgSelectSecond) {
+      apgDraftStart=key;apgDraftEnd='';apgSelectSecond=true;
+    }else{
+      apgDraftEnd=key;
+      if(apgDraftEnd<apgDraftStart)[apgDraftStart,apgDraftEnd]=[apgDraftEnd,apgDraftStart];
+      apgSelectSecond=false;
+    }
+    apgRenderDatePanel();
+  });
+  document.getElementById('apgDateApply').addEventListener('click',()=>{
+    if(!apgDraftStart||!apgDraftEnd)return;
+    if(apgDraftMode==='single') {
+      selectedRangePreset='single';
+      activeDate=apgDraftStart;
+      rangeStart='';rangeEnd='';
+    }else{
+      selectedRangePreset='custom';
+      activeDate='';
+      rangeStart=apgDraftStart;rangeEnd=apgDraftEnd;
+    }
+    apgApplyDateSelection();
+    apgCloseDatePanel();
+  });
+  document.addEventListener('pointerdown',e=>{
+    if(!document.getElementById('apgDatePicker').contains(e.target))apgCloseDatePanel();
+  });
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'&&!panel.classList.contains('hidden')) {
+      apgCloseDatePanel();
+      trigger.focus();
+    }
+  });
+}
+
+function apgApplyDateSelection() {
+  apgSyncDateWindowToUrl();
+  apgUpdateDateControls();
+  syncOverviewLink();
+  loadExplorerData();
+}
+apgUpdateDateControls();
+apgInitDateRangePicker();
 function syncOverviewLink() {
   if (!overviewLink || !token) return;
 
@@ -228,14 +521,20 @@ function syncOverviewLink() {
 
   if (activeDate) {
     url.searchParams.set('date', activeDate);
+    url.searchParams.delete('start'); url.searchParams.delete('end');
+    if (selectedRangePreset === 'today' || selectedRangePreset === 'yesterday')
+      url.searchParams.set('period', selectedRangePreset);
+    else url.searchParams.delete('period');
   } else {
     url.searchParams.delete('date');
     if (rangeStart && rangeEnd) {
       url.searchParams.set('start', rangeStart);
       url.searchParams.set('end', rangeEnd);
-      url.searchParams.set('period', params.get('period') || 'custom');
+      url.searchParams.set('period', selectedRangePreset);
     } else {
-      url.searchParams.delete('start');url.searchParams.delete('end');url.searchParams.delete('period');
+      url.searchParams.delete('start'); url.searchParams.delete('end');
+      if (selectedRangePreset === 'all') url.searchParams.set('period','all');
+      else url.searchParams.delete('period');
     }
   }
 
@@ -371,41 +670,6 @@ if (groupKey === 'LAYOUT') {
   });
 }
 
-document.getElementById('dateFilter')
-  .addEventListener('change', e => {
-    activeDate = e.target.value;
-    rangeStart='';rangeEnd='';
-
-const url = new URL(window.location);
-url.searchParams.delete('start');
-url.searchParams.delete('end');
-url.searchParams.delete('period');
-
-if (activeDate) {
-  url.searchParams.set('date', activeDate);
-} else {
-  url.searchParams.delete('date');
-}
-
-window.history.replaceState({}, '', url);
-syncOverviewLink();
-loadExplorerData();
-  });
-
-const clearDate = document.getElementById('clearDate');
-
-clearDate.addEventListener('click', () => {
-  activeDate = '';
-  const url = new URL(window.location);
-  url.searchParams.delete('date');
-  url.searchParams.delete('start');url.searchParams.delete('end');url.searchParams.delete('period');
-  rangeStart='';rangeEnd='';
-  window.history.replaceState({}, '', url);
-  document.getElementById('dateFilter').value = '';
-  syncOverviewLink();
-  loadExplorerData();
-});
-
 document.getElementById('issueFilter')
   .addEventListener('change', e => {
     selectedIssue = e.target.value;
@@ -540,10 +804,6 @@ function loadExplorerData() {
     });
 }
   
-if (activeDate) {
-  document.getElementById('dateFilter').value = activeDate;
-}
-
 loadExplorerData();
   
 function toggleChecks(id) {
