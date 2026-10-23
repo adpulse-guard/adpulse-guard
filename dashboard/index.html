@@ -204,10 +204,17 @@
             rounded-xl shadow p-5 mb-6
             border border-gray-200 dark:border-gray-700">
 
-    <h2 class="text-lg font-semibold mb-2">
-  🚨 Highest Impact Incident
-<span class="text-red-600 text-sm font-medium">Action recommended</span>
-</h2>
+    <div class="flex flex-wrap justify-between items-center gap-3 mb-2">
+      <h2 class="text-lg font-semibold">
+        🚨 Highest Impact Incident
+        <span class="text-red-600 text-sm font-medium">Action recommended</span>
+      </h2>
+      <button id="copyOffenderPagesBtn" type="button"
+              class="hidden text-xs text-indigo-600 dark:text-indigo-300 hover:underline"
+              title="Copy all affected page URLs, not only the visible ones">
+        Copy list
+      </button>
+    </div>
     <p><strong>Slot:</strong> <span id="offenderSlot"></span></p>
     <p><strong>Estimated Impact:</strong> <span id="offenderLoss"></span></p>
     <p><strong>Page:</strong></p>
@@ -319,6 +326,21 @@ copySlotsBtn.addEventListener('click', () => {
     .join('\n');
 
   navigator.clipboard.writeText(text);
+});
+
+// Store the complete offender page list independently from its scroll area.
+let currentOffenderPages = [];
+const copyOffenderPagesBtn = document.getElementById('copyOffenderPagesBtn');
+copyOffenderPagesBtn.addEventListener('click', async () => {
+  if (!currentOffenderPages.length) return;
+  try {
+    await navigator.clipboard.writeText(currentOffenderPages.join('\n'));
+    copyOffenderPagesBtn.textContent = 'Copied!';
+  } catch (err) {
+    console.error('Copy offender URLs failed:', err);
+    copyOffenderPagesBtn.textContent = 'Copy failed';
+  }
+  setTimeout(() => { copyOffenderPagesBtn.textContent = 'Copy list'; }, 1800);
 });
 function animateCurrency(el, target, duration = 1200) {
 
@@ -920,21 +942,24 @@ if (offender && offender.slotId) {
 
   const pages =
     Array.isArray(offender.pages)
-      ? offender.pages
+      ? offender.pages.filter(p => typeof p === 'string' && p.trim())
       : [];
+  currentOffenderPages = pages;
+  copyOffenderPagesBtn.classList.toggle('hidden', pages.length === 0);
+  copyOffenderPagesBtn.textContent = 'Copy list';
 
   document.getElementById(
     'offenderPage'
   ).innerHTML = pages.length
     ? `
-      <div class="max-h-40 overflow-auto pr-1">
-        <ul class="list-disc list-inside space-y-1 text-xs">
+      <div class="max-h-[72px] overflow-y-auto pr-2">
+        <ul class="list-disc pl-5 space-y-1 text-xs">
           ${pages.map(p => `
-            <li>
+            <li class="truncate" title="${apgEscapeHtml(p)}">
               <a
                 href="${apgSafeHref(p)}" rel="noopener noreferrer"
                 target="_blank"
-                class="text-indigo-400 hover:text-indigo-300 no-underline hover:underline break-all"
+                class="text-indigo-400 hover:text-indigo-300 no-underline hover:underline"
               >
                 ${apgEscapeHtml(p)}
               </a>
@@ -970,6 +995,8 @@ if (offender && offender.slotId) {
 } else {
 
   box.classList.add('hidden');
+  currentOffenderPages = [];
+  copyOffenderPagesBtn.classList.add('hidden');
 }
 
   // -------------------------
@@ -1454,10 +1481,12 @@ if (severityChart) {
                   0
                 );
 
-              return total
-                ? Math.round(
-                    (value / total) * 100
-                  ) + '%'
+              // Keep all segments, but hide text on very narrow slices.
+              const percent = total > 0
+                ? (Number(value || 0) / total) * 100
+                : 0;
+              return percent >= 3
+                ? Math.round(percent) + '%'
                 : '';
             }
           }
@@ -1544,6 +1573,21 @@ if (isSingleDayView) {
           interaction: {
             mode: 'index',
             intersect: false
+          },
+
+          scales: {
+            x: {
+              ticks: {
+                autoSkip: false,
+                maxRotation: 45,
+                callback: function(value) {
+                  const index = Number(value);
+                  return Number.isInteger(index) && index % 3 === 0
+                    ? this.getLabelForValue(value)
+                    : '';
+                }
+              }
+            }
           },
 
           plugins: {
