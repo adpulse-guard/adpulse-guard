@@ -2055,6 +2055,9 @@ updateIssueClearVisibility();
         ) &&
         !loading.textContent.includes(
           'Unable to load dashboard'
+        ) &&
+        !loading.textContent.includes(
+          'Date range unavailable'
         )
       ) {
         loading.style.display = 'none';
