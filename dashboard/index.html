@@ -26,7 +26,8 @@
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <style>
   #topOffenderBox.apg-collapsed #copyOffenderPagesBtn,
-  #securityWidget.apg-collapsed #securityCount { display: none !important; }
+  #securityWidget.apg-collapsed #securityCount,
+  #affectedSlotsPanel.apg-collapsed #copySlotsBtn { display: none !important; }
 </style>
 </head>
 
@@ -185,22 +186,27 @@
       🎯 Impacted Slots (Filtered View)
     </h3>
 
-    <button
-      id="copySlotsBtn"
-      class="text-xs text-indigo-600 hover:underline dark:text-indigo-300"
-    >
-      Copy list
-    </button>
+    <div class="flex items-center gap-3">
+      <button
+        id="copySlotsBtn"
+        class="text-xs text-indigo-600 hover:underline dark:text-indigo-300"
+      >
+        Copy list
+      </button>
+      <button type="button" data-apg-collapse="affectedSlotsPanel" aria-controls="affectedSlotsBody" aria-expanded="true" aria-label="Collapse Impacted Slots" title="Collapse Impacted Slots" class="apg-collapse-button inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-gray-400 hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"><svg aria-hidden="true" class="h-4 w-4 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg></button>
+    </div>
   </div>
 
-  <ul
-    id="affectedSlotsList"
-    class="text-xs space-y-1 max-h-48 overflow-auto"
-  ></ul>
+  <div id="affectedSlotsBody">
+    <ul
+      id="affectedSlotsList"
+      class="text-xs space-y-1 max-h-[82px] overflow-y-auto pr-2"
+    ></ul>
 
-  <p class="text-[11px] text-gray-400 mt-4 opacity-80">
-    Showing slots impacted by selected incident type
-  </p>
+    <p class="text-[11px] text-gray-400 mt-4 opacity-80">
+      Showing slots impacted by selected incident type
+    </p>
+  </div>
 </div>
 
   <div id="topOffenderBox"
@@ -261,7 +267,12 @@
     <div id="issueChartCard" class="bg-white dark:bg-darkcard rounded-xl shadow p-4 min-w-0">
       <div class="flex items-center justify-between gap-3 mb-2">
         <h2 class="text-xs uppercase tracking-wide text-gray-500">Incident Types</h2>
+        <div class="flex items-center gap-2">
+          <button id="clearIssueChartFilter" type="button"
+                  class="hidden inline-flex h-6 w-6 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100 hover:text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 dark:hover:bg-indigo-900/50"
+                  title="Clear incident filter" aria-label="Clear incident filter">✕</button>
         <button type="button" data-apg-collapse="issueChartCard" aria-controls="issueChartBody" aria-expanded="true" aria-label="Collapse Incident Types" title="Collapse Incident Types" class="apg-collapse-button inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-gray-400 hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"><svg aria-hidden="true" class="h-4 w-4 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg></button>
+        </div>
       </div>
       <div id="issueChartBody" class="overflow-x-auto">
         <div id="issueChartContainer" class="h-64 relative">
@@ -623,6 +634,7 @@ let issueChart, severityChart, lossTrendChart;
 
 const APG_COLLAPSE_KEY = 'apg-dashboard-collapsed-sections-v1';
 const APG_SECTIONS = {
+  affectedSlotsPanel: {body:'affectedSlotsBody', title:'Impacted Slots'},
   topOffenderBox: {body:'topOffenderBody', title:'Highest Impact Incident'},
   securityWidget: {body:'securityBody', title:'Security & Access Signals'},
   issueChartCard: {body:'issueChartBody', title:'Incident Types'},
@@ -683,16 +695,17 @@ const viewModeLabel = document.getElementById('viewModeLabel');
 const issueFilter = document.getElementById('issueFilter');
 const issueFilterNote = document.getElementById('issueFilterNote');
 const clearIssueFilterBtn = document.getElementById('clearIssueFilter');
+const clearIssueChartFilterBtn = document.getElementById('clearIssueChartFilter');
+// Both X buttons use the same clearing logic, with no scroll-to-top.
+clearIssueChartFilterBtn.addEventListener('click', () => clearIssueFilterBtn.click());
 const lossChartWrapper = document.getElementById('lossChartWrapper');
 if (selectedIssueFilter) {
   issueFilter.value = selectedIssueFilter;
 }
 function updateIssueClearVisibility() {
-  if (selectedIssueFilter) {
-    clearIssueFilterBtn.classList.remove('hidden');
-  } else {
-    clearIssueFilterBtn.classList.add('hidden');
-  }
+  const hasFilter = Boolean(selectedIssueFilter);
+  clearIssueFilterBtn.classList.toggle('hidden', !hasFilter);
+  clearIssueChartFilterBtn.classList.toggle('hidden', !hasFilter);
 }
 function updateViewModeLabel(selectedDate) {
   viewModeLabel.className =
