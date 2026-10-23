@@ -710,11 +710,24 @@ function renderDetails(page, data) {
         labelMap[issue] ||
         issue;
 
-      const [title, ...rest] =
+      const [firstPart, ...remainingParts] =
         fullLabel.split('·');
 
-      const subtext =
-        rest.join('·').trim();
+      // For missing-DOM incidents, lead with the actual failure and
+      // place the GPT request/response state beneath it.
+      const isEvidenceSpecificMissingDom =
+        issue === 'requested_slot_missing_dom' &&
+        (firstPart.trim() === 'Ad returned' ||
+         firstPart.trim() === 'Ad requested') &&
+        remainingParts.length >= 2;
+
+      const title = isEvidenceSpecificMissingDom
+        ? remainingParts.join('·').trim()
+        : firstPart.trim();
+
+      const subtext = isEvidenceSpecificMissingDom
+        ? firstPart.trim()
+        : remainingParts.join('·').trim();
 
       const checksId =
         btoa(issue + '|' + severity + '|' + page);
