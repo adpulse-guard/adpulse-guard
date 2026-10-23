@@ -431,6 +431,9 @@ const labelMap = {
   'DOM slot not in GPT': 'No GPT',
   'GPT slot defined without DOM': 'No DOM',
   'Requested GPT slot missing DOM': 'Req/no DOM',
+  'Ad returned · DOM container missing · Confirmed GPT response': 'Ad returned / no DOM',
+  'Ad requested · DOM container missing · Response not yet confirmed': 'Requested / no DOM',
+  'Requested GPT slot missing DOM · Response status not recorded': 'No DOM / legacy',
   'Slot visible but no ad request sent': 'Never requested',
   'Unexpected size': 'Size',
   'No ad response returned': 'Empty',
@@ -1039,7 +1042,7 @@ const issueKeys =
     Object.entries(labelMap)
       .find(([key, value]) =>
         value === label
-      )?.[0] || ''
+      )?.[0] || (label.includes('DOM container missing') || label.includes('Requested GPT slot missing DOM') ? 'requested_slot_missing_dom' : '')
   );
 
 const bgColors =
