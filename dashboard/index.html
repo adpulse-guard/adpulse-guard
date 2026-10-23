@@ -341,6 +341,15 @@ function syncExplorerLink() {
 
   explorerLink.href = url.pathname.split('/').pop() + url.search;
 }
+// Link from Highest Impact to exactly this page's incidents.
+// Date carries over, without a restrictive issue-type filter.
+function apgExplorerPageHref(pageUrl) {
+  const url = new URL('details.html', window.location.href);
+  url.searchParams.set('token', token);
+  if (activeDate) url.searchParams.set('date', activeDate);
+  url.searchParams.set('page', pageUrl);
+  return apgEscapeHtml(url.pathname.split('/').pop() + url.search);
+}
 const affectedSlotsPanel = document.getElementById('affectedSlotsPanel');
 const affectedSlotsList = document.getElementById('affectedSlotsList');
 const copySlotsBtn = document.getElementById('copySlotsBtn');
@@ -1039,8 +1048,9 @@ if (offender && offender.slotId) {
           ${pages.map(p => `
             <li class="truncate" title="${apgEscapeHtml(p)}">
               <a
-                href="${apgSafeHref(p)}" rel="noopener noreferrer"
+                href="${apgExplorerPageHref(p)}" rel="noopener noreferrer"
                 target="_blank"
+                title="Open this page in Incident Explorer"
                 class="text-indigo-400 hover:text-indigo-300 no-underline hover:underline"
               >
                 ${apgEscapeHtml(p)}
