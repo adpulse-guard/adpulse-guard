@@ -429,11 +429,11 @@ const labelMap = {
   'No GPT slot requests': 'No requests',
   'Incorrect ad network ID': 'Network',
   'DOM slot not in GPT': 'No GPT',
-  'GPT slot defined without DOM': 'No DOM',
+  'GPT slot defined without DOM': 'Defined / no DOM',
   'Requested GPT slot missing DOM': 'Req/no DOM',
   'Ad returned · DOM container missing · Confirmed GPT response': 'Ad returned / no DOM',
   'Ad requested · DOM container missing · Response not yet confirmed': 'Requested / no DOM',
-  'Requested GPT slot missing DOM · Response status not recorded': 'No DOM / legacy',
+  'Requested GPT slot missing DOM · Response status not recorded': 'Missing / legacy',
   'Slot visible but no ad request sent': 'Never requested',
   'Unexpected size': 'Size',
   'No ad response returned': 'Empty',
@@ -1032,10 +1032,20 @@ const values =
     ? incidentChartData.values
     : [];
 
+// Use compact two-line x-axis labels to prevent adjacent categories
+// overlapping; full labels remain in the tooltip and filter metadata.
+const incidentAxisLabels = {
+  'Defined / no DOM': ['Defined', 'no DOM'],
+  'Missing / legacy': ['Missing DOM', 'legacy'],
+  'No DOM / legacy': ['Missing DOM', 'legacy'],
+  'Requested / no DOM': ['Requested', 'no DOM'],
+  'Ad returned / no DOM': ['Ad returned', 'no DOM']
+};
 const labels =
-  fullLabels.map(label =>
-    shortLabelMap[label] || label
-  );
+  fullLabels.map(label => {
+    const shortLabel = shortLabelMap[label] || label;
+    return incidentAxisLabels[shortLabel] || shortLabel;
+  });
 
 const issueKeys =
   fullLabels.map(label =>
