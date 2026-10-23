@@ -245,9 +245,9 @@
       </div>
     </div>
 
-    <div class="bg-white dark:bg-darkcard rounded-xl shadow p-4">
+    <div class="bg-white dark:bg-darkcard rounded-xl shadow p-4 flex flex-col">
       <h2 class="text-xs uppercase tracking-wide text-gray-500 mb-2">Severity Breakdown</h2>
-      <div class="h-64">
+      <div class="h-64 my-auto">
         <canvas id="severityChart"></canvas>
       </div>
     </div>
@@ -1032,8 +1032,15 @@ const values =
     ? incidentChartData.values
     : [];
 
-// Use compact two-line x-axis labels to prevent adjacent categories
-// overlapping; full labels remain in the tooltip and filter metadata.
+// Six or fewer categories retain the compact vertical chart. More
+// categories switch to horizontal bars: every category remains readable,
+// including when Clear Date shows the client's entire incident history.
+const useHorizontalIssueChart = fullLabels.length > 6;
+const issueChartContainer = issueChartEl.parentElement;
+issueChartContainer.style.height = useHorizontalIssueChart
+  ? Math.max(256, fullLabels.length * 31 + 64) + 'px'
+  : '256px';
+
 const incidentAxisLabels = {
   'Defined / no DOM': ['Defined', 'no DOM'],
   'Missing / legacy': ['Missing DOM', 'legacy'],
@@ -1041,11 +1048,12 @@ const incidentAxisLabels = {
   'Requested / no DOM': ['Requested', 'no DOM'],
   'Ad returned / no DOM': ['Ad returned', 'no DOM']
 };
-const labels =
-  fullLabels.map(label => {
-    const shortLabel = shortLabelMap[label] || label;
-    return incidentAxisLabels[shortLabel] || shortLabel;
-  });
+const labels = fullLabels.map(label => {
+  const shortLabel = shortLabelMap[label] || label;
+  return useHorizontalIssueChart
+    ? (shortLabel.length > 27 ? shortLabel.slice(0, 26) + '…' : shortLabel)
+    : (incidentAxisLabels[shortLabel] || shortLabel);
+});
 
 const issueKeys =
   fullLabels.map(label =>
@@ -1127,170 +1135,113 @@ const issueTooltipTitle = items =>
   ];
 
 
-if (issueChart) {
-
-  issueChart.data.labels =
-    labels;
-
-  issueChart.data.datasets[0].data =
-    values;
-
-  issueChart.data.datasets[0]
-    .backgroundColor =
-      bgColors;
-
-  issueChart.data.datasets[0]
-    .hoverBackgroundColor =
-      bgColors;
-
-  issueChart.options.onClick =
-    handleIssueChartClick;
-
-  issueChart.options.plugins
-    .tooltip.callbacks.title =
-      issueTooltipTitle;
-
-  issueChart.update('none');
-
-} else {
-
-  issueChart = new Chart(
-    issueChartEl,
-    {
-      type: 'bar',
-
-      data: {
-        labels: labels,
-
-        datasets: [{
-          data: values,
-          backgroundColor: bgColors,
-          hoverBackgroundColor: bgColors
-        }]
+const issueDarkMode = document.documentElement.classList.contains('dark');
+const issueChartScales = useHorizontalIssueChart
+  ? {
+      x: {
+        beginAtZero: true,
+        grace: '12%',
+        ticks: {color: '#9ca3af', precision: 0, font: {size: 11}},
+        grid: {color: 'rgba(156,163,175,0.2)'}
       },
-
-      options: {
-
-        maintainAspectRatio: false,
-
-        hover: {
-          mode: 'index',
-          intersect: false
-        },
-
-        animation: {
-          duration: 300,
-          easing: 'easeOutCubic'
-        },
-
-        onClick:
-          handleIssueChartClick,
-
-        plugins: {
-
-          tooltip: {
-
-            backgroundColor:
-              document.documentElement
-                .classList.contains('dark')
-                ? '#2a2a3b'
-                : '#111827',
-
-            titleColor: '#ffffff',
-            bodyColor: '#e5e7eb',
-            borderColor: '#6366f1',
-            borderWidth: 1,
-            padding: 10,
-            cornerRadius: 6,
-            displayColors: false,
-            caretPadding: 8,
-
-            callbacks: {
-
-              title:
-                issueTooltipTitle,
-
-              label: ctx => {
-
-                const value =
-                  Number(ctx.raw || 0);
-
-                const total =
-                  ctx.dataset.data
-                    .reduce(
-                      (a, b) =>
-                        a + Number(b || 0),
-                      0
-                    );
-
-                const pct =
-                  total
-                    ? Math.round(
-                        (value / total) * 100
-                      )
-                    : 0;
-
-                return [
-                  `${value} incidents`,
-                  `~${pct}% of all incidents`
-                ];
-              }
-            }
-          },
-
-          legend: {
-            display: false
-          },
-
-          datalabels: {
-
-            color: '#ffffff',
-            anchor: 'center',
-            align: 'center',
-
-            font: {
-              weight: 'bold',
-              size: 12
-            }
-          }
-        },
-
-        scales: {
-
-          x: {
-
-            ticks: {
-              color: '#9ca3af',
-              autoSkip: false,
-              maxRotation: 0,
-
-              font: {
-                size: 11
-              }
-            }
-          },
-
-          y: {
-
-            beginAtZero: true,
-
-            ticks: {
-              color: '#9ca3af',
-
-              font: {
-                size: 11
-              }
-            },
-
-            grid: {
-              color:
-                'rgba(156,163,175,0.2)'
-            }
-          }
-        }
+      y: {
+        ticks: {color: '#9ca3af', autoSkip: false, font: {size: 11}},
+        grid: {display: false}
       }
     }
-  );
+  : {
+      x: {
+        ticks: {
+          color: '#9ca3af',
+          autoSkip: false,
+          maxRotation: 0,
+          font: {size: 11}
+        }
+      },
+      y: {
+        beginAtZero: true,
+        ticks: {color: '#9ca3af', font: {size: 11}},
+        grid: {color: 'rgba(156,163,175,0.2)'}
+      }
+    };
+
+const issueChartDatalabels = {
+  color: useHorizontalIssueChart
+    ? (issueDarkMode ? '#e5e7eb' : '#374151')
+    : '#ffffff',
+  anchor: useHorizontalIssueChart ? 'end' : 'center',
+  align: useHorizontalIssueChart ? 'end' : 'center',
+  offset: useHorizontalIssueChart ? 4 : 0,
+  font: {weight: 'bold', size: 12}
+};
+
+const issueChartTooltip = {
+  backgroundColor: issueDarkMode ? '#2a2a3b' : '#111827',
+  titleColor: '#ffffff',
+  bodyColor: '#e5e7eb',
+  borderColor: '#6366f1',
+  borderWidth: 1,
+  padding: 10,
+  cornerRadius: 6,
+  displayColors: false,
+  caretPadding: 8,
+  callbacks: {
+    title: issueTooltipTitle,
+    label: ctx => {
+      const value = Number(ctx.raw || 0);
+      const total = ctx.dataset.data.reduce(
+        (sum, n) => sum + Number(n || 0), 0
+      );
+      const pct = total ? Math.round(value / total * 100) : 0;
+      return [`${value} incidents`, `~${pct}% of all incidents`];
+    }
+  }
+};
+
+// Chart.js preserves the indexAxis from its initial configuration, so
+// recreate only when changing orientation. Filtering stays unchanged.
+const issueIndexAxis = useHorizontalIssueChart ? 'y' : 'x';
+if (issueChart && issueChart.options.indexAxis !== issueIndexAxis) {
+  issueChart.destroy();
+  issueChart = null;
+}
+
+if (issueChart) {
+  issueChart.data.labels = labels;
+  issueChart.data.datasets[0].data = values;
+  issueChart.data.datasets[0].backgroundColor = bgColors;
+  issueChart.data.datasets[0].hoverBackgroundColor = bgColors;
+  issueChart.options.onClick = handleIssueChartClick;
+  issueChart.options.scales = issueChartScales;
+  issueChart.options.plugins.tooltip = issueChartTooltip;
+  issueChart.options.plugins.datalabels = issueChartDatalabels;
+  issueChart.resize();
+  issueChart.update('none');
+} else {
+  issueChart = new Chart(issueChartEl, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: values,
+        backgroundColor: bgColors,
+        hoverBackgroundColor: bgColors
+      }]
+    },
+    options: {
+      indexAxis: issueIndexAxis,
+      maintainAspectRatio: false,
+      hover: {mode: 'index', intersect: false},
+      animation: {duration: 300, easing: 'easeOutCubic'},
+      onClick: handleIssueChartClick,
+      plugins: {
+        tooltip: issueChartTooltip,
+        legend: {display: false},
+        datalabels: issueChartDatalabels
+      },
+      scales: issueChartScales
+    }
+  });
 }
   // -------------------------
 // SEVERITY BREAKDOWN CHART
