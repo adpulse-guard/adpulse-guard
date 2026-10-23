@@ -240,8 +240,10 @@
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
     <div id="issueChartCard" class="bg-white dark:bg-darkcard rounded-xl shadow p-4 min-w-0">
       <h2 class="text-xs uppercase tracking-wide text-gray-500 mb-2">Incident Types</h2>
-      <div class="h-64">
-        <canvas id="issueChart"></canvas>
+      <div class="overflow-x-auto">
+        <div id="issueChartContainer" class="h-64 relative">
+          <canvas id="issueChart"></canvas>
+        </div>
       </div>
     </div>
 
@@ -1038,34 +1040,46 @@ const values =
     ? incidentChartData.values
     : [];
 
-// Six or fewer categories retain the compact vertical chart. More
-// categories switch to horizontal bars: every category remains readable,
-// including when Clear Date shows the client's entire incident history.
-const useHorizontalIssueChart = fullLabels.length > 6;
-const issueChartContainer = issueChartEl.parentElement;
+// Always show vertical columns with incident names under the x-axis.
+// With 7+ incident types the chart spans both columns, and severity cards
+// sit beneath it. Each category gets a minimum width on smaller screens.
+const useWideIncidentChart = fullLabels.length > 6;
+const issueChartContainer = document.getElementById('issueChartContainer');
 const issueChartCard = document.getElementById('issueChartCard');
 const severitySummaryCard = document.getElementById('severitySummaryCard');
 
-// Wide layout when many categories: horizontal bars use both columns;
-// the severity chart and summary sit together on the next row.
-issueChartCard.classList.toggle('md:col-span-2', useHorizontalIssueChart);
-severitySummaryCard.classList.toggle('hidden', !useHorizontalIssueChart);
-issueChartContainer.style.height = useHorizontalIssueChart
-  ? Math.max(256, fullLabels.length * 28 + 56) + 'px'
-  : '256px';
+issueChartCard.classList.toggle('md:col-span-2', useWideIncidentChart);
+severitySummaryCard.classList.toggle('hidden', !useWideIncidentChart);
+issueChartContainer.style.height = useWideIncidentChart ? '320px' : '256px';
+issueChartContainer.style.minWidth = Math.max(
+  0, fullLabels.length * (useWideIncidentChart ? 76 : 68)
+) + 'px';
 
+// Chart.js renders array labels over two rows while retaining the complete
+// incident description in tooltips and the original index for click filters.
 const incidentAxisLabels = {
   'Defined / no DOM': ['Defined', 'no DOM'],
   'Missing / legacy': ['Missing DOM', 'legacy'],
   'No DOM / legacy': ['Missing DOM', 'legacy'],
   'Requested / no DOM': ['Requested', 'no DOM'],
-  'Ad returned / no DOM': ['Ad returned', 'no DOM']
+  'Ad returned / no DOM': ['Ad returned', 'no DOM'],
+  'Never requested': ['Never', 'requested'],
+  'No requests': ['No', 'requests'],
+  'Req/no DOM': ['Req', 'no DOM']
 };
 const labels = fullLabels.map(label => {
   const shortLabel = shortLabelMap[label] || label;
-  return useHorizontalIssueChart
-    ? (shortLabel.length > 27 ? shortLabel.slice(0, 26) + '…' : shortLabel)
-    : (incidentAxisLabels[shortLabel] || shortLabel);
+  if (incidentAxisLabels[shortLabel]) return incidentAxisLabels[shortLabel];
+  if (shortLabel.length <= 11) return shortLabel;
+  const words = shortLabel.split(/\s+/);
+  const first = [];
+  while (words.length &&
+         (first.join(' ') + (first.length ? ' ' : '') + words[0]).length <= 11) {
+    first.push(words.shift());
+  }
+  return first.length && words.length
+    ? [first.join(' '), words.join(' ')]
+    : shortLabel;
 });
 
 const issueKeys =
@@ -1149,42 +1163,27 @@ const issueTooltipTitle = items =>
 
 
 const issueDarkMode = document.documentElement.classList.contains('dark');
-const issueChartScales = useHorizontalIssueChart
-  ? {
-      x: {
-        beginAtZero: true,
-        grace: '12%',
-        ticks: {color: '#9ca3af', precision: 0, font: {size: 11}},
-        grid: {color: 'rgba(156,163,175,0.2)'}
-      },
-      y: {
-        ticks: {color: '#9ca3af', autoSkip: false, font: {size: 11}},
-        grid: {display: false}
-      }
+const issueChartScales = {
+  x: {
+    ticks: {
+      color: '#9ca3af',
+      autoSkip: false,
+      minRotation: 0,
+      maxRotation: 0,
+      font: {size: useWideIncidentChart ? 10 : 11}
     }
-  : {
-      x: {
-        ticks: {
-          color: '#9ca3af',
-          autoSkip: false,
-          maxRotation: 0,
-          font: {size: 11}
-        }
-      },
-      y: {
-        beginAtZero: true,
-        ticks: {color: '#9ca3af', font: {size: 11}},
-        grid: {color: 'rgba(156,163,175,0.2)'}
-      }
-    };
+  },
+  y: {
+    beginAtZero: true,
+    ticks: {color: '#9ca3af', precision: 0, font: {size: 11}},
+    grid: {color: 'rgba(156,163,175,0.2)'}
+  }
+};
 
 const issueChartDatalabels = {
-  color: useHorizontalIssueChart
-    ? (issueDarkMode ? '#e5e7eb' : '#374151')
-    : '#ffffff',
-  anchor: useHorizontalIssueChart ? 'end' : 'center',
-  align: useHorizontalIssueChart ? 'end' : 'center',
-  offset: useHorizontalIssueChart ? 4 : 0,
+  color: '#ffffff',
+  anchor: 'center',
+  align: 'center',
   font: {weight: 'bold', size: 12}
 };
 
@@ -1211,9 +1210,9 @@ const issueChartTooltip = {
   }
 };
 
-// Chart.js preserves the indexAxis from its initial configuration, so
-// recreate only when changing orientation. Filtering stays unchanged.
-const issueIndexAxis = useHorizontalIssueChart ? 'y' : 'x';
+// Always use vertical columns, including when viewing all dates.
+// Destroy a previous horizontal instance after loading this version.
+const issueIndexAxis = 'x';
 if (issueChart && issueChart.options.indexAxis !== issueIndexAxis) {
   issueChart.destroy();
   issueChart = null;
@@ -1306,7 +1305,7 @@ const severityColors =
 // The additional summary is presentation-only. It reuses exactly the same
 // severity counts already supplied to the pie chart.
 const severitySummaryContent = document.getElementById('severitySummaryContent');
-if (useHorizontalIssueChart) {
+if (useWideIncidentChart) {
   const totalSeveritySignals = severityValues.reduce(
     (sum, value) => sum + Math.max(0, Number(value) || 0), 0
   );
