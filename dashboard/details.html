@@ -694,11 +694,21 @@ function renderDetails(page, data) {
           ? issueData.slots
           : [];
       
-      const affectedSlotCount =
-  Number(
-    issueData.affectedSlotCount ??
-    slots.length
-  );
+      // The Explorer displays the slots actually listed for each
+      // slot-level signal, including INFO/LOW. Sheet's affectedSlotCount
+      // intentionally stays zero for non-KPI signals, so do not use it here.
+      const isGlobalIssue = [
+        'gpt_script_missing',
+        'gpt_loaded_but_not_initialized',
+        'gpt_no_slot_requests'
+      ].includes(issue);
+      const affectedSlotCount = isGlobalIssue
+        ? Number(issueData.affectedSlotCount || 0)
+        : new Set(slots.filter(slot =>
+            typeof slot === 'string' &&
+            slot.trim() &&
+            slot !== '__global__'
+          )).size;
       const suggestedChecks =
         Array.isArray(issueData.suggestedChecks)
           ? issueData.suggestedChecks
