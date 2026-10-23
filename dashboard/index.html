@@ -90,11 +90,25 @@
 </span>
 
       <div class="flex items-center gap-2">
-        <input
-          type="date"
-          id="dateFilter"
-          class="px-2 py-1 border rounded dark:bg-darkcard"
-        />
+        <select id="datePreset" aria-label="Reporting period" class="px-2 py-1 border rounded dark:bg-darkcard dark:border-gray-600">
+          <option value="all">All time</option>
+          <option value="single">Single day</option>
+          <option value="today">Today</option>
+          <option value="yesterday">Yesterday</option>
+          <option value="last7">Last 7 days</option>
+          <option value="last30">Last 30 days</option>
+          <option value="mtd">Month to date</option>
+          <option value="lastmonth">Last month</option>
+          <option value="qtd">Quarter to date</option>
+          <option value="ytd">Year to date</option>
+          <option value="custom">Custom range</option>
+        </select>
+        <input type="date" id="dateFilter" aria-label="Single date" title="Select a single date" class="px-2 py-1 border rounded dark:bg-darkcard dark:border-gray-600" />
+        <div id="customRangeControls" class="hidden flex items-center gap-1">
+          <input type="date" id="rangeStartInput" aria-label="Period start" class="px-2 py-1 border rounded dark:bg-darkcard dark:border-gray-600" />
+          <span class="text-gray-400">–</span>
+          <input type="date" id="rangeEndInput" aria-label="Period end" class="px-2 py-1 border rounded dark:bg-darkcard dark:border-gray-600" />
+        </div>
         <button id="clearDate" class="text-indigo-500 hover:underline">
           Clear
         </button>
@@ -328,7 +342,49 @@ const params = new URLSearchParams(window.location.search);
 const fromParam = params.get('from');
 const token = params.get('token');
 let activeDate = params.get('date') || '';
+let rangeStart = activeDate ? '' : (params.get('start') || '');
+let rangeEnd = activeDate ? '' : (params.get('end') || '');
+const APG_RANGE_PRESETS = new Set(['all','single','today','yesterday','last7','last30','mtd','lastmonth','qtd','ytd','custom']);
+let selectedRangePreset = activeDate ? 'single' :
+  (rangeStart && rangeEnd && APG_RANGE_PRESETS.has(params.get('period'))
+    ? params.get('period') : rangeStart && rangeEnd ? 'custom' : 'all');
 let selectedIssueFilter = params.get('issue') || '';
+
+function apgUtcDate(y,m,d) { return new Date(Date.UTC(y,m,d)).toISOString().slice(0,10); }
+function apgTodayUtc() { return new Date().toISOString().slice(0,10); }
+function apgPeriodWindow(key) {
+  const today = new Date(apgTodayUtc() + 'T00:00:00Z');
+  const y=today.getUTCFullYear(), m=today.getUTCMonth(), d=today.getUTCDate();
+  const end=apgUtcDate(y,m,d);
+  if (key==='today') return [end,end];
+  if (key==='yesterday') {const date=apgUtcDate(y,m,d-1);return [date,date];}
+  if (key==='last7') return [apgUtcDate(y,m,d-6),end];
+  if (key==='last30') return [apgUtcDate(y,m,d-29),end];
+  if (key==='mtd') return [apgUtcDate(y,m,1),end];
+  if (key==='lastmonth') return [apgUtcDate(y,m-1,1),apgUtcDate(y,m,0)];
+  if (key==='qtd') return [apgUtcDate(y,Math.floor(m/3)*3,1),end];
+  if (key==='ytd') return [apgUtcDate(y,0,1),end];
+  return ['', ''];
+}
+function apgSyncDateWindowToUrl() {
+  const url = new URL(window.location);
+  ['date','start','end','period'].forEach(key=>url.searchParams.delete(key));
+  if (activeDate) url.searchParams.set('date',activeDate);
+  else if (rangeStart && rangeEnd) {
+    url.searchParams.set('start',rangeStart);
+    url.searchParams.set('end',rangeEnd);
+    url.searchParams.set('period',selectedRangePreset);
+  }
+  window.history.replaceState({},'',url);
+}
+function apgUpdateDateControls() {
+  document.getElementById('datePreset').value=selectedRangePreset;
+  document.getElementById('dateFilter').value=activeDate;
+  document.getElementById('rangeStartInput').value=rangeStart;
+  document.getElementById('rangeEndInput').value=rangeEnd;
+  document.getElementById('customRangeControls').classList.toggle('hidden',selectedRangePreset!=='custom');
+}
+
 const cameFromReality = fromParam === 'reality';
 function syncExplorerLink() {
   const explorerLink = document.getElementById('explorerLink');
@@ -340,8 +396,16 @@ function syncExplorerLink() {
 
   if (activeDate) {
     url.searchParams.set('date', activeDate);
+    url.searchParams.delete('start'); url.searchParams.delete('end'); url.searchParams.delete('period');
   } else {
     url.searchParams.delete('date');
+    if (rangeStart && rangeEnd) {
+      url.searchParams.set('start', rangeStart);
+      url.searchParams.set('end', rangeEnd);
+      url.searchParams.set('period', selectedRangePreset);
+    } else {
+      url.searchParams.delete('start'); url.searchParams.delete('end'); url.searchParams.delete('period');
+    }
   }
 
   if (selectedIssueFilter) {
@@ -362,6 +426,11 @@ function apgExplorerPageHref(pageUrl) {
   const url = new URL('details.html', window.location.href);
   url.searchParams.set('token', token);
   if (activeDate) url.searchParams.set('date', activeDate);
+  else if (rangeStart && rangeEnd) {
+    url.searchParams.set('start', rangeStart);
+    url.searchParams.set('end', rangeEnd);
+    url.searchParams.set('period', selectedRangePreset);
+  }
   url.searchParams.set('page', pageUrl);
   return apgEscapeHtml(url.pathname.split('/').pop() + url.search);
 }
@@ -442,7 +511,7 @@ function getOverviewCacheKey() {
   const dateKey = activeDate || 'summary';
   const issueKey = selectedIssueFilter || 'all';
 
-  return `apg_overview_${token}_${dateKey}_${issueKey}`;
+  return `apg_overview_${token}_${dateKey}_${rangeStart || 'all'}_${rangeEnd || 'all'}_${issueKey}`;
 }
 
 function getCachedOverview() {
@@ -694,6 +763,10 @@ Object.keys(APG_SECTIONS).forEach(id => {
 
     
 const dateInput = document.getElementById('dateFilter');
+const datePreset = document.getElementById('datePreset');
+const rangeStartInput = document.getElementById('rangeStartInput');
+const rangeEndInput = document.getElementById('rangeEndInput');
+apgUpdateDateControls();
 const clearDate = document.getElementById('clearDate');
 const viewModeLabel = document.getElementById('viewModeLabel');
 const issueFilter = document.getElementById('issueFilter');
@@ -730,6 +803,12 @@ function updateViewModeLabel(selectedDate) {
     return;
   }
 
+  if (rangeStart && rangeEnd && !activeDate) {
+    viewModeLabel.textContent = 'Range view';
+    viewModeLabel.title = rangeStart + ' – ' + rangeEnd;
+    viewModeLabel.classList.add('bg-indigo-100','text-indigo-700','dark:bg-indigo-900/30','dark:text-indigo-300');
+    return;
+  }
   if (selectedDate) {
     viewModeLabel.textContent = 'Daily view';
     viewModeLabel.title = '';
@@ -1868,8 +1947,10 @@ function loadOverviewData(animateMetrics = true) {
     view: 'dashboard-overview-data'
   });
 
-  if (activeDate) {
-    overviewParams.set('date', activeDate);
+  if (activeDate) overviewParams.set('date', activeDate);
+  else if (rangeStart && rangeEnd) {
+    overviewParams.set('start', rangeStart);
+    overviewParams.set('end', rangeEnd);
   }
 
   if (selectedIssueFilter) {
@@ -1879,11 +1960,11 @@ function loadOverviewData(animateMetrics = true) {
     .then(r => r.json())
     .then(j => {
 
-  if (j.error) {
-        throw new Error(j.error);
-      }
-      
-      setCachedOverview(j);
+  if (j.error) throw new Error(j.error);
+  // Old backend ignores date ranges; never display all-time as a range.
+  if (rangeStart && rangeEnd && (j.start !== rangeStart || j.end !== rangeEnd))
+    throw new Error('date_range_backend_not_deployed');
+  setCachedOverview(j);
       
       if (activeDate) {
         dateInput.value = activeDate;
@@ -1924,6 +2005,11 @@ updateIssueClearVisibility();
       const loading =
         document.getElementById('loadingIndicator');
 
+      if (error.message === 'date_range_backend_not_deployed' || error.message === 'invalid_date_range') {
+        loading.innerHTML = '<div class="bg-white dark:bg-darkcard rounded-xl shadow p-6 max-w-md text-center"><h2 class="text-lg font-semibold mb-2">Date range unavailable</h2><p class="text-sm text-gray-500 dark:text-gray-400">The reporting backend needs the date-range update. Single-day reports still work.</p></div>';
+        loading.style.display = 'flex';
+        return;
+      }
       if (
         error.message ===
         'invalid_or_expired_token'
@@ -1978,38 +2064,44 @@ updateIssueClearVisibility();
 
 loadOverviewData(false);
 
-dateInput.addEventListener('change', () => {
-  activeDate = dateInput.value;
-  const url = new URL(window.location);
-  if (activeDate) {
-  url.searchParams.set('date', activeDate);
-} else {
-  url.searchParams.delete('date');
-}
-
-if (fromParam) {
-  url.searchParams.set('from', fromParam);
-}
-  window.history.replaceState({}, '', url);
+function apgApplyDateSelection() {
+  apgSyncDateWindowToUrl();
+  apgUpdateDateControls();
   syncExplorerLink();
   updateViewModeLabel(cameFromReality ? null : activeDate);
   loadOverviewData();
-});
-
-clearDate.addEventListener('click', () => {
-  activeDate = '';
-  dateInput.value = '';
-  const url = new URL(window.location);
-url.searchParams.delete('date');
-
-if (fromParam) {
-  url.searchParams.set('from', fromParam);
 }
-
-window.history.replaceState({}, '', url);
-  syncExplorerLink();
-  updateViewModeLabel(cameFromReality ? null : '');
-  loadOverviewData();
+dateInput.addEventListener('change', () => {
+  activeDate = dateInput.value;
+  rangeStart=''; rangeEnd='';
+  selectedRangePreset=activeDate?'single':'all';
+  apgApplyDateSelection();
+});
+datePreset.addEventListener('change', () => {
+  const chosen=datePreset.value;
+  selectedRangePreset=chosen;
+  if (chosen==='all') {activeDate='';rangeStart='';rangeEnd='';}
+  else if (chosen==='single') {activeDate=dateInput.value || apgTodayUtc();rangeStart='';rangeEnd='';}
+  else if (chosen==='custom') {
+    activeDate='';
+    if (!rangeStart || !rangeEnd) [rangeStart,rangeEnd]=apgPeriodWindow('last7');
+  } else {
+    activeDate='';
+    [rangeStart,rangeEnd]=apgPeriodWindow(chosen);
+  }
+  apgApplyDateSelection();
+});
+function apgApplyCustomRange() {
+  const start=rangeStartInput.value,end=rangeEndInput.value;
+  if (!start || !end || start>end) return;
+  activeDate='';rangeStart=start;rangeEnd=end;selectedRangePreset='custom';
+  apgApplyDateSelection();
+}
+rangeStartInput.addEventListener('change',apgApplyCustomRange);
+rangeEndInput.addEventListener('change',apgApplyCustomRange);
+clearDate.addEventListener('click', () => {
+  activeDate='';rangeStart='';rangeEnd='';selectedRangePreset='all';
+  apgApplyDateSelection();
 });
 
   issueFilter.addEventListener('change', () => {
