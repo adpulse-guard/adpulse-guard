@@ -24,6 +24,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<style>
+  #topOffenderBox.apg-collapsed #copyOffenderPagesBtn,
+  #securityWidget.apg-collapsed #securityCount { display: none !important; }
+</style>
 </head>
 
 <body class="bg-gray-50 dark:bg-darkbg text-gray-900 dark:text-white font-sans min-h-screen">
@@ -209,18 +213,23 @@
         🚨 Highest Impact Incident
         <span class="text-red-600 dark:text-red-400/70 text-sm font-medium">Action recommended</span>
       </h2>
-      <button id="copyOffenderPagesBtn" type="button"
-              class="hidden text-xs text-indigo-600 dark:text-indigo-300 hover:underline"
-              title="Copy all affected page URLs, not only the visible ones">
-        Copy list
-      </button>
+      <div class="flex items-center gap-3">
+        <button id="copyOffenderPagesBtn" type="button"
+                class="hidden text-xs text-indigo-600 dark:text-indigo-300 hover:underline"
+                title="Copy all affected page URLs, not only the visible ones">
+          Copy list
+        </button>
+        <button type="button" data-apg-collapse="topOffenderBox" aria-controls="topOffenderBody" aria-expanded="true" aria-label="Collapse Highest Impact Incident" title="Collapse Highest Impact Incident" class="apg-collapse-button inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-gray-400 hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"><svg aria-hidden="true" class="h-4 w-4 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg></button>
+      </div>
     </div>
-    <p><strong>Slot:</strong> <span id="offenderSlot"></span></p>
+    <div id="topOffenderBody">
+      <p><strong>Slot:</strong> <span id="offenderSlot"></span></p>
     <p><strong>Estimated Impact:</strong> <span id="offenderLoss"></span></p>
     <p><strong>Page:</strong></p>
       <div id="offenderPage" class="mt-1"></div>
     <p><strong>Incident:</strong></p>
       <div id="offenderIssue" class="mt-1 flex flex-wrap gap-1"></div>
+    </div>
   </div>
 
 <div id="securityWidget"
@@ -232,43 +241,61 @@
     <h2 class="text-sm font-semibold text-gray-700 dark:text-gray-300">
       🔐 Security & Access Signals
     </h2>
-    <span id="securityCount"
-          class="text-xs px-2 py-1 rounded bg-gray-100 text-gray-600
-                 dark:bg-gray-700 dark:text-gray-300">
-    </span>
+    <div class="flex items-center gap-3">
+      <span id="securityCount"
+            class="text-xs px-2 py-1 rounded bg-gray-100 text-gray-600
+                   dark:bg-gray-700 dark:text-gray-300">
+      </span>
+      <button type="button" data-apg-collapse="securityWidget" aria-controls="securityBody" aria-expanded="true" aria-label="Collapse Security & Access Signals" title="Collapse Security & Access Signals" class="apg-collapse-button inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-gray-400 hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"><svg aria-hidden="true" class="h-4 w-4 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg></button>
+    </div>
   </div>
-
-  <ul id="securityList"
-      class="text-xs space-y-2 text-gray-600 dark:text-gray-400">
-  </ul>
+  <div id="securityBody">
+    <ul id="securityList"
+        class="text-xs space-y-2 text-gray-600 dark:text-gray-400">
+    </ul>
+  </div>
 
 </div>
   
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
     <div id="issueChartCard" class="bg-white dark:bg-darkcard rounded-xl shadow p-4 min-w-0">
-      <h2 class="text-xs uppercase tracking-wide text-gray-500 mb-2">Incident Types</h2>
-      <div class="overflow-x-auto">
+      <div class="flex items-center justify-between gap-3 mb-2">
+        <h2 class="text-xs uppercase tracking-wide text-gray-500">Incident Types</h2>
+        <button type="button" data-apg-collapse="issueChartCard" aria-controls="issueChartBody" aria-expanded="true" aria-label="Collapse Incident Types" title="Collapse Incident Types" class="apg-collapse-button inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-gray-400 hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"><svg aria-hidden="true" class="h-4 w-4 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg></button>
+      </div>
+      <div id="issueChartBody" class="overflow-x-auto">
         <div id="issueChartContainer" class="h-64 relative">
           <canvas id="issueChart"></canvas>
         </div>
       </div>
     </div>
 
-    <div class="bg-white dark:bg-darkcard rounded-xl shadow p-4 flex flex-col min-w-0">
-      <h2 class="text-xs uppercase tracking-wide text-gray-500 mb-2">Severity Breakdown</h2>
-      <div class="h-64 my-auto">
+    <div id="severityChartCard" class="bg-white dark:bg-darkcard rounded-xl shadow p-4 flex flex-col min-w-0 self-start">
+      <div class="flex items-center justify-between gap-3 mb-2">
+        <h2 class="text-xs uppercase tracking-wide text-gray-500">Severity Breakdown</h2>
+        <button type="button" data-apg-collapse="severityChartCard" aria-controls="severityChartBody" aria-expanded="true" aria-label="Collapse Severity Breakdown" title="Collapse Severity Breakdown" class="apg-collapse-button inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-gray-400 hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"><svg aria-hidden="true" class="h-4 w-4 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg></button>
+      </div>
+      <div id="severityChartBody" class="h-64 my-auto w-full">
         <canvas id="severityChart"></canvas>
       </div>
     </div>
 
     <div id="severitySummaryCard" class="hidden bg-white dark:bg-darkcard rounded-xl shadow p-4 min-w-0">
-      <h2 class="text-xs uppercase tracking-wide text-gray-500 mb-5">Severity Summary</h2>
-      <div id="severitySummaryContent" class="space-y-4"></div>
+      <div class="flex items-center justify-between gap-3 mb-5">
+        <h2 class="text-xs uppercase tracking-wide text-gray-500">Severity Summary</h2>
+        <button type="button" data-apg-collapse="severitySummaryCard" aria-controls="severitySummaryBody" aria-expanded="true" aria-label="Collapse Severity Summary" title="Collapse Severity Summary" class="apg-collapse-button inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-gray-400 hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"><svg aria-hidden="true" class="h-4 w-4 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg></button>
+      </div>
+      <div id="severitySummaryBody">
+        <div id="severitySummaryContent" class="space-y-4"></div>
+      </div>
     </div>
 
     <div id="lossChartWrapper" class="bg-white dark:bg-darkcard rounded-xl shadow p-4 md:col-span-2">
-      <h2 class="text-xs uppercase tracking-wide text-gray-500 mb-2">Revenue at Risk Trend</h2>
-      <div class="h-64">
+      <div class="flex items-center justify-between gap-3 mb-2">
+        <h2 class="text-xs uppercase tracking-wide text-gray-500">Revenue at Risk Trend</h2>
+        <button type="button" data-apg-collapse="lossChartWrapper" aria-controls="lossChartBody" aria-expanded="true" aria-label="Collapse Revenue at Risk Trend" title="Collapse Revenue at Risk Trend" class="apg-collapse-button inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-gray-400 hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-indigo-500"><svg aria-hidden="true" class="h-4 w-4 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg></button>
+      </div>
+      <div id="lossChartBody" class="h-64">
         <canvas id="lossTrendChart"></canvas>
       </div>
     </div>
@@ -584,6 +611,62 @@ select.appendChild(groupHeader);
 };
 
 let issueChart, severityChart, lossTrendChart;
+
+const APG_COLLAPSE_KEY = 'apg-dashboard-collapsed-sections-v1';
+const APG_SECTIONS = {
+  topOffenderBox: {body:'topOffenderBody', title:'Highest Impact Incident'},
+  securityWidget: {body:'securityBody', title:'Security & Access Signals'},
+  issueChartCard: {body:'issueChartBody', title:'Incident Types'},
+  severityChartCard: {body:'severityChartBody', title:'Severity Breakdown'},
+  severitySummaryCard: {body:'severitySummaryBody', title:'Severity Summary'},
+  lossChartWrapper: {body:'lossChartBody', title:'Revenue at Risk Trend'}
+};
+let apgCollapsed = new Set();
+try {
+  const saved = JSON.parse(localStorage.getItem(APG_COLLAPSE_KEY) || '[]');
+  if (Array.isArray(saved)) {
+    apgCollapsed = new Set(saved.filter(id =>
+      Object.prototype.hasOwnProperty.call(APG_SECTIONS, id)));
+  }
+} catch (error) { apgCollapsed = new Set(); }
+
+function apgSyncCollapse(id) {
+  const config = APG_SECTIONS[id];
+  const card = document.getElementById(id);
+  const content = document.getElementById(config.body);
+  const control = card?.querySelector('[data-apg-collapse="' + id + '"]');
+  if (!card || !content || !control) return;
+  const closed = apgCollapsed.has(id);
+  content.classList.toggle('hidden', closed);
+  card.classList.toggle('apg-collapsed', closed);
+  control.setAttribute('aria-expanded', String(!closed));
+  control.setAttribute('aria-label', (closed ? 'Expand ' : 'Collapse ') + config.title);
+  control.title = (closed ? 'Expand ' : 'Collapse ') + config.title;
+  control.querySelector('svg')?.classList.toggle('rotate-180', !closed);
+}
+
+Object.keys(APG_SECTIONS).forEach(id => {
+  const control = document.querySelector('[data-apg-collapse="' + id + '"]');
+  if (!control) return;
+  apgSyncCollapse(id);
+  control.addEventListener('click', () => {
+    const opening = apgCollapsed.has(id);
+    if (opening) apgCollapsed.delete(id);
+    else apgCollapsed.add(id);
+    try {
+      localStorage.setItem(APG_COLLAPSE_KEY, JSON.stringify([...apgCollapsed]));
+    } catch (error) { /* optional browser storage */ }
+    apgSyncCollapse(id);
+    if (opening) {
+      requestAnimationFrame(() => {
+        if (id === 'issueChartCard' && issueChart) issueChart.resize();
+        if (id === 'severityChartCard' && severityChart) severityChart.resize();
+        if (id === 'lossChartWrapper' && lossTrendChart) lossTrendChart.resize();
+      });
+    }
+  });
+});
+
     
 const dateInput = document.getElementById('dateFilter');
 const clearDate = document.getElementById('clearDate');
