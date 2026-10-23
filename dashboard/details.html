@@ -705,6 +705,7 @@ function renderDetails(page, data) {
           : [];
 
       const fullLabel =
+        (typeof issueData.displayLabel === 'string' && issueData.displayLabel.trim()) ||
         ISSUE_LABEL[issue] ||
         labelMap[issue] ||
         issue;
