@@ -476,34 +476,15 @@
 
     } else {
 
-      const realityParams =
-        new URLSearchParams();
-
-      realityParams.set(
-        'view',
-        'reality-data'
-      );
-
-      realityParams.set(
-        'token',
-        token
-      );
-
-      realityParams.set(
-        'date',
-        date
-      );
-
-
-      const realityKeys = [
-        'slots',
-        'issues',
-        'loss',
+      // Reality Mode reads the same incident types and KPI totals as the
+      // Dashboard. Email links intentionally omit INFO/LOW incidents; the
+      // dashboard overview does not, so these signals can appear here even
+      // on days when no alert email was sent.
+      const realitySignalKeys = [
         'gptScriptMissing',
         'gptNotInitialized',
         'gptNoSlotRequests',
         'domFail',
-        'requestedMissingDom',
         'requestedMissingDomHigh',
         'requestedMissingDomMedium',
         'noDomNoRequest',
@@ -516,32 +497,102 @@
         'visibilityImpaired'
       ];
 
+      const realityLabelKeys = {
+        'GPT script missing': 'gptScriptMissing',
+        'GPT loaded but not initialized': 'gptNotInitialized',
+        'No GPT slot requests': 'gptNoSlotRequests',
+        'Incorrect ad network ID': 'wrongNetwork',
+        'DOM slot not in GPT': 'domFail',
+        'GPT slot defined without DOM': 'noDomNoRequest',
+        'Requested GPT slot missing DOM': 'requestedMissingDomMedium',
+        'Unexpected size': 'unexpectedSize',
+        'No ad response returned': 'emptyResponse',
+        'Slot visible but no ad request sent': 'neverRequested',
+        'Layout overlap': 'layoutOverlap',
+        'Ad visibility impaired': 'visibilityImpaired',
+        'Slot container collapsed': 'containerCollapsed'
+      };
 
-      realityKeys.forEach(key => {
+      function buildRealityParams(overview) {
+        const out = new URLSearchParams({
+          view: 'reality-data',
+          token: token
+        });
+        if (date) out.set('date', date);
 
-        const value =
-          params.get(key);
+        const counts = Object.fromEntries(
+          realitySignalKeys.map(key => [key, 0])
+        );
+        let legacyMissingDom = 0;
+        const chart = overview.incidentTypesChart || {};
+        const labels = Array.isArray(chart.labels) ? chart.labels : [];
+        const values = Array.isArray(chart.values) ? chart.values : [];
 
-        if (value !== null) {
-          realityParams.set(
-            key,
-            value
-          );
+        labels.forEach((label, index) => {
+          const name = String(label || '');
+          const value = Math.max(0, Number(values[index]) || 0);
+          if (!value) return;
+
+          let key = realityLabelKeys[name];
+
+          if (name.includes('DOM container missing') ||
+              name.includes('Requested GPT slot missing DOM')) {
+            if (name.startsWith('Ad returned') ||
+                name.includes('Confirmed GPT response')) {
+              key = 'requestedMissingDomHigh';
+            } else if (name.startsWith('Ad requested') ||
+                       name.includes('Response not yet confirmed')) {
+              key = 'requestedMissingDomMedium';
+            } else {
+              legacyMissingDom += value;
+              return;
+            }
+          }
+          if (key) counts[key] += value;
+        });
+
+        // This aggregate is for Reality's incident messaging only. The
+        // financial KPIs always come from Dashboard's independent figures.
+        const allMissingDom =
+          counts.requestedMissingDomHigh +
+          counts.requestedMissingDomMedium +
+          legacyMissingDom;
+
+        const allIssues =
+          realitySignalKeys.reduce((sum, key) => sum + counts[key], 0) +
+          legacyMissingDom;
+
+        out.set('issues', String(allIssues));
+        out.set('slots', String(Math.max(0,
+          Number(overview.totalImpactedSlots) || 0)));
+        out.set('loss', String(Math.max(0,
+          Number(overview.revenueAtRisk) || 0)));
+        out.set('requestedMissingDom', String(allMissingDom));
+
+        // Preserve the old response-unknown wording when all missing-DOM
+        // records are legacy; do not classify them as confirmed responses.
+        for (const key of realitySignalKeys) {
+          out.set(key, String(counts[key]));
         }
+        return out;
+      }
 
+      const overviewParams = new URLSearchParams({
+        view: 'dashboard-overview-data',
+        token: token
       });
+      if (date) overviewParams.set('date', date);
 
-
-      const realityDataUrl =
-        `${APPS_SCRIPT_URL}?${realityParams.toString()}`;
-
-
-      fetch(realityDataUrl)
-
-        .then(response =>
-          response.json()
-        )
-
+      fetch(`${APPS_SCRIPT_URL}?${overviewParams.toString()}`)
+        .then(response => response.json())
+        .then(overview => {
+          if (!overview.ok) {
+            throw new Error(overview.error || 'Dashboard data unavailable');
+          }
+          const realityParams = buildRealityParams(overview);
+          return fetch(`${APPS_SCRIPT_URL}?${realityParams.toString()}`);
+        })
+        .then(response => response.json())
         .then(data => {
 
           if (!data.ok) {
