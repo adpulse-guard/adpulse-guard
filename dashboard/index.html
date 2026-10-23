@@ -89,7 +89,7 @@
   Summary view
 </span>
 
-      <div class="flex items-center gap-2">
+      <div class="flex flex-wrap items-center gap-2">
         <select id="datePreset" aria-label="Reporting period" class="px-2 py-1 border rounded dark:bg-darkcard dark:border-gray-600">
           <option value="all">All time</option>
           <option value="single">Single day</option>
@@ -104,9 +104,11 @@
           <option value="custom">Custom range</option>
         </select>
         <input type="date" id="dateFilter" aria-label="Single date" title="Select a single date" class="px-2 py-1 border rounded dark:bg-darkcard dark:border-gray-600" />
-        <div id="customRangeControls" class="hidden flex items-center gap-1">
+        <span id="dateRangeLabel" aria-live="polite" class="hidden px-2 py-1 rounded bg-gray-100 text-gray-700 dark:bg-gray-700/60 dark:text-gray-200 font-medium whitespace-nowrap"></span>
+        <div id="customRangeControls" class="hidden flex flex-wrap items-center gap-2">
+          <label for="rangeStartInput" class="text-gray-500 dark:text-gray-400">From</label>
           <input type="date" id="rangeStartInput" aria-label="Period start" class="px-2 py-1 border rounded dark:bg-darkcard dark:border-gray-600" />
-          <span class="text-gray-400">–</span>
+          <label for="rangeEndInput" class="text-gray-500 dark:text-gray-400">To</label>
           <input type="date" id="rangeEndInput" aria-label="Period end" class="px-2 py-1 border rounded dark:bg-darkcard dark:border-gray-600" />
         </div>
         <button id="clearDate" class="text-indigo-500 hover:underline">
@@ -377,12 +379,42 @@ function apgSyncDateWindowToUrl() {
   }
   window.history.replaceState({},'',url);
 }
+// Dates are displayed independently from native date inputs to avoid empty
+// "mm/dd/yyyy" placeholders for Today/Yesterday and preset ranges.
+function apgFormatDate(dateKey, showYear = true) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateKey || '')) return '';
+  const date = new Date(dateKey + 'T00:00:00Z');
+  if (Number.isNaN(date.getTime())) return '';
+  return new Intl.DateTimeFormat('en-GB', {
+    day: '2-digit',
+    month: 'short',
+    ...(showYear ? {year: 'numeric'} : {}),
+    timeZone: 'UTC'
+  }).format(date);
+}
+function apgFormatRange(start, end) {
+  if (!start || !end) return '';
+  if (start === end) return apgFormatDate(start);
+  const commonYear = start.slice(0,4) === end.slice(0,4);
+  return apgFormatDate(start, !commonYear) + ' – ' + apgFormatDate(end);
+}
 function apgUpdateDateControls() {
-  document.getElementById('datePreset').value=selectedRangePreset;
-  document.getElementById('dateFilter').value=activeDate;
-  document.getElementById('rangeStartInput').value=rangeStart;
-  document.getElementById('rangeEndInput').value=rangeEnd;
-  document.getElementById('customRangeControls').classList.toggle('hidden',selectedRangePreset!=='custom');
+  document.getElementById('datePreset').value = selectedRangePreset;
+  const datePicker = document.getElementById('dateFilter');
+  datePicker.value = activeDate;
+  datePicker.classList.toggle('hidden', selectedRangePreset !== 'single');
+
+  document.getElementById('rangeStartInput').value = rangeStart;
+  document.getElementById('rangeEndInput').value = rangeEnd;
+  document.getElementById('customRangeControls')
+    .classList.toggle('hidden', selectedRangePreset !== 'custom');
+
+  const textDate = document.getElementById('dateRangeLabel');
+  const showDate = selectedRangePreset !== 'single' &&
+    selectedRangePreset !== 'custom' && selectedRangePreset !== 'all' &&
+    Boolean(rangeStart && rangeEnd);
+  textDate.textContent = showDate ? apgFormatRange(rangeStart, rangeEnd) : '';
+  textDate.classList.toggle('hidden', !showDate);
 }
 
 const cameFromReality = fromParam === 'reality';
