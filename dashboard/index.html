@@ -238,18 +238,24 @@
 </div>
   
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <div class="bg-white dark:bg-darkcard rounded-xl shadow p-4">
+    <div id="issueChartCard" class="bg-white dark:bg-darkcard rounded-xl shadow p-4 min-w-0">
       <h2 class="text-xs uppercase tracking-wide text-gray-500 mb-2">Incident Types</h2>
       <div class="h-64">
         <canvas id="issueChart"></canvas>
       </div>
     </div>
 
-    <div class="bg-white dark:bg-darkcard rounded-xl shadow p-4 flex flex-col">
+    <div class="bg-white dark:bg-darkcard rounded-xl shadow p-4 flex flex-col min-w-0">
       <h2 class="text-xs uppercase tracking-wide text-gray-500 mb-2">Severity Breakdown</h2>
       <div class="h-64 my-auto">
         <canvas id="severityChart"></canvas>
       </div>
+    </div>
+
+    <div id="severitySummaryCard" class="hidden bg-white dark:bg-darkcard rounded-xl shadow p-4 min-w-0">
+      <h2 class="text-xs uppercase tracking-wide text-gray-500 mb-2">Severity Summary</h2>
+      <p class="text-xs text-gray-400 mb-5">Share of detected incident signals</p>
+      <div id="severitySummaryContent" class="space-y-4"></div>
     </div>
 
     <div id="lossChartWrapper" class="bg-white dark:bg-darkcard rounded-xl shadow p-4 md:col-span-2">
@@ -1037,8 +1043,15 @@ const values =
 // including when Clear Date shows the client's entire incident history.
 const useHorizontalIssueChart = fullLabels.length > 6;
 const issueChartContainer = issueChartEl.parentElement;
+const issueChartCard = document.getElementById('issueChartCard');
+const severitySummaryCard = document.getElementById('severitySummaryCard');
+
+// Wide layout when many categories: horizontal bars use both columns;
+// the severity chart and summary sit together on the next row.
+issueChartCard.classList.toggle('md:col-span-2', useHorizontalIssueChart);
+severitySummaryCard.classList.toggle('hidden', !useHorizontalIssueChart);
 issueChartContainer.style.height = useHorizontalIssueChart
-  ? Math.max(256, fullLabels.length * 31 + 64) + 'px'
+  ? Math.max(256, fullLabels.length * 28 + 56) + 'px'
   : '256px';
 
 const incidentAxisLabels = {
@@ -1290,6 +1303,38 @@ const severityColors =
       '#9ca3af'
   );
 
+// The additional summary is presentation-only. It reuses exactly the same
+// severity counts already supplied to the pie chart.
+const severitySummaryContent = document.getElementById('severitySummaryContent');
+if (useHorizontalIssueChart) {
+  const totalSeveritySignals = severityValues.reduce(
+    (sum, value) => sum + Math.max(0, Number(value) || 0), 0
+  );
+  severitySummaryContent.innerHTML = severityLabels.length
+    ? severityLabels.map((severity, i) => {
+        const count = Math.max(0, Number(severityValues[i]) || 0);
+        const pct = totalSeveritySignals ? count / totalSeveritySignals * 100 : 0;
+        const percentage = pct > 0 && pct < 1 ? pct.toFixed(1) : pct.toFixed(0);
+        const color = severityColorMap[severity] || '#9ca3af';
+        return `
+          <div class="space-y-1.5">
+            <div class="flex justify-between items-center gap-3 text-xs">
+              <span class="flex items-center gap-2 font-medium text-gray-700 dark:text-gray-200">
+                <span class="inline-block h-2.5 w-2.5 rounded-sm" style="background-color:${color}"></span>
+                ${apgEscapeHtml(severity)}
+              </span>
+              <span class="text-gray-500 dark:text-gray-300 tabular-nums">
+                ${count.toLocaleString()} · ${percentage}%
+              </span>
+            </div>
+            <div class="h-2 bg-gray-100 dark:bg-gray-700/70 rounded-full overflow-hidden">
+              <div class="h-full rounded-full" style="width:${pct}%;background-color:${color}"></div>
+            </div>
+          </div>`;
+      }).join('')
+    : '<p class="text-sm text-gray-400">No severity data for this view.</p>';
+}
+
 if (severityChart) {
 
   severityChart.data.labels =
@@ -1302,6 +1347,7 @@ if (severityChart) {
     .backgroundColor =
       severityColors;
 
+  severityChart.resize();
   severityChart.update();
 
 } else {
