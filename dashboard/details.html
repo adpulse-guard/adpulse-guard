@@ -214,6 +214,8 @@ const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxAD4aNij0ApHx21r68hq
 
 let currentPageMap = new Map();
 let activeDate = params.get('date') || '';
+let rangeStart = activeDate ? '' : (params.get('start') || '');
+let rangeEnd = activeDate ? '' : (params.get('end') || '');
 let selectedIssue = params.get('issue') || '';
 // Consume one page deep-link after the Explorer data loads.
 let pendingExplorerPage = params.get('page') || '';
@@ -228,6 +230,13 @@ function syncOverviewLink() {
     url.searchParams.set('date', activeDate);
   } else {
     url.searchParams.delete('date');
+    if (rangeStart && rangeEnd) {
+      url.searchParams.set('start', rangeStart);
+      url.searchParams.set('end', rangeEnd);
+      url.searchParams.set('period', params.get('period') || 'custom');
+    } else {
+      url.searchParams.delete('start');url.searchParams.delete('end');url.searchParams.delete('period');
+    }
   }
 
   if (selectedIssue) {
@@ -365,8 +374,12 @@ if (groupKey === 'LAYOUT') {
 document.getElementById('dateFilter')
   .addEventListener('change', e => {
     activeDate = e.target.value;
+    rangeStart='';rangeEnd='';
 
 const url = new URL(window.location);
+url.searchParams.delete('start');
+url.searchParams.delete('end');
+url.searchParams.delete('period');
 
 if (activeDate) {
   url.searchParams.set('date', activeDate);
@@ -385,6 +398,8 @@ clearDate.addEventListener('click', () => {
   activeDate = '';
   const url = new URL(window.location);
   url.searchParams.delete('date');
+  url.searchParams.delete('start');url.searchParams.delete('end');url.searchParams.delete('period');
+  rangeStart='';rangeEnd='';
   window.history.replaceState({}, '', url);
   document.getElementById('dateFilter').value = '';
   syncOverviewLink();
@@ -430,8 +445,10 @@ function loadExplorerData() {
     view: 'dashboard-explorer-data'
   });
 
-  if (activeDate) {
-    explorerParams.set('date', activeDate);
+  if (activeDate) explorerParams.set('date', activeDate);
+  else if (rangeStart && rangeEnd) {
+    explorerParams.set('start',rangeStart);
+    explorerParams.set('end',rangeEnd);
   }
 
   if (selectedIssue) {
@@ -442,9 +459,10 @@ function loadExplorerData() {
     .then(r => r.json())
     .then(j => {
 
-      if (j.error) {
-        throw new Error(j.error);
-      }
+      if (j.error) throw new Error(j.error);
+      if (rangeStart && rangeEnd &&
+          (j.start !== rangeStart || j.end !== rangeEnd))
+        throw new Error('Date-range reporting backend has not been deployed.');
 
       buildIssueDropdown(j.issueCounts || {});
 
