@@ -215,6 +215,8 @@ const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxAD4aNij0ApHx21r68hq
 let currentPageMap = new Map();
 let activeDate = params.get('date') || '';
 let selectedIssue = params.get('issue') || '';
+// Consume one page deep-link after the Explorer data loads.
+let pendingExplorerPage = params.get('page') || '';
 function syncOverviewLink() {
   if (!overviewLink || !token) return;
 
@@ -480,6 +482,29 @@ function loadExplorerData() {
 
       renderSidebar(currentPageMap);
 
+      if (pendingExplorerPage) {
+        const requestedPage = pendingExplorerPage;
+        pendingExplorerPage = '';
+        const normalize = value => String(value || '').replace(/\/$/, '');
+        const pageKey = currentPageMap.has(requestedPage)
+          ? requestedPage
+          : [...currentPageMap.keys()].find(key =>
+              normalize(key) === normalize(requestedPage));
+
+        if (pageKey) {
+          const element = [...document.querySelectorAll(
+            '#pageList > div[data-apg-page]'
+          )].find(el => el.getAttribute('data-apg-page') === pageKey);
+          // Also works when the page isn't among the first 100 sidebar items.
+          selectPageByUrl(pageKey, element || null);
+        } else {
+          const notice = document.createElement('div');
+          notice.className = 'text-xs text-amber-600 dark:text-amber-400 py-2';
+          notice.textContent = 'Selected page not found for this date range.';
+          document.getElementById('pageList').prepend(notice);
+        }
+      }
+
       updateIssueClearVisibility();
     })
     .catch(error => {
@@ -573,6 +598,7 @@ function renderSidebar(pageMap) {
 
     return `
       <div onclick="selectPage('${btoa(page)}', this)"
+           data-apg-page="${apgEscapeHtml(page)}"
            class="cursor-pointer p-3.5 rounded-xl
                   bg-white dark:bg-darkcard
                   border border-gray-200 dark:border-gray-700/50
@@ -611,6 +637,9 @@ function renderSidebar(pageMap) {
 }
 
 function selectPage(encodedPage, el) {
+  selectPageByUrl(atob(encodedPage), el);
+}
+function selectPageByUrl(page, el) {
 
   document.querySelectorAll('#pageList > div')
   .forEach(d => d.classList.remove(
@@ -631,7 +660,6 @@ setTimeout(() => {
 }, 120);
   }
 
-  const page = atob(encodedPage);
   const data = currentPageMap.get(page);
 
   if (!data) return;
