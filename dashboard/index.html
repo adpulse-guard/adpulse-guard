@@ -2125,7 +2125,8 @@ if (statusEl) {
 }
 }
 function loadOverviewData(animateMetrics = true) {
-
+const apgLoadStart = performance.now();
+    
   const loading =
     document.getElementById('loadingIndicator');
 
@@ -2204,10 +2205,19 @@ function loadOverviewData(animateMetrics = true) {
         cameFromReality ? null : activeDate
       );
 
-      renderOverviewData(
-  j,
-  animateMetrics
-);
+      
+      const apgDataReady = performance.now();
+
+      renderOverviewData(j, animateMetrics);
+
+      const apgRenderDone = performance.now();
+
+      console.table({
+        'Data waiting (ms)': Math.round(apgDataReady - apgLoadStart),
+        'Dashboard rendering (ms)': Math.round(apgRenderDone - apgDataReady),
+        'Total until render (ms)': Math.round(apgRenderDone - apgLoadStart)
+      });
+
 
 const serverIssueCounts = {};
 
