@@ -697,13 +697,73 @@ updateIssueClearVisibility();
 loadExplorerData();
   });
 
+    
+const EXPLORER_CACHE_TTL = 5 * 60 * 1000;
+
+function getExplorerCacheKey() {
+  return [
+    'apg_explorer_v1',
+    token,
+    activeDate || 'summary',
+    rangeStart || 'all',
+    rangeEnd || 'all',
+    selectedIssue || 'all'
+  ].join('_');
+}
+
+function getCachedExplorer() {
+  try {
+    const key = getExplorerCacheKey();
+    const raw = sessionStorage.getItem(key);
+    if (!raw) return null;
+
+    const cached = JSON.parse(raw);
+
+    if (
+      !cached.timestamp ||
+      Date.now() - cached.timestamp > EXPLORER_CACHE_TTL
+    ) {
+      sessionStorage.removeItem(key);
+      return null;
+    }
+
+    return cached.data && cached.data.ok === true
+      ? cached.data
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function setCachedExplorer(data, key) {
+  if (!data || data.ok !== true) return;
+
+  try {
+    sessionStorage.setItem(
+      key,
+      JSON.stringify({
+        timestamp: Date.now(),
+        data: data
+      })
+    );
+  } catch {
+  }
+}
+
+
 function loadExplorerData() {
 
-  document.getElementById('pageList').innerHTML = `
-    <div class="text-sm text-gray-400">
-      Loading incidents...
-    </div>
-  `;
+  const cachedExplorer = getCachedExplorer();
+  const explorerCacheKey = getExplorerCacheKey();
+
+  if (!cachedExplorer) {
+    document.getElementById('pageList').innerHTML = `
+      <div class="text-sm text-gray-400">
+        Loading incidents...
+      </div>
+    `;
+  }
+
 
   const explorerParams = new URLSearchParams({
     token: token,
@@ -720,14 +780,29 @@ function loadExplorerData() {
     explorerParams.set('issue', selectedIssue);
   }
 
-  fetch(`${SHEET_URL}?${explorerParams.toString()}`)
-    .then(r => r.json())
+  
+  (cachedExplorer
+    ? Promise.resolve(cachedExplorer)
+    : fetch(`${SHEET_URL}?${explorerParams.toString()}`)
+        .then(r => {
+          if (!r.ok) {
+            throw new Error('Explorer request failed: ' + r.status);
+          }
+          return r.json();
+        })
+  )
     .then(j => {
+
 
       if (j.error) throw new Error(j.error);
       if (rangeStart && rangeEnd &&
           (j.start !== rangeStart || j.end !== rangeEnd))
         throw new Error('Date-range reporting backend has not been deployed.');
+
+        
+      if (!cachedExplorer && j.ok === true) {
+        setCachedExplorer(j, explorerCacheKey);
+      }
 
       buildIssueDropdown(j.issueCounts || {});
 
