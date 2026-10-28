@@ -2118,7 +2118,6 @@ if (statusEl) {
 }
 }
 function loadOverviewData(animateMetrics = true) {
-const apgLoadStart = performance.now();
     
   const loading =
     document.getElementById('loadingIndicator');
@@ -2186,10 +2185,6 @@ const apgLoadStart = performance.now();
   fetch(`${SHEET_URL}?${overviewParams.toString()}`)
     .then(r => r.json())
     .then(j => {
-    
-      if (j._perf) {
-        console.table(j._perf);
-      }
 
 
   if (j.error) throw new Error(j.error);
@@ -2203,17 +2198,7 @@ const apgLoadStart = performance.now();
       );
 
       
-      const apgDataReady = performance.now();
-
       renderOverviewData(j, animateMetrics);
-
-      const apgRenderDone = performance.now();
-
-      console.table({
-        'Data waiting (ms)': Math.round(apgDataReady - apgLoadStart),
-        'Dashboard rendering (ms)': Math.round(apgRenderDone - apgDataReady),
-        'Total until render (ms)': Math.round(apgRenderDone - apgLoadStart)
-      });
 
 
 const serverIssueCounts = {};
