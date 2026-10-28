@@ -29,7 +29,7 @@
   #topOffenderBox.apg-collapsed #copyOffenderPagesBtn,
   #securityWidget.apg-collapsed #securityCount,
   #affectedSlotsPanel.apg-collapsed #copySlotsBtn { display: none !important; }
-  /* Single-menu date picker, native light/dark, keyboard accessible. */
+  
   .apg-date-panel { z-index: 70; }
   .apg-preset { display:block; width:100%; text-align:left; padding:10px 12px; border-radius:7px; font-size:12px; transition:background .12s; }
   .apg-preset:hover, .apg-preset:focus-visible { background:rgba(99,102,241,.10); outline:none; }
@@ -431,8 +431,7 @@ function apgSyncDateWindowToUrl() {
     url.searchParams.set('period',selectedRangePreset);
   window.history.replaceState({},'',url);
 }
-// Dates are displayed independently from native date inputs to avoid empty
-// "mm/dd/yyyy" placeholders for Today/Yesterday and preset ranges.
+
 function apgFormatDate(dateKey, showYear = true) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dateKey || '')) return '';
   const date = new Date(dateKey + 'T00:00:00Z');
@@ -489,8 +488,7 @@ function apgRenderOneMonth(monthOffset) {
   const heading=new Intl.DateTimeFormat('en-GB',{month:'short',year:'numeric',timeZone:'UTC'}).format(month);
   const weekdays=['S','M','T','W','T','F','S'].map(d =>
     '<span class="text-center text-[10px] text-gray-400">'+d+'</span>').join('');
-  // Render only the weeks touched by this month (4–6 rows), not a fixed six weeks.
-  // Keep the few adjacent-month dates needed to complete the final Sunday–Saturday row.
+  
   const daysInMonth=new Date(Date.UTC(y,m+1,0)).getUTCDate();
   const visibleCells=Math.ceil((firstDow+daysInMonth)/7)*7;
   let days='';
@@ -660,8 +658,7 @@ function syncExplorerLink() {
 
   explorerLink.href = url.pathname.split('/').pop() + url.search;
 }
-// Link from Highest Impact to exactly this page's incidents.
-// Date carries over, without a restrictive issue-type filter.
+
 function apgExplorerPageHref(pageUrl) {
   const url = new URL('details.html', window.location.href);
   url.searchParams.set('token', token);
@@ -1491,9 +1488,7 @@ const values =
     ? incidentChartData.values
     : [];
 
-// Always show vertical columns with incident names under the x-axis.
-// With 7+ incident types the chart spans both columns, and severity cards
-// sit beneath it. Each category gets a minimum width on smaller screens.
+
 const useWideIncidentChart = fullLabels.length > 6;
 const issueChartContainer = document.getElementById('issueChartContainer');
 const issueChartCard = document.getElementById('issueChartCard');
@@ -1506,8 +1501,7 @@ issueChartContainer.style.minWidth = Math.max(
   0, fullLabels.length * (useWideIncidentChart ? 76 : 68)
 ) + 'px';
 
-// Chart.js renders array labels over two rows while retaining the complete
-// incident description in tooltips and the original index for click filters.
+
 const incidentAxisLabels = {
   'Defined / no DOM': ['Defined', 'no DOM'],
   'Missing / legacy': ['Missing DOM', 'legacy'],
@@ -1661,8 +1655,7 @@ const issueChartTooltip = {
   }
 };
 
-// Always use vertical columns, including when viewing all dates.
-// Destroy a previous horizontal instance after loading this version.
+
 const issueIndexAxis = 'x';
 if (issueChart && issueChart.options.indexAxis !== issueIndexAxis) {
   issueChart.destroy();
@@ -1905,7 +1898,7 @@ if (severityChart) {
                   0
                 );
 
-              // Keep all segments, but hide text on very narrow slices.
+              
               const percent = total > 0
                 ? (Number(value || 0) / total) * 100
                 : 0;
@@ -2193,9 +2186,13 @@ const apgLoadStart = performance.now();
   fetch(`${SHEET_URL}?${overviewParams.toString()}`)
     .then(r => r.json())
     .then(j => {
+    
+      if (j._perf) {
+        console.table(j._perf);
+      }
+
 
   if (j.error) throw new Error(j.error);
-  // Old backend ignores date ranges; never display all-time as a range.
   if (rangeStart && rangeEnd && (j.start !== rangeStart || j.end !== rangeEnd))
     throw new Error('date_range_backend_not_deployed');
   setCachedOverview(j);
