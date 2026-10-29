@@ -83,6 +83,32 @@
   @media(max-width:767px) {
     .apg-date-panel { position:fixed !important; left:12px !important; right:12px !important; top:75px !important; width:auto !important; max-height:calc(100vh - 90px); overflow-y:auto; }
   }
+
+/* APG brand accents for dark mode only — retain muted navy surfaces and severity colors. */
+.dark header nav a.border-b-2{
+  color:#b4a0ff !important;
+  border-bottom-color:#8d6bff !important;
+}
+.dark header nav a:not(.border-b-2):hover{color:#90beff !important;}
+.dark header nav a.border-b-2:hover{color:#c4b6ff !important;}
+.dark #viewModeLabel,
+.dark header span.uppercase.tracking-wide{
+  background:rgba(105,78,209,.18) !important;
+  color:#beaaff !important;
+}
+.dark #apgDateTrigger:focus-visible,
+.dark #issueFilter:focus-visible{
+  outline:2px solid rgba(109,147,255,.72);
+  outline-offset:2px;
+}
+.dark #apgDateTrigger:hover{border-color:#6084d2;}
+.dark .apg-preset.is-selected{background:rgba(125,92,235,.2);color:#c5b5ff;}
+.dark .apg-day.apg-range-edge{background:#7564e8;color:#fff;}
+.dark .apg-day.apg-in-range{background:rgba(125,92,235,.16);}
+.dark .apg-day.apg-today{box-shadow:inset 0 0 0 1px #9b84f4;}
+
+/* Maintain readable filter caption in the Explorer. */
+.dark .text-xs.uppercase.text-gray-500{color:#a4b4d0 !important;}
 </style>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
