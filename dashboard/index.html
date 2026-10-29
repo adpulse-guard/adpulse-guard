@@ -970,6 +970,42 @@ select.appendChild(groupHeader);
 
 let issueChart, severityChart, lossTrendChart;
 
+function apgSeverityColorMap(isDark) {
+  return {
+    HIGH: isDark ? 'rgba(239,68,68,0.80)' : 'rgba(220,38,38,0.85)',
+    MEDIUM: isDark ? 'rgba(251,146,60,0.80)' : APG_BRAND.warning,
+    LOW: APG_BRAND.primarySoft,
+    INFO: isDark ? '#6b7280' : '#9ca3af'
+  };
+}
+
+// The chart canvas and the optional severity summary both contain inline colors.
+// Reapply the active theme's palette whenever Light/Dark Mode changes.
+function apgRefreshSeverityTheme(isDark) {
+  if (!severityChart) return;
+  const colors = apgSeverityColorMap(isDark);
+  const labels = severityChart.data.labels || [];
+  severityChart.data.datasets[0].backgroundColor =
+    labels.map(label => colors[label] || '#9ca3af');
+  if (severityChart.options.plugins?.tooltip) {
+    severityChart.options.plugins.tooltip.backgroundColor =
+      isDark ? '#1b2335' : '#111827';
+  }
+  severityChart.update();
+
+  const summary = document.getElementById('severitySummaryContent');
+  if (summary) {
+    const rows = [...summary.children].filter(el => el.classList.contains('space-y-1.5'));
+    rows.forEach((row, index) => {
+      const color = colors[labels[index]] || '#9ca3af';
+      const swatch = row.querySelector('.inline-block.rounded-sm');
+      const bar = row.querySelector('.h-full.rounded-full');
+      if (swatch) swatch.style.backgroundColor = color;
+      if (bar) bar.style.backgroundColor = color;
+    });
+  }
+}
+
 const APG_COLLAPSE_KEY = 'apg-dashboard-collapsed-sections-v1';
 const APG_SECTIONS = {
   affectedSlotsPanel: {body:'affectedSlotsBody', title:'Impacted Slots'},
@@ -1102,7 +1138,7 @@ darkModeBtn.addEventListener('click', () => {
   modeLabel.textContent = isDark ? 'Light Mode' : 'Dark Mode';
 
   if (issueChart) issueChart.update();
-  if (severityChart) severityChart.update();
+  apgRefreshSeverityTheme(isDark);
   if (lossTrendChart) lossTrendChart.update();
 });
 function renderOverviewData(data, animateMetrics = true) {
@@ -1751,21 +1787,7 @@ const isDark =
   document.documentElement
     .classList.contains('dark');
 
-const severityColorMap = {
-  HIGH: isDark
-    ? 'rgba(239,68,68,0.80)'
-    : 'rgba(220,38,38,0.85)',
-
-  MEDIUM: isDark
-    ? 'rgba(251,146,60,0.80)'
-    : APG_BRAND.warning,
-
-  LOW: APG_BRAND.primarySoft,
-
-  INFO: isDark
-    ? '#6b7280'
-    : '#9ca3af'
-};
+const severityColorMap = apgSeverityColorMap(isDark);
 
 const severityColors =
   severityLabels.map(
