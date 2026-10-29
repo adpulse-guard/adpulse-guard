@@ -188,49 +188,6 @@ footer{background:#060c1b;border-top:1px solid #1f3051;padding:25px 0;color:#91a
 .pulse svg{display:block;width:min(260px,100%);height:auto;overflow:visible;filter:drop-shadow(0 0 4px #ff454577)}
 
 
-/* PILOT — simple compact horizontal timeline, consistent title/description spacing */
-.pilot{position:relative;padding:45px 0 32px;background:linear-gradient(180deg,#0b1733,#09142d);border-bottom:1px solid #21447c}
-.pilot-head{display:flex;justify-content:space-between;align-items:center;gap:22px;margin-bottom:27px}
-.pilot-head h2{font-size:clamp(27px,3.1vw,39px);letter-spacing:-1.2px;line-height:1.15;margin:8px 0 0}
-.pilot-label{padding:11px 16px;border:1px solid #2874bd;border-radius:11px;background:#0c2853a8;color:#cde8ff;font-size:12px;white-space:nowrap}
-.pilot .steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px}
-.pilot .step{position:relative;display:grid;grid-template-columns:45px minmax(0,1fr);grid-template-rows:25px auto;gap:0 13px;align-content:start;padding:0;min-width:0}
-.pilot .num{grid-column:1;grid-row:1/span 2;display:grid;place-items:center;width:42px;height:42px;border-radius:50%;color:#fff;background:linear-gradient(135deg,#0aabff,#4a4bff);box-shadow:0 0 20px #176dff67;font-weight:800}
-.pilot .step:nth-child(2) .num{background:linear-gradient(135deg,#6457ff,#ad38ff)}
-.pilot .step:nth-child(3) .num{background:linear-gradient(135deg,#00d4fa,#148eff)}
-.pilot .step:nth-child(4) .num{background:linear-gradient(135deg,#8849ff,#bb33f5)}
-.pilot .step h3{grid-column:2;grid-row:1;font-size:15px;line-height:21px;margin:2px 0 0;font-weight:750}
-.pilot .step p{grid-column:2;grid-row:2;margin:0;font-size:12px;line-height:1.5;color:#c1cfea;max-width:190px}
-.pilot .step:not(:last-child)::after{content:"";position:absolute;top:20px;right:-19px;width:34px;height:13px;background:linear-gradient(90deg,transparent 0%,#3495f6 23%,#67c7ff 75%,transparent);clip-path:polygon(0 44%,74% 44%,74% 15%,100% 50%,74% 85%,74% 56%,0 56%);filter:drop-shadow(0 0 5px #168cfc);opacity:.82}
-.pilot .safety{font-size:11px;color:#9daece;text-align:center;margin-top:22px}
-/* CONTACT — no arcs, grid, rings or line patterns; only deep-space glow and particles */
-.contact{position:relative;overflow:hidden;isolation:isolate;min-height:244px;padding:0;background:linear-gradient(105deg,#07142e 0%,#07142d 40%,#0a1231 74%,#090e24 100%)}
-.contact::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:-1;background:
-radial-gradient(circle at 48% 11%,#7bbfff 0 1px,transparent 2px),
-radial-gradient(circle at 54% 19%,#8a70ff 0 1px,transparent 2px),
-radial-gradient(circle at 56% 69%,#76aaff 0 1px,transparent 2px),
-radial-gradient(circle at 62% 35%,#407eff 0 1px,transparent 2px),
-radial-gradient(circle at 66% 78%,#ae6bff 0 1.2px,transparent 2.2px),
-radial-gradient(circle at 73% 13%,#73b7ff 0 1px,transparent 2px),
-radial-gradient(circle at 78% 54%,#aa62ff 0 1px,transparent 2px),
-radial-gradient(circle at 90% 28%,#4cbbff 0 1px,transparent 2px),
-radial-gradient(ellipse at 74% 37%,#274aaa62,transparent 37%),
-radial-gradient(ellipse at 65% 90%,#56249536,transparent 31%)}
-.contact::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.58;background:linear-gradient(119deg,transparent 37%,#2456bc0b 47%,#447fff25 56%,#7e48b321 66%,transparent 79%);filter:blur(12px)}
-.contact-grid{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 365px;align-items:center;gap:20px;min-height:244px}
-.contact-copy{position:relative;z-index:2;padding:25px 0}
-.contact .kicker{font-size:11px;color:#9fbdf6;letter-spacing:2.7px;margin-bottom:7px}
-.contact h2{font-size:clamp(27px,2.9vw,38px);letter-spacing:-1px;line-height:1.16;margin:0 0 10px}
-.contact p{max-width:530px;font-size:13px;line-height:1.55;color:#cbd8f2;margin:0 0 16px}
-.contact-email{display:inline-flex;align-items:center;gap:12px;font-size:13px;color:#c7e7ff;background:#0b2855aa;border:1px solid #168ffb;border-radius:10px;padding:10px 16px;box-shadow:0 0 17px #0a78ff21;min-height:42px;font-weight:700}
-.contact-email:hover{background:#10376abf}
-.contact-art{position:absolute;right:0;top:0;bottom:0;width:410px;display:flex;align-items:center;justify-content:flex-end;pointer-events:none}
-.contact-art img{display:block;position:relative;max-width:none;width:410px;height:auto;object-fit:contain;filter:none;mix-blend-mode:screen;transform:none;opacity:1}
-.contact-fallback-copy{display:none}
-.contact-art.fallback-art img{width:290px;margin-right:75px;filter:drop-shadow(0 0 24px #396cff48)}
-.contact-art.fallback-art .contact-fallback-copy{display:block;position:absolute;right:0;top:47px;color:#a8caff;font-weight:800;font-size:10px;line-height:2.1;letter-spacing:2.5px}
-@media(max-width:950px){.pilot .steps{gap:17px}.pilot .step{grid-template-columns:40px 1fr;column-gap:9px}.pilot .num{width:38px;height:38px}.pilot .step:not(:last-child)::after{right:-13px;width:25px}.contact-grid{grid-template-columns:minmax(0,1fr) 290px}.contact-art{width:320px}.contact-art img{width:320px}.contact-art.fallback-art img{width:235px;margin-right:55px}}
-@media(max-width:680px){.pilot-head{display:block}.pilot-label{display:inline-block;margin-top:12px}.pilot .steps{grid-template-columns:repeat(2,minmax(0,1fr));gap:23px 15px}.pilot .step:not(:last-child)::after{display:none}.contact{min-height:320px}.contact-grid{display:block;min-height:320px}.contact-copy{max-width:83%;padding:29px 0}.contact h2{font-size:27px}.contact p{font-size:12px}.contact-art{right:-65px;top:auto;height:180px;bottom:-20px;width:260px;opacity:.7}.contact-art img{width:260px}.contact-art.fallback-art img{width:175px;margin-right:35px}.contact-art.fallback-art .contact-fallback-copy{display:none}}
 /* =========================
    CLEAN PILOT + CLEAN CONTACT
    ========================= */
@@ -474,7 +431,7 @@ radial-gradient(ellipse at 65% 90%,#56249536,transparent 31%)}
   width: 240px;
   height: auto;
   display: block;
-  margin-right: 55px;
+  margin-right: 105px;
   opacity: 0.96;
   filter: drop-shadow(0 0 16px rgba(42, 114, 255, 0.20));
 }
@@ -531,6 +488,7 @@ radial-gradient(ellipse at 65% 90%,#56249536,transparent 31%)}
 
   .clean-contact .contact-visual img {
     width: 210px;
+    margin-right: 70px;
   }
 }
 
@@ -579,6 +537,7 @@ radial-gradient(ellipse at 65% 90%,#56249536,transparent 31%)}
 
   .clean-contact .contact-visual img {
     width: 180px;
+    margin-right: 0;
   }
 
   .clean-contact .contact-tagline {
