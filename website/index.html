@@ -320,9 +320,9 @@ footer{background:#060c1b;border-top:1px solid #1f3051;padding:25px 0;color:#91a
 .clean-contact {
   position: relative;
   overflow: hidden;
-  min-height: 240px;
+  min-height: 220px;
   padding: 0 !important;
-  background: linear-gradient(135deg, #0b1733 0%, #0d1934 55%, #101b39 100%) !important;
+  background: linear-gradient(120deg, #0b1733 0%, #101b37 65%, #111c39 100%) !important;
   border-top: 1px solid rgba(95, 121, 178, 0.23);
   border-bottom: 1px solid rgba(95, 121, 178, 0.15);
 }
@@ -338,11 +338,11 @@ footer{background:#060c1b;border-top:1px solid #1f3051;padding:25px 0;color:#91a
   grid-template-columns: minmax(0, 1fr) 360px;
   align-items: center;
   gap: 20px;
-  min-height: 240px;
+  min-height: 220px;
 }
 
 .clean-contact .contact-copy {
-  padding: 28px 0;
+  padding: 24px 0;
   position: relative;
   z-index: 2;
 }
@@ -392,20 +392,31 @@ footer{background:#060c1b;border-top:1px solid #1f3051;padding:25px 0;color:#91a
 .clean-contact .contact-visual {
   position: relative;
   height: 100%;
-  min-height: 240px;
+  min-height: 220px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   pointer-events: none;
 }
 
+/* A restrained divider and soft brand light link the footer to the rest of the page. */
+.clean-contact .contact-visual::before {
+  content: "";
+  position: absolute;
+  left: -16px;
+  top: 22%;
+  height: 56%;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(105,137,212,.24), transparent);
+}
+
 .clean-contact .contact-visual img {
-  width: 240px;
+  width: 195px;
   height: auto;
   display: block;
-  margin-right: 105px;
-  opacity: 0.96;
-  filter: drop-shadow(0 0 8px rgba(42, 114, 255, 0.10));
+  margin-right: 112px;
+  opacity: 0.92;
+  filter: drop-shadow(0 0 8px rgba(42, 114, 255, 0.08));
 }
 
 .clean-contact .contact-tagline {
@@ -459,8 +470,8 @@ footer{background:#060c1b;border-top:1px solid #1f3051;padding:25px 0;color:#91a
   }
 
   .clean-contact .contact-visual img {
-    width: 210px;
-    margin-right: 70px;
+    width: 175px;
+    margin-right: 82px;
   }
 }
 
@@ -497,6 +508,8 @@ footer{background:#060c1b;border-top:1px solid #1f3051;padding:25px 0;color:#91a
     padding: 28px 0;
   }
 
+  .clean-contact .contact-visual::before { display:none; }
+
   .clean-contact .contact-visual {
     position: absolute;
     right: -25px;
@@ -508,7 +521,7 @@ footer{background:#060c1b;border-top:1px solid #1f3051;padding:25px 0;color:#91a
   }
 
   .clean-contact .contact-visual img {
-    width: 180px;
+    width: 155px;
     margin-right: 0;
   }
 
