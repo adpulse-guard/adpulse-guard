@@ -320,44 +320,16 @@ footer{background:#060c1b;border-top:1px solid #1f3051;padding:25px 0;color:#91a
 .clean-contact {
   position: relative;
   overflow: hidden;
-  isolation: isolate;
   min-height: 240px;
   padding: 0 !important;
-  background:
-    radial-gradient(circle at 72% 30%, rgba(53, 105, 255, 0.14), transparent 22%),
-    radial-gradient(circle at 78% 65%, rgba(154, 82, 255, 0.10), transparent 20%),
-    linear-gradient(100deg, #07142d 0%, #08142d 45%, #091230 75%, #0a1025 100%) !important;
-  border-top: 1px solid rgba(88, 118, 188, 0.16);
-  border-bottom: 1px solid rgba(88, 118, 188, 0.12);
+  background: linear-gradient(135deg, #0b1733 0%, #0d1934 55%, #101b39 100%) !important;
+  border-top: 1px solid rgba(95, 121, 178, 0.23);
+  border-bottom: 1px solid rgba(95, 121, 178, 0.15);
 }
-
-.clean-contact::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 58% 20%, rgba(123, 194, 255, 0.9) 0 1px, transparent 2px),
-    radial-gradient(circle at 64% 34%, rgba(77, 138, 255, 0.9) 0 1px, transparent 2px),
-    radial-gradient(circle at 69% 16%, rgba(178, 109, 255, 0.9) 0 1px, transparent 2px),
-    radial-gradient(circle at 76% 58%, rgba(110, 187, 255, 0.85) 0 1px, transparent 2px),
-    radial-gradient(circle at 84% 38%, rgba(171, 102, 255, 0.85) 0 1px, transparent 2px),
-    radial-gradient(circle at 88% 22%, rgba(103, 177, 255, 0.9) 0 1px, transparent 2px),
-    linear-gradient(115deg, transparent 35%, rgba(71, 124, 255, 0.06) 55%, rgba(159, 85, 255, 0.08) 68%, transparent 82%);
-  opacity: 0.9;
-}
-
+.clean-contact::before,
 .clean-contact::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse at 68% 45%, rgba(41, 94, 214, 0.22), transparent 35%),
-    radial-gradient(ellipse at 85% 80%, rgba(89, 44, 155, 0.14), transparent 26%);
-  filter: blur(16px);
+  content: none !important;
+  display: none !important;
 }
 
 .clean-contact .contact-grid {
@@ -433,7 +405,7 @@ footer{background:#060c1b;border-top:1px solid #1f3051;padding:25px 0;color:#91a
   display: block;
   margin-right: 105px;
   opacity: 0.96;
-  filter: drop-shadow(0 0 16px rgba(42, 114, 255, 0.20));
+  filter: drop-shadow(0 0 8px rgba(42, 114, 255, 0.10));
 }
 
 .clean-contact .contact-tagline {
