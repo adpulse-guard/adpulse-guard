@@ -740,82 +740,81 @@ footer{background:#060c1b;border-top:1px solid #1f3051;padding:25px 0;color:#91a
 
     <div class="faq-list">
 
-      <details>
-        <summary>Will APG slow down my website?</summary>
-        <p>
-          APG is designed as a lightweight monitoring tag.
-          As with any additional script, performance impact
-          should be measured rather than assumed to be zero.
-          We can evaluate its behavior on agreed pages
-          during the pilot.
-        </p>
-      </details>
+      
+<details>
+  <summary>Will APG slow down my website?</summary>
+  <p>
+    APG uses scheduled browser-side checks and
+    asynchronous reporting to monitor ad-slot behavior.
+    It is designed to limit unnecessary processing,
+    but actual performance impact depends on the
+    publisher's environment and is evaluated
+    during the pilot.
+  </p>
+</details>
 
-      <details>
-        <summary>Does APG collect visitor personal data?</summary>
-        <p>
-          APG is designed for ad-slot diagnostics, not
-          visitor profiling. It records operational signals
-          such as page URLs, slot identifiers, issue types
-          and timestamps. The exact collected fields and
-          data-handling arrangements are reviewed before
-          installation.
-        </p>
-      </details>
+<details>
+  <summary>Does APG collect visitor personal data?</summary>
+  <p>
+    APG is designed for technical ad-delivery
+    diagnostics, not visitor profiling.
+    It collects page paths, slot identifiers,
+    issue details and technical timestamps.
+    These fields are reviewed with the publisher
+    before deployment to minimize the possibility
+    of identifying data being included.
+  </p>
+</details>
 
-      <details>
-        <summary>Will APG interfere with ad delivery?</summary>
-        <p>
-          APG is designed for observation and diagnostics.
-          It does not intentionally modify ad serving
-          configuration, campaigns or targeting.
-          Implementation behavior is verified during
-          pilot setup.
-        </p>
-      </details>
+<details>
+  <summary>Does APG use cookies or browser storage?</summary>
+  <p>
+    The current monitoring engine does not
+    explicitly read browser cookies.
+    It uses localStorage for report deduplication
+    and retry handling, rather than for
+    visitor profiling.
+    Storage and privacy requirements are
+    reviewed during pilot setup.
+  </p>
+</details>
 
-      <details>
-        <summary>Where is diagnostic data stored?</summary>
-        <p>
-          During the pilot, technical reports are logged
-          in Google Sheets and used for email alerts
-          and dashboard diagnostics. Access, retention
-          and data-handling details are agreed with
-          each publisher before deployment.
-        </p>
-      </details>
+<details>
+  <summary>Will APG interfere with ad delivery?</summary>
+  <p>
+    APG observes Google Publisher Tag events,
+    DOM state and rendering signals.
+    It does not intentionally modify ad requests,
+    campaign targeting or creative delivery.
+    Compatibility is checked in the
+    publisher's environment.
+  </p>
+</details>
 
-      <details>
-        <summary>How is APG installed and removed?</summary>
-        <p>
-          APG can be deployed through Google Tag Manager
-          on agreed pages. The monitoring tag can be
-          disabled or removed through GTM without
-          requiring changes to existing ad campaigns.
-        </p>
-      </details>
+<details>
+  <summary>Where is diagnostic data stored?</summary>
+  <p>
+    During the pilot, technical reports are
+    processed using Google Apps Script and
+    stored in Google Sheets.
+    Authorized recipients receive diagnostic
+    alerts and dashboard access.
+    Access permissions, retention and
+    deletion arrangements are agreed
+    before installation.
+  </p>
+</details>
 
-      <details>
-        <summary>
-          Does APG support direct-sold and programmatic ads?
-        </summary>
-        <p>
-          Yes. APG monitors technical behavior of
-          GPT-based ad slots regardless of how the
-          inventory is sold. It does not monitor
-          campaign pacing.
-        </p>
-      </details>
-
-      <details>
-        <summary>What happens after the 14-day pilot?</summary>
-        <p>
-          We review alert accuracy, diagnostic usefulness
-          and findings from the pilot. Based on the
-          results and your feedback, we discuss
-          whether continued monitoring makes sense.
-        </p>
-      </details>
+<details>
+  <summary>How is APG installed and removed?</summary>
+  <p>
+    APG is deployed through a monitoring tag
+    in Google Tag Manager on agreed pages.
+    The tag can be disabled or removed through
+    GTM without changing existing
+    ad campaigns or ad-unit configuration.
+  </p>
+</details>
 
     </div>
   </div>
