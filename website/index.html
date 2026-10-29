@@ -76,6 +76,27 @@
 .contact-grid:after{content:"HEALTHY ADS. HEALTHY REVENUE.";position:absolute;right:0;top:50px;width:94px;font-size:10px;line-height:2.2;letter-spacing:2.7px;color:#a0caff;font-weight:800;white-space:normal}
 @media(max-width:900px){.contact-grid{grid-template-columns:1fr 200px}.contact img{right:60px;width:220px;bottom:-90px}}
 @media(max-width:680px){.contact{min-height:320px}.contact-grid{display:block;min-height:320px}.contact-grid>div:first-child{padding:35px 0;max-width:78%}.contact h2{font-size:28px}.contact img{display:block!important;width:185px;right:-32px;bottom:-64px;opacity:.72}.contact-grid:after{display:none}.contact p{font-size:13px}}
+
+/* Fine-tuning v1.3 — reference-accurate CTA framing and stronger pilot arrows. */
+.contact{min-height:265px;overflow:hidden;background:linear-gradient(105deg,#07142d 0%,#07112b 46%,#0c1230 100%)!important}
+.contact:before{content:"";inset:0;transform:none;opacity:1;background:
+  radial-gradient(ellipse at 76% 90%,rgba(57,85,214,.24),transparent 42%),
+  radial-gradient(ellipse at 77% -5%,rgba(28,99,244,.17),transparent 35%);z-index:-1}
+.contact:after{content:"";inset:0 0 0 35%;opacity:.34;transform:none;background:
+ radial-gradient(ellipse at 40% 91%,rgba(14,78,180,.28),transparent 51%),
+ repeating-radial-gradient(ellipse at 82% 140%,rgba(52,100,223,.16) 0 1px,transparent 2px 30px);
+ mask-image:linear-gradient(90deg,transparent,black 45%);z-index:-1}
+.contact-grid{min-height:265px;grid-template-columns:minmax(0,1fr) 360px}
+.contact img{width:360px!important;right:88px!important;top:-45px!important;bottom:auto!important;
+  transform:perspective(1000px) rotateY(-13deg) rotateZ(-5deg)!important;
+  filter:drop-shadow(9px 7px 0 rgba(5,46,115,.29)) drop-shadow(0 0 22px rgba(70,113,243,.27))!important}
+.contact-grid:after{right:4px;top:52px;width:80px;content:"HEALTHY\A ADS.\A HEALTHY\A REVENUE.";white-space:pre;line-height:2.05;letter-spacing:2.7px}
+.step:not(:last-child):after{content:"⟶"!important;right:-25px!important;top:50%;font-size:37px!important;font-weight:700;color:#62c9ff!important;text-shadow:0 0 8px #218dff,0 0 22px #147dffad!important;opacity:1}
+.steps{gap:28px}
+@media(max-width:900px){.steps{gap:16px}.step:not(:last-child):after{right:-20px!important;font-size:29px!important}.contact img{right:38px!important;width:300px!important;top:-16px!important}.contact-grid{grid-template-columns:minmax(0,1fr) 275px}}
+@media(max-width:680px){.steps{grid-template-columns:repeat(2,1fr)}.step:not(:last-child):after{display:none!important}
+.contact{min-height:320px}.contact-grid{min-height:320px;display:block}.contact-grid>div:first-child{max-width:82%}.contact img{width:220px!important;top:auto!important;right:-65px!important;bottom:-63px!important;opacity:.7}.contact-grid:after{display:none}}
+
 </style></head><body>
 <header class="topbar"><div class="container topinner"><a class="brand" href="#top"><img src="../Logo%20Shield.png" alt=""><span>AdPulse Guard</span></a><nav class="nav" aria-label="Main"><a href="#product">Product</a><a href="#detections">Detections</a><a href="#pilot">Pilot</a><a href="#contact">Contact</a></nav><a class="btn primary small" href="#contact">Join the pilot →</a></div></header>
 <main id="top"><section class="hero"><div class="container hero-grid"><div><div class="eyebrow">REAL PAGE LOADS · REAL SIGNALS</div><h1>Silent ad delivery failures <span class="gradient">shouldn’t be invisible.</span></h1><p>Detect GPT configuration and ad delivery issues from real page loads — with technical context to support faster troubleshooting.</p><div class="hero-buttons"><a class="btn primary" href="#product">Explore the product →</a><a class="btn outline" href="#pilot">Join the 14-day pilot</a></div><div class="facts"><span>Page-load signals</span><span>Technical context</span><span>No ad delivery changes</span></div></div><div class="emblem"><div class="ring"></div><div class="ring two"></div><img src="../Logo%20Shield.png" alt="AdPulse Guard shield"><span class="hero-vertical">DETECT.<br>UNDERSTAND.<br>ACT.</span></div></div></section>
