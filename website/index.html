@@ -1,73 +1,497 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#071029"><meta name="description" content="AdPulse Guard detects GPT configuration and ad delivery issues from real page loads. Explore the product and 14-day publisher pilot."><title>AdPulse Guard — Ad Delivery Monitoring</title><style>
-:root{--bg:#070e22;--card:#101a35;--line:#263659;--text:#f6f8ff;--muted:#aab9d6;--blue:#148dff;--cyan:#27d4f6;--violet:#9b57fa}*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:85px}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.55}a{color:inherit;text-decoration:none}button{font:inherit;cursor:pointer}button:focus-visible,a:focus-visible{outline:2px solid #6be4ff;outline-offset:4px}.container{width:min(1170px,calc(100% - 48px));margin:auto}.topbar{position:sticky;top:0;z-index:20;background:#080f26ed;backdrop-filter:blur(15px);border-bottom:1px solid #24365a}.topinner{min-height:77px;display:flex;align-items:center;gap:25px}.brand{display:flex;align-items:center;gap:10px;font-size:21px;font-weight:800;letter-spacing:-.65px;margin-right:auto}.brand img{width:43px;height:49px;object-fit:contain}.brand span{background:linear-gradient(90deg,#22c4fb,#c0a5ff);color:transparent;background-clip:text}.nav{display:flex;gap:32px;align-items:center}.nav a{font-size:13px;color:#ccd6ec}.nav a:hover{color:#49d4fb}.btn{display:inline-flex;justify-content:center;align-items:center;gap:12px;padding:13px 23px;min-height:46px;border-radius:9px;font-size:13px;font-weight:750;border:1px solid #315eb4;transition:transform .18s,box-shadow .18s}.btn:hover{transform:translateY(-2px)}.primary{background:linear-gradient(100deg,#009fff,#165bf5 72%,#683cf4);border-color:#338fff;box-shadow:0 0 26px #126cf66b}.outline{background:#0b1c3a80;border-color:#2779cc;color:#dceaff}.small{min-height:39px;padding:8px 17px}.hero{position:relative;overflow:hidden;background:radial-gradient(ellipse at 81% 36%,#143e884b,transparent 47%),radial-gradient(ellipse at 70% 90%,#3d20965a,transparent 35%),#071028;border-bottom:1px solid #243969}.hero::after{content:"";position:absolute;bottom:-115px;left:32%;width:800px;height:310px;background:repeating-radial-gradient(ellipse at center,#2f78f64d 0 2px,transparent 3px 16px);transform:perspective(500px) rotateX(66deg);filter:blur(.3px);mask-image:linear-gradient(0deg,transparent,#000);pointer-events:none}.hero-grid{min-height:510px;padding:65px 0 62px;display:grid;grid-template-columns:1.13fr .87fr;gap:30px;align-items:center;position:relative;z-index:1}.eyebrow,.kicker{color:#80a9ff;font-weight:800;font-size:11px;letter-spacing:2.6px}.hero h1{font-size:clamp(45px,5vw,68px);line-height:1.07;letter-spacing:-2.9px;max-width:670px;margin:22px 0}.gradient{background:linear-gradient(95deg,#27c7fb,#377bff 52%,#9f52ff);background-clip:text;color:transparent}.hero p{color:#bfcae3;max-width:570px;font-size:17px}.hero-buttons{display:flex;flex-wrap:wrap;gap:12px;margin-top:27px}.facts{display:flex;flex-wrap:wrap;gap:16px;margin-top:24px;color:#9db1d0;font-size:12px}.facts span:before{content:"✦";color:#33bcff;margin-right:7px}.emblem{position:relative;min-height:370px;display:grid;place-items:center}.emblem img{width:min(75%,340px);filter:drop-shadow(0 0 38px #1b6dff88);position:relative;z-index:2}.ring{position:absolute;border-radius:50%;border:1px solid #326be15c;width:84%;aspect-ratio:1;transform:rotateX(68deg)}.ring.two{width:69%;transform:rotateY(70deg);border-color:#974dff80}.hero-vertical{position:absolute;top:22%;right:0;line-height:2.2;font-weight:750;letter-spacing:2.4px;font-size:10px;color:#9cceff}.section{padding:100px 0}.section-title{text-align:center;max-width:780px;margin:0 auto 35px}.section-title h2,.pilot-head h2,.contact h2{font-size:clamp(29px,3.5vw,43px);line-height:1.16;letter-spacing:-1.4px;margin:10px 0 13px}.section-title p{color:var(--muted);margin:0}.preview{background:radial-gradient(ellipse at top,#13275c4d,transparent 60%)}.tabrow{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-bottom:17px}.tab{border:1px solid #253657;text-align:left;padding:18px;border-radius:13px;background:linear-gradient(150deg,#151f3d,#0d1631);color:#e8efff;display:flex;gap:13px;align-items:center}.tab[aria-selected=true]{border:2px solid #248aff;padding:17px;box-shadow:0 0 23px #075bff5c,inset 0 0 20px #075bff19}.tabico{display:grid;place-items:center;flex:none;width:45px;height:45px;border-radius:50%;border:1px solid #3166b8;color:#48bbff;font-size:24px}.tab strong,.tab small{display:block}.tab strong{font-size:15px}.tab small{font-size:12px;color:#a9b5d0;font-weight:400}.showcase{border:1px solid #2b3e67;background:linear-gradient(145deg,#141e3b,#0d1630);border-radius:15px;padding:28px;display:grid;grid-template-columns:290px minmax(0,1fr);gap:27px;box-shadow:0 27px 90px #02071680}.showcase h3{font-size:27px;line-height:1.22;letter-spacing:-1px;margin:12px 0}.showcase p{color:#b2c1df;font-size:14px}.note{font-size:12px!important;color:#859abf!important;border-left:2px solid #3e6baf;padding-left:12px;margin-top:20px}.browser{border:1px solid #344568;border-radius:10px;background:#171827;overflow:hidden;min-height:350px}.browser-head{background:#24263b;display:flex;align-items:center;gap:9px;padding:11px 13px;border-bottom:1px solid #3b4058;font-size:12px;color:#b2bad3}.dots{color:#f17485;letter-spacing:3px}.browser-head button{margin-left:auto;border:1px solid #39466b;color:#d3e9ff;background:#2e3652;border-radius:6px;padding:5px 9px;font-size:11px}.mock{padding:16px;min-height:310px;color:#e8edff}.mocknav{font-size:12px;color:#91a5d4;padding:0 0 13px;border-bottom:1px solid #333b56}.mocknav b{color:#c5d8ff}.mocknav span{color:#779eff;margin-left:12px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:14px 0}.stat{background:#292a3e;border-radius:8px;padding:13px 8px;text-align:center}.stat small{display:block;color:#929ab6;font-size:9px;letter-spacing:.5px}.stat strong{display:block;font-size:22px;color:#ff9b33}.stat:nth-child(2) strong{color:white}.stat:nth-child(3) strong{color:#fa555a}.incidentbox,.incident-row{background:#2a2b3f;border:1px solid #393b53;border-radius:8px;padding:14px;margin:10px 0}.incidentbox b{font-size:12px}.incidentbox p{margin:6px 0!important;font-size:11px!important}.red{color:#fa5358}.blue{color:#799cff}.bars{display:flex;align-items:end;gap:10px;height:95px;margin-top:18px;padding-top:8px;border-bottom:1px solid #515473}.bars span{flex:1;background:linear-gradient(#746dff,#3d4ade);min-height:10px;border-radius:4px 4px 0 0}.incident-row{display:flex;justify-content:space-between;align-items:center;font-size:12px}.incident-row small{display:block;color:#9ca4bd}.alert-head{font-weight:800;font-size:24px;margin:12px 0}.pulse{color:#ff494e;letter-spacing:3px;font-size:22px}.alert-card{background:#373747;border-radius:9px;border-left:3px solid #fd5559;margin:10px 0;padding:11px 13px;font-size:12px}.alert-card.orange{border-color:#ff962c}.alert-card small{display:block;color:#b1b2c8;margin-top:3px}.mockfoot{font-size:11px;color:#9dabc7;margin-top:14px}.safety{font-size:11px;color:#99a8c7;margin-top:21px;text-align:center}.value-row{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:24px}.value-row div{border-left:2px solid #248aff;padding-left:15px}.value-row b,.value-row span{display:block}.value-row b{font-size:14px}.value-row span{color:#97a7c8;font-size:12px}.detection{background:linear-gradient(145deg,#0c152d,#111d3d);border-top:1px solid #203458;border-bottom:1px solid #203458}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:17px}.card{background:linear-gradient(145deg,#192441,#111931);border:1px solid #293b60;padding:27px;border-radius:13px}.glyph{display:grid;place-items:center;width:53px;height:53px;border-radius:50%;border:1px solid #177ff1;color:#57c5ff;font-size:26px;background:#163765}.card:nth-child(2) .glyph{border-color:#945fff;color:#cc9fff;background:#34245a}.card:nth-child(3) .glyph{border-color:#31b9e7;color:#6be6ff;background:#17425c}.card h3{font-size:20px;margin:20px 0 4px}.card p{font-size:13px;color:#aab9d6}.card ul{padding:0;margin:22px 0 0;list-style:none}.card li{font-size:13px;margin:11px 0;color:#d8e3fc}.card li:before{content:"✓";color:#6abfff;padding-right:12px}.pilot{background:radial-gradient(ellipse at top,#173b7460,transparent 65%),#0b1731}.pilot-head{display:flex;justify-content:space-between;align-items:center;gap:22px;margin-bottom:34px}.pilot-label{border:1px solid #276bb0;background:#102b52;border-radius:9px;padding:12px;font-size:12px;color:#b9dfff}.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}.step{background:#15213c;border:1px solid #2d4267;border-radius:12px;padding:20px}.num{width:40px;height:40px;display:grid;place-items:center;background:linear-gradient(130deg,#03b1ff,#4735f9);border-radius:50%;font-weight:850;box-shadow:0 0 20px #186bf583}.step:nth-child(even) .num{background:linear-gradient(130deg,#5d42ff,#ad35f5)}.step h3{font-size:18px;margin:17px 0 7px}.step p{font-size:12px;color:#b4c2dc;margin:0}.contact{border-top:1px solid #264879;background:radial-gradient(ellipse at 80% 70%,#2c2b8f61,transparent 50%),#08172f;overflow:hidden}.contact-grid{display:grid;grid-template-columns:1fr 260px;gap:35px;align-items:center}.contact p{max-width:650px;color:#b0c0dc}.contact .btn{margin-top:12px}.contact img{width:260px;opacity:.78;filter:drop-shadow(0 0 35px #275dff70)}footer{background:#060c1b;border-top:1px solid #1f3051;padding:25px 0;color:#91a3c3;font-size:12px}.footerrow{display:flex;justify-content:space-between;gap:15px}.footerrow a{color:#70c5ff}[hidden]{display:none!important}.mobilemenu{display:none}.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}@media(max-width:900px){.hero-grid{grid-template-columns:1fr 300px}.emblem{min-height:290px}.showcase{grid-template-columns:1fr}.cards{gap:10px}.card{padding:18px}}@media(max-width:680px){.container{width:min(100% - 34px,1170px)}.topinner{min-height:65px}.brand{font-size:17px}.brand img{width:34px;height:39px}.nav,.topinner>.small{display:none}.hero-grid{grid-template-columns:1fr;padding:65px 0 28px}.hero h1{font-size:clamp(40px,11vw,57px);letter-spacing:-1.8px}.hero p{font-size:15px}.emblem{min-height:210px}.emblem img{width:190px}.hero-vertical{right:8%}.section{padding:70px 0}.tabrow{gap:6px}.tab{flex-direction:column;gap:4px;padding:9px 4px;text-align:center}.tab[aria-selected=true]{padding:8px 3px}.tabico{width:32px;height:32px;font-size:18px}.tab strong{font-size:11px}.tab small{display:none}.showcase{padding:15px;gap:15px}.stats{gap:4px}.stat{padding:10px 4px}.stat strong{font-size:17px}.value-row,.cards{grid-template-columns:1fr}.pilot-head{display:block}.pilot-label{display:inline-block;margin:10px 0}.steps{grid-template-columns:repeat(2,1fr)}.step{padding:15px}.contact-grid{grid-template-columns:1fr}.contact img{display:none}.footerrow{flex-wrap:wrap}.browser{min-height:300px}}
-@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn{transition:none}}
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#070d20">
+  <meta name="description" content="AdPulse Guard detects GPT configuration and ad delivery issues from real page loads, with technical context to support troubleshooting.">
+  <title>AdPulse Guard — Ad Delivery Monitoring</title>
+  <style>
+    :root{
+      --bg:#060c1d;
+      --bg-2:#0a1228;
+      --panel:#101a34;
+      --panel-2:#121f3f;
+      --panel-3:#18244a;
+      --line:rgba(108,136,213,.18);
+      --text:#f5f8ff;
+      --muted:#aab7d4;
+      --soft:#7c8eb4;
+      --blue:#2390ff;
+      --cyan:#26d9ff;
+      --violet:#9655ff;
+      --pink:#d96cff;
+      --red:#ff5d66;
+      --green:#4fd89a;
+      --shadow:0 30px 80px rgba(0,0,0,.38);
+      --radius:26px;
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth;scroll-padding-top:88px}
+    body{
+      margin:0;
+      background:
+        radial-gradient(circle at 15% 0%, rgba(40,112,255,.18), transparent 34%),
+        radial-gradient(circle at 85% 10%, rgba(154,85,255,.14), transparent 28%),
+        linear-gradient(180deg, #071029 0%, #060c1d 32%, #09132b 100%);
+      color:var(--text);
+      font:16px/1.55 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      overflow-x:hidden;
+    }
+    a{text-decoration:none;color:inherit}
+    button{font:inherit}
+    img{max-width:100%;display:block}
+    .container{width:min(1180px, calc(100% - 40px)); margin:0 auto}
+    .site-header{
+      position:sticky; top:0; z-index:30;
+      backdrop-filter: blur(18px);
+      background:rgba(6,12,29,.82);
+      border-bottom:1px solid rgba(255,255,255,.05);
+    }
+    .header-inner{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 0}
+    .brand{display:flex;align-items:center;gap:12px;font-weight:800;font-size:1.1rem;letter-spacing:-.02em}
+    .brand img{width:38px;height:38px;object-fit:contain;filter:drop-shadow(0 0 12px rgba(70,165,255,.32))}
+    .brand span{font-size:1.05rem}
+    .nav{display:flex;align-items:center;gap:26px;color:#ced7ec}
+    .nav a{opacity:.88;transition:.2s}
+    .nav a:hover{opacity:1;color:#fff}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:10px;
+      border-radius:16px;padding:14px 22px;font-weight:700;border:1px solid transparent;
+      transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease, background .18s ease;
+      cursor:pointer;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn.primary{
+      background:linear-gradient(135deg, #1787ff, #355dff 42%, #6c4fff 100%);
+      box-shadow:0 12px 34px rgba(34,106,255,.32), inset 0 1px 0 rgba(255,255,255,.16);
+      color:#fff;
+    }
+    .btn.primary:hover{box-shadow:0 16px 42px rgba(34,106,255,.42), inset 0 1px 0 rgba(255,255,255,.16)}
+    .btn.outline{
+      background:rgba(16,26,52,.72);
+      border-color:rgba(85,130,255,.45);
+      color:#edf4ff;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,.03);
+    }
+    .btn.small{padding:12px 18px;border-radius:14px}
+    .header-glow{height:2px;background:linear-gradient(90deg, transparent 0%, rgba(60,157,255,.75) 25%, rgba(166,98,255,.7) 50%, rgba(60,157,255,.75) 75%, transparent 100%);opacity:.9}
+    .hero{padding:42px 0 34px;position:relative}
+    .hero-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:42px;align-items:center}
+    .eyebrow{display:inline-flex;align-items:center;gap:10px;font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:#c8d7fb;font-weight:700;margin-bottom:18px}
+    .eyebrow::before{content:"";width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--violet));box-shadow:0 0 18px rgba(80,174,255,.6)}
+    h1{font-size:clamp(2.8rem,6vw,5.3rem);line-height:.96;letter-spacing:-.05em;margin:0 0 18px;max-width:9.7ch}
+    h1 .gradient{background:linear-gradient(92deg,#ffffff 0%, #e8f1ff 18%, #5cb5ff 46%, #7e79ff 68%, #cb66ff 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .hero p{max-width:630px;font-size:1.2rem;color:#c6d3ee;margin:0 0 28px}
+    .hero-actions{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:22px}
+    .hero-notes{display:flex;flex-wrap:wrap;gap:26px;color:#d9e5ff;font-size:.98rem}
+    .hero-notes span{display:inline-flex;align-items:center;gap:10px;color:#c6d5f5}
+    .hero-notes i{font-style:normal;display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:rgba(44,104,255,.16);border:1px solid rgba(87,142,255,.34);color:#9ec5ff;font-size:.82rem}
+    .hero-visual{
+      position:relative;min-height:560px;border-radius:36px;overflow:hidden;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(132,87,255,.22), transparent 32%),
+        radial-gradient(circle at 58% 58%, rgba(27,136,255,.18), transparent 30%),
+        linear-gradient(180deg, rgba(13,21,46,.86), rgba(10,18,41,.74));
+      border:1px solid rgba(100,128,205,.15);
+      box-shadow:var(--shadow);
+    }
+    .hero-visual::before{
+      content:""; position:absolute; inset:auto -10% -4% -5%; height:52%;
+      background:
+        radial-gradient(circle at 55% 90%, rgba(180,81,255,.18), transparent 34%),
+        repeating-linear-gradient(90deg, rgba(53,112,255,.14) 0 2px, transparent 2px 24px),
+        repeating-linear-gradient(0deg, rgba(53,112,255,.1) 0 2px, transparent 2px 24px);
+      transform:perspective(950px) rotateX(70deg);
+      border-top:1px solid rgba(78,122,255,.2);
+      opacity:.95;
+    }
+    .hero-visual::after{
+      content:""; position:absolute; left:8%; right:8%; bottom:19%; height:2px;
+      background:linear-gradient(90deg, transparent, rgba(70,163,255,.8), rgba(194,87,255,.88), transparent);
+      filter:blur(.3px);
+    }
+    .hero-logo{position:absolute;inset:70px 50px auto auto;width:min(74%,430px);filter:drop-shadow(0 0 34px rgba(70,163,255,.2))}
+    .hero-words{position:absolute;right:42px;top:118px;text-align:right;font-size:1rem;letter-spacing:.24em;text-transform:uppercase;line-height:1.9;color:#deecff;font-weight:700}
+    .hero-words::after{content:"";display:block;width:64px;height:3px;border-radius:30px;margin:16px 0 0 auto;background:linear-gradient(90deg,var(--cyan),var(--violet))}
 
-/* APG visual refinement — v1.1 */
-.topbar{box-shadow:0 2px 35px #1455ff19}
-.topbar:after{content:"";display:block;height:2px;background:linear-gradient(90deg,transparent,#1d99ff 22%,#9258ff 52%,#19b8f4 78%,transparent);opacity:.74;box-shadow:0 0 18px #307dff8c}
-.hero{background:radial-gradient(ellipse at 73% 50%,#27357e55,transparent 43%),radial-gradient(ellipse at 64% 105%,#172e8c66,transparent 42%),#071028}
-.hero:before{content:"";position:absolute;inset:auto 0 -25px 30%;height:220px;pointer-events:none;opacity:.55;background:radial-gradient(ellipse at center,#297eff3b,transparent 65%);filter:blur(30px)}
-.emblem:after{content:"";position:absolute;inset:20% -10% 0;background:repeating-radial-gradient(ellipse at 50% 95%,#498bff3a 0 1px,transparent 2px 18px);transform:perspective(650px) rotateX(58deg);opacity:.7;pointer-events:none}
-.emblem img{transform:perspective(800px) rotateY(-14deg) rotateZ(-6deg);filter:drop-shadow(14px 12px 0 #0759a55e) drop-shadow(-8px -7px 24px #a563ff70) drop-shadow(0 0 48px #2177ff92);animation:float-logo 7s ease-in-out infinite}
-@keyframes float-logo{50%{transform:perspective(800px) rotateY(-9deg) rotateZ(-3deg) translateY(-8px)}}
-.hero-vertical{font-size:11px;line-height:2;letter-spacing:2.4px;color:#a8d6ff}
-.section-title h2{letter-spacing:-1.7px}
-.tab{border-radius:16px;transition:transform .18s,border-color .18s,box-shadow .18s}
-.tab:hover{transform:translateY(-2px);border-color:#4b79d4}
-.tab[aria-selected=true]{background:linear-gradient(135deg,#1c315a,#101a39);box-shadow:0 0 27px #187cff50,inset 0 0 30px #167dff12}
-.tabico{box-shadow:0 0 18px #236cff32}
-.value-row div{border-left-color:#3194ff}
-.card{border-radius:16px;box-shadow:0 10px 40px #03071438}
-.card li{display:flex;align-items:center;gap:10px}
-.card li:before{content:"✓";width:21px;height:21px;display:grid;place-items:center;border-radius:50%;background:#293b64;color:#9ec7ff;padding:0;flex-shrink:0;font-weight:700}
-.glyph{box-shadow:0 0 19px #137eff41}
-.steps{gap:24px}
-.step{position:relative;border:1px solid #2c426b}
-.step:not(:last-child):after{content:"→";position:absolute;right:-23px;top:50%;transform:translateY(-50%);font-size:31px;color:#3697ff;text-shadow:0 0 18px #348aff84;z-index:2}
-.num{box-shadow:0 0 25px #146cff69}
-.step:nth-child(2) .num{background:linear-gradient(135deg,#6b4dff,#a34cff);box-shadow:0 0 25px #7d46ff69}
-.step:nth-child(3) .num{background:linear-gradient(135deg,#00c4e9,#1c82f4)}
-.step:nth-child(4) .num{background:linear-gradient(135deg,#8e3aff,#c045ff)}
-.contact{position:relative;isolation:isolate;overflow:hidden;min-height:440px;background:radial-gradient(ellipse at 82% 78%,#4a249a6b,transparent 32%),radial-gradient(ellipse at 16% 10%,#1b4b9d3d,transparent 42%),linear-gradient(130deg,#09152c,#091129 50%,#0e1739)}
-.contact:before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:repeating-radial-gradient(ellipse at 83% 112%,#3785ff25 0 2px,transparent 3px 20px);mask-image:linear-gradient(90deg,transparent 35%,#000);opacity:.9;transform:perspective(900px) rotateX(32deg)}
-.contact-grid{position:relative;min-height:345px;grid-template-columns:1fr 360px}
-.contact h2{max-width:600px}
-.contact img{position:absolute;width:360px;right:16px;bottom:-115px;opacity:.97;transform:perspective(720px) rotateY(-24deg) rotateZ(-10deg);filter:drop-shadow(15px 12px 0 #044f9e75) drop-shadow(-12px 0 25px #a35bff73) drop-shadow(0 0 40px #258aff7d);pointer-events:none}
-.contact-grid:after{content:"HEALTHY ADS.  HEALTHY REVENUE.";position:absolute;top:25px;right:0;width:98px;font-size:10px;line-height:2;letter-spacing:3px;font-weight:800;color:#9dd5ff;white-space:normal}
-.modal[hidden]{display:none!important}
-.modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:18px}
-.modal-backdrop{position:absolute;inset:0;background:#020512e8;backdrop-filter:blur(8px)}
-.modal-window{position:relative;width:min(1280px,100%);height:min(93vh,1000px);display:flex;flex-direction:column;border:1px solid #36548a;background:#151c32;border-radius:18px;box-shadow:0 35px 90px #000c;overflow:hidden}
-.modal-header{padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid #35456c;color:#dceaff}
-.modal-close{font-size:26px;line-height:1;color:#fff;border:0;background:#293957;border-radius:9px;width:40px;height:38px;cursor:pointer}
-.modal-content{overflow:auto;flex:1;padding:25px;background:#181b30}
-.modal-content .mock{max-width:1000px;margin:auto;transform:none;min-height:650px;font-size:1.2em}
-.modal-content .stat strong{font-size:37px}
-.modal-content .incidentbox{padding:20px}
-.modal-content .incidentbox b{font-size:17px}
-.modal-content .incidentbox p{font-size:15px!important}
-.modal-content .mocknav{font-size:17px}
-.modal-content .alert-card{font-size:16px}
-.modal-content .alert-head{font-size:32px}
-@media(max-width:900px){.steps{gap:10px}.step:after{display:none!important}.contact-grid{grid-template-columns:1fr 250px}.contact img{width:260px;right:0}}
-@media(max-width:680px){.contact-grid{grid-template-columns:1fr}.contact img{position:absolute;width:175px;right:-48px;bottom:-85px;opacity:.5}.contact-grid:after{display:none}.modal{padding:4px}.modal-window{height:96vh}.modal-content{padding:9px}.modal-content .mock{font-size:1em}}
-@media(prefers-reduced-motion:reduce){.emblem img{animation:none}}
-</style></head><body>
-<header class="topbar"><div class="container topinner"><a class="brand" href="#top"><img src="../Logo%20Shield.png" alt=""><span>AdPulse Guard</span></a><nav class="nav" aria-label="Main"><a href="#product">Product</a><a href="#detections">Detections</a><a href="#pilot">Pilot</a><a href="#contact">Contact</a></nav><a class="btn primary small" href="#contact">Join the pilot →</a></div></header>
-<main id="top"><section class="hero"><div class="container hero-grid"><div><div class="eyebrow">REAL PAGE LOADS · REAL SIGNALS</div><h1>Silent ad delivery failures <span class="gradient">shouldn’t be invisible.</span></h1><p>Detect GPT configuration and ad delivery issues from real page loads — with technical context to support faster troubleshooting.</p><div class="hero-buttons"><a class="btn primary" href="#product">Explore the product →</a><a class="btn outline" href="#pilot">Join the 14-day pilot</a></div><div class="facts"><span>Page-load signals</span><span>Technical context</span><span>No ad delivery changes</span></div></div><div class="emblem"><div class="ring"></div><div class="ring two"></div><img src="../Logo%20Shield.png" alt="AdPulse Guard shield"><span class="hero-vertical">DETECT.<br>UNDERSTAND.<br>ACT.</span></div></div></section>
-<section id="product" class="section preview"><div class="container"><div class="section-title"><div class="kicker">PRODUCT PREVIEW</div><h2>See issues. Understand impact. Take action.</h2><p>Explore how AdPulse Guard presents signals and technical context.</p></div><div class="tabrow" role="tablist" aria-label="Product preview"><button class="tab" role="tab" aria-selected="true" data-tab="overview"><span class="tabico">▥</span><span><strong>Overview Dashboard</strong><small>Monitor delivery health at a glance</small></span></button><button class="tab" role="tab" aria-selected="false" data-tab="incidents"><span class="tabico">⌕</span><span><strong>Incident Explorer</strong><small>Investigate individual issues</small></span></button><button class="tab" role="tab" aria-selected="false" data-tab="alerts"><span class="tabico">♧</span><span><strong>Reality Mode Alerts</strong><small>See the alert experience</small></span></button></div>
-<div class="showcase"><div><span class="kicker" id="viewNumber">01 / OVERVIEW</span><h3 id="viewTitle">A clearer view of ad delivery health.</h3><p id="viewDescription">Track detected signals, issue distribution, severity and modeled revenue exposure.</p><p class="note">Illustrative interface recreated from APG test screenshots. Values are modeled sample estimates, not verified revenue loss.</p></div><div class="browser"><div class="browser-head"><span class="dots">● ● ●</span><b>AdPulse Guard / Product Preview</b><button id="zoom" type="button" aria-label="Enlarge preview">Expand ↗</button></div><div class="mock" id="mock"></div></div></div><div class="value-row"><div><b>Page-level evidence</b><span>See where signals were observed</span></div><div><b>Issue-specific context</b><span>Understand affected slots and checks</span></div><div><b>Operational visibility</b><span>Review signals in one place</span></div></div><p class="safety">Sample data shown. Demo preview does not access any live APG dashboard, API or publisher environment.</p></div></section>
-<section id="detections" class="section detection"><div class="container"><div class="section-title"><div class="kicker">CORE DETECTIONS</div><h2>From request to render.</h2><p>Browser-side observation of GPT, DOM and ad-slot behavior, without making ad delivery changes.</p></div><div class="cards"><article class="card"><div class="glyph">⌁</div><h3>Delivery signals</h3><p>Did the request and response happen?</p><ul><li>GPT missing or inactive</li><li>No slot requests</li><li>Requested slot missing DOM</li></ul></article><article class="card"><div class="glyph">⚙</div><h3>Configuration</h3><p>Is the page set up correctly?</p><ul><li>Wrong GAM network ID</li><li>DOM slot not registered</li><li>Unexpected rendered size</li></ul></article><article class="card"><div class="glyph">◉</div><h3>Rendering &amp; context</h3><p>Did the ad render as expected?</p><ul><li>Empty ad response</li><li>Collapsed container</li><li>Visibility / layout issues</li></ul></article></div></div></section>
-<section id="pilot" class="section pilot"><div class="container"><div class="pilot-head"><div><div class="kicker">14-DAY EARLY ACCESS PILOT</div><h2>Simple to try. Focused on real findings.</h2></div><div class="pilot-label">14 days &nbsp; | &nbsp; No ad delivery changes</div></div><div class="steps"><div class="step"><span class="num">1</span><h3>Install</h3><p>Add a site-specific GTM test tag after agreeing on setup and scope.</p></div><div class="step"><span class="num">2</span><h3>Observe</h3><p>Capture browser-side diagnostics and per-page deduplicated alerts.</p></div><div class="step"><span class="num">3</span><h3>Review</h3><p>Inspect signals using a read-only dashboard and Incident Explorer.</p></div><div class="step"><span class="num">4</span><h3>Feedback</h3><p>Assess alert accuracy, usefulness and areas to improve.</p></div></div><p class="safety">Pilot participation is subject to mutually agreed installation, data-handling and access details.</p></div></section>
-<section id="contact" class="section contact"><div class="container contact-grid"><div><div class="kicker">GET IN TOUCH</div><h2>Interested in joining the pilot?</h2><p>We're inviting a small group of publishers to help validate AdPulse Guard in real environments. Tell us a little about your ad setup and let's see whether it's a fit.</p><a class="btn primary" href="mailto:adpulse.guard@gmail.com?subject=AdPulse%20Guard%20%E2%80%94%2014-day%20pilot%20inquiry">✉ &nbsp; adpulse.guard@gmail.com →</a></div><img src="../Logo%20Shield.png" alt="" loading="lazy"></div></section></main><footer><div class="container footerrow"><span>© 2026 AdPulse Guard · Independent AdTech monitoring project</span><span>Never Miss a Beat.</span><a href="mailto:adpulse.guard@gmail.com">Contact</a></div></footer>
-<script>
-const mock=document.getElementById('mock'),tabs=[...document.querySelectorAll('[data-tab]')],meta={overview:['01 / OVERVIEW','A clearer view of ad delivery health.','Track detected signals, issue distribution, severity and modeled revenue exposure.'],incidents:['02 / INCIDENT EXPLORER','Investigate the signal, not just the symptom.','Drill into affected pages, slot identifiers, diagnostic evidence and suggested checks.'],alerts:['03 / REALITY MODE','Alerts with a little personality.','Get issue summaries and diagnostic context, with a memorable Reality Mode twist.']};
-const screens={
-overview:`<div class="mocknav"><b>◈ AdPulse Guard</b><span>Overview</span> &nbsp; Incident Explorer</div><div class="stats"><div class="stat"><small>AD DELIVERY HEALTH</small><strong>57%</strong><small>44 / 77 expected slots</small></div><div class="stat"><small>IMPACTED SLOTS</small><strong>33</strong><small>Delivery issues</small></div><div class="stat"><small>MODELED EXPOSURE</small><strong>$396</strong><small>Example only</small></div></div><div class="incidentbox"><b>🚨 Highest Impact Incident <span class="red">· Action recommended</span></b><p>Slot: div-gpt-ad-apg-lab-0</p><p>Detected: Missing response · Requested slot missing DOM</p></div><div class="bars"><span style="height:47%"></span><span style="height:20%"></span><span style="height:63%"></span><span style="height:40%"></span><span style="height:75%"></span><span style="height:52%"></span><span style="height:90%"></span><span style="height:42%"></span></div><div class="mockfoot">INCIDENT TYPES · EXAMPLE DATA</div>`,
-incidents:`<div class="mocknav"><b>◈ AdPulse Guard</b> &nbsp; Overview <span>Incident Explorer</span></div><div class="incident-row"><div><small>PAGE · DEMO</small><span class="blue">/apg-lab/combo_two_slots</span></div><b class="red">$24.00</b></div><div class="incidentbox"><b>Wrong network <span class="red">· Configuration mismatch</span></b><p>1 affected slot · div-gpt-ad-apg-lab-0</p><p class="blue">⌕ Suggested checks</p><p>• Verify the network code used for the ad request</p><p>• Check for conflicting GPT initialization</p></div><div class="incidentbox"><b>Slot visible but no request sent</b><p>Delivery failure · 1 affected slot</p><p class="blue">⌕ Suggested checks available</p></div>`,
-alerts:`<div class="mocknav"><b>◈ AdPulse Guard · Reality Mode™</b></div><div class="alert-head">The ads tried. You didn’t.</div><div class="pulse">━╱╲━━╱╲━</div><p style="font-size:13px;color:#e8e8f6">Your monetization strategy has encountered 2 plot twists. The slots left confused.</p><div class="mockfoot">THE SITUATION, SUMMARIZED:</div><div class="alert-card"><b>1 Ad returned · DOM container missing</b><small>GPT delivered the ad. The DOM filed a missing person report.</small></div><div class="alert-card orange"><b>1 Ad requested · DOM container missing</b><small>The ad request was sent to an imaginary address.</small></div><div class="mockfoot">SYSTEM VITALS · Pulse: Unstable · 57%</div>`
-};
-function selectTab(key){tabs.forEach(t=>t.setAttribute('aria-selected',String(t.dataset.tab===key)));document.getElementById('viewNumber').textContent=meta[key][0];document.getElementById('viewTitle').textContent=meta[key][1];document.getElementById('viewDescription').textContent=meta[key][2];mock.innerHTML=screens[key]}
-tabs.forEach(t=>t.addEventListener('click',()=>selectTab(t.dataset.tab)));const modal=document.createElement('div');modal.className='modal';modal.hidden=true;modal.innerHTML='<div class="modal-backdrop"></div><div class="modal-window" role="dialog" aria-modal="true" aria-labelledby="preview-title"><div class="modal-header"><strong id="preview-title">AdPulse Guard — Product Preview</strong><button type="button" class="modal-close" aria-label="Close expanded view">×</button></div><div class="modal-content"></div></div>';document.body.appendChild(modal);const closePreview=()=>{modal.hidden=true;document.body.style.overflow='';document.getElementById('zoom').focus()};document.getElementById('zoom').addEventListener('click',()=>{modal.querySelector('.modal-content').innerHTML='<div class="mock">'+mock.innerHTML+'</div>';const selected=tabs.find(t=>t.getAttribute('aria-selected')==='true');modal.querySelector('#preview-title').textContent='AdPulse Guard — '+(selected?.innerText||'Product Preview');modal.hidden=false;document.body.style.overflow='hidden';modal.querySelector('.modal-close').focus()});modal.querySelector('.modal-close').addEventListener('click',closePreview);modal.querySelector('.modal-backdrop').addEventListener('click',closePreview);document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)closePreview()});selectTab('overview');
-</script></body></html>
+    .section{padding:34px 0 0}
+    .section-title{text-align:center;max-width:780px;margin:0 auto 28px}
+    .kicker{color:#95a9d8;font-size:.78rem;letter-spacing:.28em;text-transform:uppercase;font-weight:800;margin:0 0 10px}
+    .section-title h2{font-size:clamp(2rem,4vw,3.3rem);line-height:1.05;letter-spacing:-.04em;margin:0 0 12px}
+    .section-title p{margin:0;color:#b9cae8;font-size:1.08rem}
+
+    .product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:22px}
+    .product-card{background:linear-gradient(180deg, rgba(17,27,53,.96), rgba(14,22,45,.92));border:1px solid rgba(101,132,220,.16);border-radius:24px;padding:18px;box-shadow:var(--shadow);cursor:pointer;transition:.22s ease}
+    .product-card.active{border-color:rgba(67,151,255,.8);box-shadow:0 0 0 1px rgba(67,151,255,.35), 0 24px 60px rgba(5,10,25,.6), 0 0 28px rgba(56,137,255,.18)}
+    .product-card:hover{transform:translateY(-2px)}
+    .card-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+    .card-icon{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;flex:none;background:linear-gradient(135deg, rgba(32,123,255,.22), rgba(24,226,255,.08));border:1px solid rgba(76,152,255,.3);color:#a9d4ff;font-size:1.25rem;font-weight:700}
+    .product-card:nth-child(2) .card-icon{background:linear-gradient(135deg, rgba(165,85,255,.22), rgba(255,90,154,.08));border-color:rgba(185,110,255,.28);color:#ddb9ff}
+    .product-card:nth-child(3) .card-icon{background:linear-gradient(135deg, rgba(176,95,255,.22), rgba(60,110,255,.08));border-color:rgba(190,112,255,.28);color:#efcaff}
+    .card-head h3{font-size:1.28rem;line-height:1.1;letter-spacing:-.03em;margin:1px 0 6px}
+    .card-head p{margin:0;color:#b0c2e7;font-size:.95rem}
+    .card-icon svg{display:block;margin:auto}
+    .card-thumb{border-radius:18px;overflow:hidden;border:1px solid rgba(104,127,190,.2);background:#0b1227;box-shadow:inset 0 0 0 1px rgba(255,255,255,.02)}
+    .card-thumb img{width:100%;height:260px;object-fit:cover;object-position:top center;display:block}
+    .product-card:nth-child(3) .card-thumb img{object-position:top center}
+
+    .showcase{display:grid;grid-template-columns:.94fr 1.06fr;gap:20px;align-items:start;background:linear-gradient(180deg, rgba(10,18,41,.96), rgba(12,19,39,.94));border:1px solid rgba(104,127,190,.16);border-radius:28px;padding:24px;box-shadow:var(--shadow)}
+    .showcase h3{font-size:2rem;line-height:1.06;letter-spacing:-.04em;margin:0 0 10px}
+    .showcase p{margin:0 0 12px;color:#b8caea}
+    .note{font-size:.93rem;color:#92a6d5;background:rgba(88,111,177,.09);border:1px solid rgba(100,126,191,.14);padding:14px 16px;border-radius:16px}
+    .showcase-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}
+    .browser{background:linear-gradient(180deg, #111c39, #0d1630);border-radius:24px;border:1px solid rgba(110,134,198,.2);overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+    .browser-top{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,0));border-bottom:1px solid rgba(255,255,255,.06);gap:10px}
+    .dots{display:flex;gap:7px}
+    .dots span{width:10px;height:10px;border-radius:50%;background:#40537f}
+    .browser-label{font-size:.92rem;color:#c5d5f8}
+    .expand-btn{border:none;background:rgba(255,255,255,.05);color:#dbe8ff;padding:10px 12px;border-radius:12px;display:inline-flex;gap:8px;align-items:center;cursor:pointer}
+    .expand-btn:hover{background:rgba(255,255,255,.08)}
+    .browser-screen{padding:16px;background:linear-gradient(180deg,#0b1227,#0c1329)}
+    .browser-screen img{width:100%;height:min(72vh,700px);object-fit:contain;object-position:top center;border-radius:18px}
+
+    .detect-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .detect-card{background:linear-gradient(180deg, rgba(16,26,52,.94), rgba(12,19,39,.94));border:1px solid rgba(104,127,190,.16);border-radius:24px;padding:28px;box-shadow:var(--shadow)}
+    .detect-top{display:flex;align-items:center;gap:14px;margin-bottom:10px}
+    .detect-ico{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(97,155,255,.34);background:radial-gradient(circle at 30% 30%, rgba(28,148,255,.2), rgba(20,30,63,.8));color:#9ad4ff}
+    .detect-card:nth-child(2) .detect-ico{border-color:rgba(199,108,255,.3);background:radial-gradient(circle at 30% 30%, rgba(180,80,255,.24), rgba(32,22,57,.8));color:#efc7ff}
+    .detect-card:nth-child(3) .detect-ico{border-color:rgba(72,220,255,.3);background:radial-gradient(circle at 30% 30%, rgba(47,217,255,.22), rgba(14,32,57,.8));color:#b7f4ff}
+    .detect-card h3{font-size:1.55rem;line-height:1.05;letter-spacing:-.03em;margin:0 0 6px}
+    .detect-card p{margin:0 0 18px;color:#a9bcdf}
+    .checks{list-style:none;padding:0;margin:0;display:grid;gap:12px}
+    .checks li{display:flex;align-items:center;gap:10px;color:#dbe5fb}
+    .checks li::before{content:"✓";display:inline-grid;place-items:center;flex:none;width:22px;height:22px;border-radius:50%;background:rgba(72,113,255,.18);border:1px solid rgba(111,145,255,.32);color:#cae6ff;font-size:.8rem;font-weight:800}
+
+    .pilot-wrap{background:linear-gradient(180deg, rgba(8,15,33,.72), rgba(8,15,33,.0));border-top:1px solid rgba(255,255,255,.04);padding-top:18px}
+    .pilot-head{display:flex;align-items:end;justify-content:space-between;gap:22px;flex-wrap:wrap;margin-bottom:24px}
+    .pilot-head h2{font-size:clamp(2rem,4vw,3.2rem);line-height:1.04;letter-spacing:-.04em;margin:0 0 10px}
+    .pilot-head p{margin:0;color:#b8caea}
+    .pilot-pill{display:inline-flex;align-items:center;gap:12px;background:rgba(11,24,49,.9);border:1px solid rgba(98,139,255,.22);color:#dcebff;border-radius:16px;padding:13px 16px;font-weight:700}
+    .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+    .step{position:relative;background:linear-gradient(180deg, rgba(16,26,52,.96), rgba(12,19,39,.92));border:1px solid rgba(104,127,190,.16);border-radius:24px;padding:26px 22px 24px;box-shadow:var(--shadow)}
+    .step:not(:last-child)::after{content:"→";position:absolute;right:-16px;top:50%;transform:translateY(-50%);font-size:2rem;color:#5aaeff;z-index:2;text-shadow:0 0 18px rgba(69,162,255,.34)}
+    .num{display:grid;place-items:center;width:52px;height:52px;border-radius:50%;margin-bottom:18px;background:linear-gradient(145deg,#1d83ff,#3e63ff 58%, #6d4eff);font-size:1.35rem;font-weight:800;box-shadow:0 12px 30px rgba(36,106,255,.32)}
+    .step:nth-child(2) .num{background:linear-gradient(145deg,#5c64ff,#7e59ff,#b54dff)}
+    .step:nth-child(3) .num{background:linear-gradient(145deg,#19c4ff,#1d86ff,#4d69ff)}
+    .step:nth-child(4) .num{background:linear-gradient(145deg,#794fff,#aa57ff,#d26cff)}
+    .step h3{font-size:1.5rem;line-height:1.05;margin:0 0 8px;letter-spacing:-.03em}
+    .step p{margin:0;color:#b4c3e5}
+
+    .contact-box{position:relative;overflow:hidden;border-radius:0;padding:34px 44px;background:
+      radial-gradient(circle at 18% 18%, rgba(27,114,255,.22), transparent 28%),
+      radial-gradient(circle at 78% 35%, rgba(190,88,255,.14), transparent 22%),
+      linear-gradient(90deg, rgba(7,17,41,.98) 0%, rgba(6,14,34,.98) 42%, rgba(8,12,28,.98) 100%);
+      border:1px solid rgba(97,128,205,.10);box-shadow:var(--shadow);min-height:240px}
+    .contact-box::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 62% 74%, rgba(40,118,255,.18), transparent 24%), linear-gradient(120deg, transparent 46%, rgba(63,118,255,.06) 56%, rgba(204,92,255,.12) 74%, transparent 88%);opacity:.95}
+    .contact-content{position:relative;z-index:2;max-width:520px;padding-top:4px}
+    .contact-content h2{font-size:clamp(2rem,4vw,3.3rem);line-height:1.02;letter-spacing:-.04em;margin:0 0 12px;max-width:13ch}
+    .contact-content p{font-size:1.05rem;color:#c1d0ed;margin:0 0 20px;max-width:46ch}
+    .contact-logo{position:absolute;right:120px;top:8px;width:min(31vw,300px);opacity:.98;transform:perspective(860px) rotateY(-22deg) rotateZ(-8deg);filter:drop-shadow(12px 12px 0 rgba(7,90,165,.38)) drop-shadow(-10px 0 24px rgba(163,91,255,.44)) drop-shadow(0 0 40px rgba(37,138,255,.36));z-index:1}
+    .contact-side{position:absolute;right:34px;top:38px;z-index:2;text-align:left;font-size:.88rem;letter-spacing:.28em;line-height:2.05;text-transform:uppercase;color:#d9e6ff;font-weight:700}
+    .contact-side::after{content:"";display:block;width:48px;height:3px;background:linear-gradient(90deg,var(--cyan),var(--violet));border-radius:20px;margin:12px 0 0 0}
+
+    .footer{padding:24px 0 34px;color:#9eb1d8}
+    .footer-inner{display:flex;justify-content:space-between;align-items:center;gap:16px;border-top:1px solid rgba(255,255,255,.06);padding-top:18px;font-size:.95rem}
+    .footer-brand{display:flex;align-items:center;gap:10px;color:#dce8ff;font-weight:700}
+    .footer-brand img{width:26px;height:26px}
+
+    .modal[hidden]{display:none}
+    .modal{position:fixed;inset:0;z-index:50}
+    .modal-backdrop{position:absolute;inset:0;background:rgba(4,8,18,.8);backdrop-filter:blur(12px)}
+    .modal-panel{position:relative;width:min(1200px, calc(100% - 28px));max-height:calc(100vh - 28px);margin:14px auto;background:linear-gradient(180deg,#101a35,#0b132a);border:1px solid rgba(106,130,191,.22);border-radius:28px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.55)}
+    .modal-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid rgba(255,255,255,.07)}
+    .modal-top strong{font-size:1.05rem}
+    .close{border:none;background:rgba(255,255,255,.05);color:#fff;width:42px;height:42px;border-radius:50%;font-size:1.5rem;cursor:pointer}
+    .modal-body{padding:18px;overflow:auto}
+    .modal-body img{width:100%;height:auto;border-radius:16px;background:#0b1227}
+
+    @media (max-width: 1120px){
+      .hero-grid,.showcase{grid-template-columns:1fr}
+      .hero-visual{min-height:420px}
+      .hero-logo{width:min(62%,360px)}
+      .product-grid,.detect-grid,.steps{grid-template-columns:1fr 1fr}
+      .step:nth-child(2)::after{display:none}
+    }
+    @media (max-width: 760px){
+      .container{width:min(100% - 28px, 1180px)}
+      .nav{display:none}
+      .header-inner{flex-wrap:wrap;justify-content:space-between}
+      .hero{padding-top:30px}
+      .hero p{font-size:1.05rem}
+      .hero-visual{min-height:360px}
+      .hero-words{right:24px;top:32px;font-size:.82rem;letter-spacing:.18em}
+      .hero-logo{inset:88px 22px auto auto;width:72%}
+      .product-grid,.detect-grid,.steps{grid-template-columns:1fr}
+      .step::after{display:none !important}
+      .showcase,.contact-box{padding:18px}
+      .browser-screen img{height:auto;max-height:none}
+      .contact-logo{position:relative;right:auto;top:auto;width:180px;margin:24px auto 0;display:block}
+      .contact-side{position:relative;right:auto;top:auto;text-align:left;margin-top:22px}
+      .footer-inner{flex-direction:column;align-items:flex-start}
+      .btn.small{width:100%}
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="#top"><img src="assets/logo-shield.png" alt=""><span>AdPulse Guard</span></a>
+      <nav class="nav" aria-label="Main navigation">
+        <a href="#product">Product</a>
+        <a href="#detections">Detections</a>
+        <a href="#pilot">Pilot</a>
+        <a href="#contact">Contact</a>
+      </nav>
+      <a class="btn primary small" href="#contact">Join the pilot →</a>
+    </div>
+    <div class="header-glow" aria-hidden="true"></div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <div class="eyebrow">Browser-side ad delivery monitoring</div>
+          <h1>Silent ad delivery failures <span class="gradient">shouldn’t be invisible.</span></h1>
+          <p>Detect GPT configuration and ad delivery issues from real page loads — with technical context to support faster troubleshooting.</p>
+          <div class="hero-actions">
+            <a class="btn primary" href="#product">Explore the product →</a>
+            <a class="btn outline" href="#pilot">Join the 14-day pilot</a>
+          </div>
+          <div class="hero-notes">
+            <span><i>⚡</i> Real page loads</span>
+            <span><i>🛡</i> Actionable alerts</span>
+            <span><i>▥</i> Protect revenue</span>
+          </div>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+          <img class="hero-logo" src="assets/logo-mark-large.png" alt="">
+          <div class="hero-words">Real page loads.<br>Real signals.<br>Real impact.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="product" class="section">
+      <div class="container">
+        <div class="section-title">
+          <div class="kicker">PRODUCT PREVIEW</div>
+          <h2>See issues. Understand impact. Take action.</h2>
+          <p>Explore actual APG product screens and inspect them in full size.</p>
+        </div>
+
+        <div class="product-grid" id="productTabs" role="tablist" aria-label="Product preview views">
+          <article class="product-card active" role="tab" aria-selected="true" tabindex="0" data-view="overview">
+            <div class="card-head"><div class="card-icon">▥</div><div><h3>Overview Dashboard</h3><p>Spot issues and revenue impact at a glance.</p></div></div>
+            <div class="card-thumb"><img src="assets/overview.png" alt="Overview dashboard screenshot"></div>
+          </article>
+          <article class="product-card" role="tab" aria-selected="false" tabindex="-1" data-view="incidents">
+            <div class="card-head"><div class="card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="2"></circle><path d="M16 16l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg></div><div><h3>Incident Explorer</h3><p>Dive into specific issues with detailed diagnostics.</p></div></div>
+            <div class="card-thumb"><img src="assets/incidents.png" alt="Incident Explorer screenshot"></div>
+          </article>
+          <article class="product-card" role="tab" aria-selected="false" tabindex="-1" data-view="reality">
+            <div class="card-head"><div class="card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2 13h4l2-4 3 8 2-5h9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><h3>Reality Mode Alerts</h3><p>Get clear, actionable alerts when ads don’t deliver.</p></div></div>
+            <div class="card-thumb"><img src="assets/reality.png" alt="Reality Mode alert screenshot"></div>
+          </article>
+        </div>
+
+        <div class="showcase">
+          <div>
+            <div class="kicker" id="showcaseMini">01 / OVERVIEW</div>
+            <h3 id="showcaseTitle">A clearer view of ad delivery health.</h3>
+            <p id="showcaseText">Track detected signals, issue distribution, severity and modeled revenue exposure. Prioritize what deserves investigation first.</p>
+            <div class="note" id="showcaseNote">Illustrative screen using APG test data. Impact values shown are modeled sample estimates, not verified revenue loss.</div>
+            <div class="showcase-actions">
+              <button class="btn outline" id="expandMain" type="button">Expand current view ↗</button>
+              <a class="btn primary" href="#contact">Interested in joining the pilot?</a>
+            </div>
+          </div>
+          <div class="browser">
+            <div class="browser-top">
+              <div class="dots"><span></span><span></span><span></span></div>
+              <div class="browser-label" id="browserLabel">AdPulse Guard / Overview Dashboard</div>
+              <button class="expand-btn" id="expandTop" type="button">⤢ <span>Expand</span></button>
+            </div>
+            <div class="browser-screen">
+              <img id="showcaseImage" src="assets/overview.png" alt="Overview dashboard screenshot">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="detections" class="section">
+      <div class="container">
+        <div class="section-title">
+          <div class="kicker">CORE DETECTIONS</div>
+          <h2>How AdPulse Guard helps</h2>
+          <p>Identify the real reasons ads don’t show — from request to render.</p>
+        </div>
+        <div class="detect-grid">
+          <article class="detect-card">
+            <div class="detect-top"><div class="detect-ico">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 12h3l2-5 4 10 2-5h7" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div><div><h3>Delivery signals</h3><p>Did the ad request and response happen?</p></div></div>
+            <ul class="checks"><li>GPT missing or inactive</li><li>No slot requests</li><li>Requested slot missing DOM</li></ul>
+          </article>
+          <article class="detect-card">
+            <div class="detect-top"><div class="detect-ico">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 8.7a3.3 3.3 0 1 0 0 6.6 3.3 3.3 0 0 0 0-6.6Z" stroke="currentColor" stroke-width="2"/><path d="M19.4 13.5c.05-.49.05-1.01 0-1.5l1.65-1.29-1.56-2.7-2 .81a7.42 7.42 0 0 0-1.3-.75l-.3-2.15h-3.12l-.3 2.15a7.42 7.42 0 0 0-1.3.75l-2-.81-1.56 2.7L4.6 12c-.05.49-.05 1.01 0 1.5l-1.65 1.29 1.56 2.7 2-.81c.4.3.84.56 1.3.75l.3 2.15h3.12l.3-2.15c.46-.19.9-.45 1.3-.75l2 .81 1.56-2.7-1.65-1.29Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            </div><div><h3>Configuration</h3><p>Is the page set up correctly?</p></div></div>
+            <ul class="checks"><li>Wrong GAM network ID</li><li>DOM slot not registered</li><li>Unexpected rendered size</li></ul>
+          </article>
+          <article class="detect-card">
+            <div class="detect-top"><div class="detect-ico">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
+            </div><div><h3>Rendering &amp; context</h3><p>Did the ad render as expected?</p></div></div>
+            <ul class="checks"><li>Empty ad response</li><li>Collapsed container</li><li>Visibility / layout issues</li></ul>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="pilot" class="section pilot-wrap">
+      <div class="container">
+        <div class="pilot-head">
+          <div>
+            <div class="kicker">14-DAY EARLY ACCESS PILOT</div>
+            <h2>Simple to try. Valuable from day one.</h2>
+            <p>Low-friction onboarding, real observations and practical feedback.</p>
+          </div>
+          <div class="pilot-pill">14-day pilot &nbsp; | &nbsp; No ad delivery changes</div>
+        </div>
+        <div class="steps">
+          <article class="step"><div class="num">1</div><h3>Install</h3><p>Add our lightweight GTM test tag after agreeing on setup and scope.</p></article>
+          <article class="step"><div class="num">2</div><h3>Observe</h3><p>We monitor real page loads and send per-page deduplicated alerts.</p></article>
+          <article class="step"><div class="num">3</div><h3>Review</h3><p>Access a read-only dashboard and Incident Explorer for investigation.</p></article>
+          <article class="step"><div class="num">4</div><h3>Feedback</h3><p>Evaluate alert accuracy and usefulness. Your input shapes what's next.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="section">
+      <div class="container">
+        <div class="contact-box">
+          <div class="contact-content">
+            <div class="kicker">GET IN TOUCH</div>
+            <h2>Interested in joining the pilot?</h2>
+            <p>We’re working with a small group of publishers to validate and improve AdPulse Guard. If you’re interested in early access, we’d love to hear from you.</p>
+            <a class="btn outline" href="mailto:adpulse.guard@gmail.com?subject=AdPulse%20Guard%20%E2%80%94%2014-day%20pilot%20inquiry">✉ &nbsp; adpulse.guard@gmail.com &nbsp; →</a>
+          </div>
+          <img class="contact-logo" src="assets/logo-mark-large.png" alt="">
+          <div class="contact-side">Healthy<br>ads.<br>Healthy<br>revenue.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand"><img src="assets/logo-shield.png" alt=""> AdPulse Guard</div>
+      <div>Real page loads. Real signals. Real impact.</div>
+      <a href="mailto:adpulse.guard@gmail.com">Contact ↗</a>
+    </div>
+  </footer>
+
+  <div class="modal" id="modal" hidden>
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-top">
+        <strong id="modalTitle">Product view</strong>
+        <button class="close" id="modalClose" type="button" aria-label="Close">×</button>
+      </div>
+      <div class="modal-body"><img id="modalImage" src="assets/overview.png" alt="Expanded product screenshot"></div>
+    </div>
+  </div>
+
+  <script>
+    const views = {
+      overview: {
+        mini: '01 / OVERVIEW',
+        title: 'A clearer view of ad delivery health.',
+        text: 'Track detected signals, issue distribution, severity and modeled revenue exposure. Prioritize what deserves investigation first.',
+        note: 'Illustrative screen using APG test data. Impact values shown are modeled sample estimates, not verified revenue loss.',
+        browser: 'AdPulse Guard / Overview Dashboard',
+        src: 'assets/overview.png',
+        alt: 'Overview dashboard screenshot'
+      },
+      incidents: {
+        mini: '02 / INCIDENT EXPLORER',
+        title: 'Investigate the signal, not just the symptom.',
+        text: 'Drill into affected pages, slot identifiers, technical evidence and suggested checks so the right team can investigate sooner.',
+        note: 'Incident Explorer view shown with local APG lab data and example modeled impact values.',
+        browser: 'AdPulse Guard / Incident Explorer',
+        src: 'assets/incidents.png',
+        alt: 'Incident Explorer screenshot'
+      },
+      reality: {
+        mini: '03 / REALITY MODE',
+        title: 'Alerts with a little personality.',
+        text: 'Reality Mode turns supported issue detections into a more human alert summary while still pointing users toward action.',
+        note: 'Reality Mode alert shown as a product example. Tone can evolve, but the purpose stays the same: clear signal and context.',
+        browser: 'AdPulse Guard / Reality Mode Alerts',
+        src: 'assets/reality.png',
+        alt: 'Reality Mode alert screenshot'
+      }
+    };
+
+    const cards = document.querySelectorAll('.product-card');
+    const showcaseMini = document.getElementById('showcaseMini');
+    const showcaseTitle = document.getElementById('showcaseTitle');
+    const showcaseText = document.getElementById('showcaseText');
+    const showcaseNote = document.getElementById('showcaseNote');
+    const browserLabel = document.getElementById('browserLabel');
+    const showcaseImage = document.getElementById('showcaseImage');
+    const modal = document.getElementById('modal');
+    const modalImage = document.getElementById('modalImage');
+    const modalTitle = document.getElementById('modalTitle');
+
+    let currentView = 'overview';
+
+    function setView(name){
+      currentView = name;
+      const view = views[name];
+      cards.forEach(card => {
+        const active = card.dataset.view === name;
+        card.classList.toggle('active', active);
+        card.setAttribute('aria-selected', active ? 'true' : 'false');
+        card.setAttribute('tabindex', active ? '0' : '-1');
+      });
+      showcaseMini.textContent = view.mini;
+      showcaseTitle.textContent = view.title;
+      showcaseText.textContent = view.text;
+      showcaseNote.textContent = view.note;
+      browserLabel.textContent = view.browser;
+      showcaseImage.src = view.src;
+      showcaseImage.alt = view.alt;
+    }
+
+    cards.forEach(card => {
+      card.addEventListener('click', () => setView(card.dataset.view));
+      card.addEventListener('keydown', e => {
+        if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); setView(card.dataset.view); }
+      });
+    });
+
+    function openModal(){
+      const view = views[currentView];
+      modalImage.src = view.src;
+      modalImage.alt = view.alt;
+      modalTitle.textContent = view.browser;
+      modal.hidden = false;
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal(){
+      modal.hidden = true;
+      document.body.style.overflow = '';
+    }
+    document.getElementById('expandMain').addEventListener('click', openModal);
+    document.getElementById('expandTop').addEventListener('click', openModal);
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+    document.getElementById('modalBackdrop').addEventListener('click', closeModal);
+    window.addEventListener('keydown', e => { if(e.key === 'Escape' && !modal.hidden) closeModal(); });
+
+    setView('overview');
+  </script>
+</body>
+</html>
