@@ -97,6 +97,44 @@
 @media(max-width:680px){.steps{grid-template-columns:repeat(2,1fr)}.step:not(:last-child):after{display:none!important}
 .contact{min-height:320px}.contact-grid{min-height:320px;display:block}.contact-grid>div:first-child{max-width:82%}.contact img{width:220px!important;top:auto!important;right:-65px!important;bottom:-63px!important;opacity:.7}.contact-grid:after{display:none}}
 
+
+/* APG v1.4 — surgical pilot + cosmic CTA refinements only */
+.pilot{padding:50px 0 36px!important;background:linear-gradient(180deg,#0b1733,#0a1430)!important}
+.pilot-head{margin-bottom:26px!important;align-items:center}
+.pilot-head h2{font-size:clamp(28px,3.15vw,40px);margin-bottom:0}
+.pilot-label{padding:10px 15px;border-radius:11px;background:#0c2853b3;border:1px solid #2e75c7;color:#d1eaff}
+.pilot .steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:28px!important}
+.pilot .step{position:relative;background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important;padding:2px 5px 0 0!important;display:grid;grid-template-columns:54px minmax(0,1fr);column-gap:13px;align-items:start}
+.pilot .num{width:45px;height:45px;margin:0;grid-row:1/span 2;box-shadow:0 0 23px #176dff76}
+.pilot .step h3{font-size:16px;letter-spacing:-.2px;margin:2px 0 5px;line-height:1.3}
+.pilot .step p{font-size:12.5px;line-height:1.45;color:#bfcee9;margin:0;max-width:190px}
+.pilot .step:not(:last-child):after{content:""!important;display:block!important;position:absolute;top:21px!important;left:auto!important;right:-17px!important;width:36px;height:14px;transform:none!important;background:linear-gradient(90deg,transparent 0%,#398df6 27%,#67c8ff 72%,transparent 100%);clip-path:polygon(0 44%,72% 44%,72% 11%,100% 50%,72% 89%,72% 56%,0 56%);filter:drop-shadow(0 0 6px #2599ff);opacity:.9}
+.pilot .safety{font-size:11px;margin-top:19px}
+.contact{min-height:257px!important;overflow:hidden;isolation:isolate;background:radial-gradient(ellipse at 72% 44%,#183c8d55,transparent 38%),linear-gradient(100deg,#07152f 0%,#07122e 48%,#0a102a 100%)!important}
+.contact:before{content:"";position:absolute;inset:0;z-index:-1;opacity:1;background:
+ radial-gradient(circle at 48% 17%,#73c3ff 0 1px,transparent 2px),
+ radial-gradient(circle at 55% 33%,#408aff 0 1px,transparent 2px),
+ radial-gradient(circle at 57% 50%,#a35aff 0 1.4px,transparent 2.5px),
+ radial-gradient(circle at 64% 14%,#408aff 0 1px,transparent 2px),
+ radial-gradient(circle at 68% 65%,#aa73ff 0 1.3px,transparent 2.3px),
+ radial-gradient(circle at 76% 10%,#76bdff 0 1px,transparent 2px),
+ radial-gradient(circle at 83% 31%,#935aff 0 1.4px,transparent 2.4px),
+ radial-gradient(circle at 91% 60%,#56b4ff 0 1px,transparent 2px),
+ radial-gradient(ellipse at 67% 74%,#2966d955,transparent 34%),
+ radial-gradient(ellipse at 88% 15%,#5935a344,transparent 28%)}
+.contact:after{content:"";position:absolute;inset:0 0 0 35%;z-index:-1;opacity:.45;transform:none;background:
+ linear-gradient(117deg,transparent 0 26%,#2265c319 37%,#6277ef1a 48%,#aa4dff19 57%,transparent 70%),
+ repeating-radial-gradient(ellipse at 70% 175%,#2d67b51a 0 1px,transparent 2px 32px);
+ mask-image:linear-gradient(90deg,transparent,black 35%)}
+.contact-grid{min-height:257px!important;grid-template-columns:minmax(0,1fr) 350px}
+.contact-grid>div:first-child{padding:18px 0}
+.contact h2{font-size:clamp(25px,2.7vw,34px);line-height:1.15;margin:5px 0 9px}
+.contact p{font-size:13px;line-height:1.45;max-width:520px;margin:0 0 14px}
+.contact .btn{font-size:12.5px;padding:10px 16px;min-height:42px}
+.contact img{display:block!important;position:absolute;right:92px!important;top:-24px!important;bottom:auto!important;width:290px!important;opacity:1!important;transform:perspective(800px) rotateY(-15deg) rotateZ(-6deg)!important;filter:drop-shadow(9px 7px 0 #0b49aa66) drop-shadow(-4px 0 19px #9c58ff70) drop-shadow(0 0 30px #227eff88)!important}
+.contact-grid:after{content:"HEALTHY\A ADS.\A HEALTHY\A REVENUE.";position:absolute;right:3px;top:51px;width:80px;white-space:pre;line-height:2.1;font-size:10px;letter-spacing:2.8px;color:#a8cbff}
+@media(max-width:950px){.pilot .steps{gap:18px!important}.pilot .step{grid-template-columns:44px minmax(0,1fr);gap:9px}.pilot .num{width:40px;height:40px}.pilot .step:not(:last-child):after{right:-12px!important;width:25px}.contact img{width:250px!important;right:55px!important;top:-5px!important}}
+@media(max-width:680px){.pilot{padding:38px 0 28px!important}.pilot .steps{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:24px}.pilot .step:not(:last-child):after{display:none!important}.contact{min-height:300px!important}.contact-grid{min-height:300px!important;display:block}.contact-grid>div:first-child{max-width:78%;padding:22px 0}.contact img{width:185px!important;right:-42px!important;top:auto!important;bottom:-25px!important;opacity:.8!important}.contact-grid:after{display:none}}
 </style></head><body>
 <header class="topbar"><div class="container topinner"><a class="brand" href="#top"><img src="../Logo%20Shield.png" alt=""><span>AdPulse Guard</span></a><nav class="nav" aria-label="Main"><a href="#product">Product</a><a href="#detections">Detections</a><a href="#pilot">Pilot</a><a href="#contact">Contact</a></nav><a class="btn primary small" href="#contact">Join the pilot →</a></div></header>
 <main id="top"><section class="hero"><div class="container hero-grid"><div><div class="eyebrow">REAL PAGE LOADS · REAL SIGNALS</div><h1>Silent ad delivery failures <span class="gradient">shouldn’t be invisible.</span></h1><p>Detect GPT configuration and ad delivery issues from real page loads — with technical context to support faster troubleshooting.</p><div class="hero-buttons"><a class="btn primary" href="#product">Explore the product →</a><a class="btn outline" href="#pilot">Join the 14-day pilot</a></div><div class="facts"><span>Page-load signals</span><span>Technical context</span><span>No ad delivery changes</span></div></div><div class="emblem"><div class="ring"></div><div class="ring two"></div><img src="../Logo%20Shield.png" alt="AdPulse Guard shield"><span class="hero-vertical">DETECT.<br>UNDERSTAND.<br>ACT.</span></div></div></section>
