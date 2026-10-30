@@ -18,20 +18,27 @@
       --apg-muted: #aab9d6;
     }
 
-    body {
-      font-family:
-        Inter,
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        sans-serif;
+    html {
+  min-height: 100%;
+  background: var(--apg-bg);
+  background-image: radial-gradient(
+    1200px 600px at top,
+    #1d2947,
+    var(--apg-bg)
+  );
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
 
-      background:
-        radial-gradient(
-          1200px 600px at top,
-          #1d2947,
-          var(--apg-bg)
-        );
+body {
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+
+  background: transparent;
 
       color: var(--apg-text);
 
