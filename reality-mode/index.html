@@ -241,6 +241,13 @@
       color: var(--apg-muted);
     }
 
+    .incident-affected {
+      font-size: 11px;
+      color: var(--apg-muted);
+      opacity: 0.75;
+      margin-top: 4px;
+    }
+
     .score-good {
       color: #4ade80;
       font-weight: 600;
@@ -513,7 +520,8 @@
         'emptyResponse',
         'unexpectedSize',
         'layoutOverlap',
-        'visibilityImpaired'
+        'visibilityImpaired',
+        'slotImpacts'
       ];
 
       realityKeys.forEach(key => {
@@ -603,6 +611,17 @@
                       ${escapeHtml(incident.message)}
 
                     </div>
+
+                    ${Number.isInteger(Number(incident.affectedSlots)) &&
+                      Number(incident.affectedSlots) > 0
+                        ? `
+                  <div class="incident-affected">
+                    Affects ${escapeHtml(incident.affectedSlots)}
+                    ${Number(incident.affectedSlots) === 1 ? 'slot' : 'slots'}
+                  </div>
+                    `
+                    : ''
+                }
 
                   </div>
                 `;
