@@ -612,7 +612,12 @@
 
                     </div>
 
-                    ${Number.isInteger(Number(incident.affectedSlots)) &&
+                    ${[
+                      'GPT script missing',
+                      'GPT not initialized',
+                      'No GPT slot requests'
+                    ].includes(incident.title) &&
+                      Number.isInteger(Number(incident.affectedSlots)) &&
                       Number(incident.affectedSlots) > 0
                         ? `
                   <div class="incident-affected">
