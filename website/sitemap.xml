@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://adpulse-guard.github.io/adpulse-guard/website/</loc>
-  </url>
+  <url><loc>https://adpulse-guard.github.io/adpulse-guard/website/</loc></url>
+  <url><loc>https://adpulse-guard.github.io/adpulse-guard/website/guides/gam-slot-not-requesting/</loc></url>
+  <url><loc>https://adpulse-guard.github.io/adpulse-guard/website/guides/google-publisher-tag-monitoring/</loc></url>
 </urlset>
