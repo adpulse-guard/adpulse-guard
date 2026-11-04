@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#071029">
+<title>GAM Ad Slot Not Requesting? GPT Troubleshooting Guide | AdPulse Guard</title>
+<meta name="description" content="An ad slot exists but never requests an ad? Check GPT initialization, DOM containers, slot events, consent, lazy loading and refresh behavior.">
+<link rel="canonical" href="https://adpulse-guard.github.io/adpulse-guard/website/guides/gam-slot-not-requesting/">
+<meta property="og:type" content="article"><meta property="og:title" content="GAM Ad Slot Not Requesting? GPT Troubleshooting Guide | AdPulse Guard">
+<meta property="og:description" content="An ad slot exists but never requests an ad? Check GPT initialization, DOM containers, slot events, consent, lazy loading and refresh behavior."><meta property="og:url" content="https://adpulse-guard.github.io/adpulse-guard/website/guides/gam-slot-not-requesting/">
+<meta property="og:image" content="https://adpulse-guard.github.io/adpulse-guard/Logo%20Shield.png">
+<meta name="twitter:card" content="summary">
+<style>:root{color-scheme:dark;--bg:#070e22;--card:#101a35;--border:#263659;--text:#f6f8ff;--muted:#b8c7e2;--blue:#45beff}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 80% 0%,#143b8147,transparent 38%),var(--bg);color:var(--text);font:16px/1.75 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}a{color:#6ed4ff}a:hover{color:#b4eaff}a:focus-visible{outline:2px solid #74e0ff;outline-offset:3px}.wrap{width:min(940px,calc(100% - 40px));margin:auto}.top{border-bottom:1px solid var(--border);background:#080f26ee}.top .wrap{display:flex;gap:20px;align-items:center;justify-content:space-between;padding:18px 0}.brand{display:flex;align-items:center;gap:11px;color:var(--text);font-weight:800;text-decoration:none;letter-spacing:-.3px}.brand img{width:36px;height:40px;object-fit:contain}.nav a{font-size:14px;text-decoration:none;color:#d2e4fa;margin-left:22px}.hero{padding:70px 0 45px}.kicker{color:#8eb7ff;font-size:12px;letter-spacing:2px;font-weight:800;text-transform:uppercase}.hero h1{font-size:clamp(32px,5vw,56px);line-height:1.15;letter-spacing:-1.8px;margin:16px 0 20px}.deck{font-size:19px;max-width:810px;color:#c2d0e8}.meta{color:#9fb3d8;font-size:13px;margin-top:24px}.content{padding-bottom:60px}.content section{margin:36px 0;padding:0 2px}.content .panel{padding:26px 28px;background:linear-gradient(145deg,#152348,#0b1733);border:1px solid #34528a;border-radius:14px}.content h2{font-size:clamp(23px,3vw,30px);line-height:1.3;letter-spacing:-.5px;margin:0 0 15px}.content p,.content li{color:#c7d2e9}.content li{margin:9px 0}.content ul{padding-left:23px}code{font:0.92em/1.6 ui-monospace,Consolas,monospace;color:#bce4ff;background:#192d52;padding:2px 5px;border-radius:4px}pre{white-space:pre;overflow:auto;padding:18px;border-radius:10px;border:1px solid #35537d;background:#040b1a}pre code{background:transparent;padding:0;font-size:13px}.matrix{display:grid;gap:12px;grid-template-columns:repeat(3,1fr);margin-top:21px}.matrix div{padding:17px;border:1px solid var(--border);border-radius:11px;background:#122241}.matrix strong,.matrix span{display:block}.matrix span{color:#c3d2eb;font-size:14px;margin-top:9px}.button{display:inline-flex;margin-top:12px;padding:12px 20px;border-radius:9px;background:linear-gradient(100deg,#068de9,#245efa 75%,#6237d8);font-size:14px;font-weight:800;color:#fff;text-decoration:none}.button:hover{color:#fff}.sources{border-top:1px solid var(--border);padding-top:30px!important}.sources a{overflow-wrap:anywhere}.foot{border-top:1px solid var(--border);padding:20px 0 34px;color:#a8bbd9;font-size:13px}.foot .wrap{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}@media(max-width:620px){.hero{padding:46px 0 24px}.nav a{margin-left:11px;font-size:12px}.brand{font-size:14px}.matrix{grid-template-columns:1fr}.content .panel{padding:20px}.deck{font-size:17px}}</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><a class="brand" href="https://adpulse-guard.github.io/adpulse-guard/website/"><img src="https://adpulse-guard.github.io/adpulse-guard/Logo%20Shield.png" alt=""> AdPulse Guard</a><nav class="nav" aria-label="Main"><a href="https://adpulse-guard.github.io/adpulse-guard/website/#product">Product</a><a href="https://adpulse-guard.github.io/adpulse-guard/website/#detections">Detections</a><a href="https://adpulse-guard.github.io/adpulse-guard/website/#contact">Pilot</a></nav></div></header>
+<main><div class="wrap"><section class="hero"><div class="kicker">Ad Delivery Troubleshooting / APG Guides</div><h1>GAM ad slot not requesting? A practical GPT troubleshooting guide</h1><p class="deck">A container on the page is not proof that an ad request was sent. Follow the evidence from GPT setup to the request and render stages before deciding whether delivery is broken.</p><p class="meta">AdPulse Guard technical guide · November 2026</p></section><article class="content"><section class="panel"><h2>First, define what “not requesting” means</h2>
+<p>A visible placeholder, a <code>defineSlot()</code> call and a completed ad request are different things. A slot may be registered in GPT but held until consent, viewability, user interaction or an explicit <code>refresh()</code>. An absent request is not necessarily a defect.</p>
+<p>Start with a specific page, viewport, slot ID and expected behavior. Reproduce the issue after any consent choice has been made and allow lazy-loaded placements to enter the relevant loading range.</p></section>
+<section><h2>1. Confirm that Google Publisher Tag initialized</h2>
+<p>In the browser console, inspect <code>window.googletag?.apiReady</code> and <code>window.googletag?.pubadsReady</code>. If GPT never initializes, check whether <code>gpt.js</code> is blocked, missing or prevented from running. A page that loads a GTM container does not necessarily load GPT.</p>
+<p>In DevTools → Network, look for the GPT script and check for blocking errors. If consent management controls advertising scripts, test the state in which ads are expected to run.</p></section>
+<section><h2>2. Compare registered slots with DOM containers</h2>
+<p>When GPT is ready, list the slots and the elements they target. Use this read-only snippet for ordinary in-page slots:</p>
+<pre><code>const slots = window.googletag?.pubads?.().getSlots?.() || [];
+console.table(slots.map(slot =&gt; ({
+  id: slot.getSlotElementId(),
+  adUnit: slot.getAdUnitPath(),
+  inDOM: !!document.getElementById(slot.getSlotElementId())
+})));</code></pre>
+<p>For in-page slots, a missing matching container deserves investigation. However, a registered slot without a DOM element is not automatically a failed request: it may be intended for another template, created before rendering, or use an out-of-page format.</p></section>
+<section><h2>3. Check requests at the slot level</h2>
+<p>In DevTools → Network, filter for <code>/gampad/ads</code>. This is useful request evidence, but do not equate the number of HTTP requests with the number of ad slots. Google Publisher Tag can bundle multiple slots into one request through single request architecture.</p>
+<p>For instrumented pages, GPT’s <code>slotRequested</code> event provides slot-level evidence. A monitoring listener must be attached before the relevant event; adding one after the request cannot reconstruct past events. Compare a particular slot’s request evidence with its registration and DOM state.</p></section>
+<section><h2>4. Check intentional request delays</h2>
+<ul><li><strong>Consent:</strong> An ad request may be postponed until a consent decision is available.</li>
+<li><strong>Lazy loading:</strong> Below-the-fold placements may not request until the user approaches them.</li>
+<li><strong>Initial load disabled:</strong> If <code>disableInitialLoad</code> is enabled, <code>display()</code> alone does not fetch an ad; a later <code>refresh()</code> is required.</li>
+<li><strong>Conditional templates:</strong> Mobile, desktop and article layouts may intentionally activate different slots.</li></ul>
+<p>Do not “fix” a missing request by calling <code>refresh()</code> in production without understanding the publisher’s setup and refresh policies.</p></section>
+<section><h2>5. Separate missing requests from empty responses and render problems</h2>
+<p>These stages need different investigations:</p>
+<div class="matrix"><div><strong>No request observed</strong><span>Check initialization, triggering, consent and lazy-load conditions.</span></div><div><strong>Request sent, empty render</strong><span>Review eligibility, demand, targeting and the response path; an empty response is not proof of a code failure.</span></div><div><strong>Response received, ad not visible</strong><span>Check creative rendering, slot dimensions, collapsed containers and overlapping page content.</span></div></div>
+<p>GPT exposes <code>slotResponseReceived</code> and <code>slotRenderEnded</code> events. The <code>slotRenderEnded</code> event includes an <code>isEmpty</code> field, which helps distinguish an empty result from other rendering outcomes.</p></section>
+<section class="panel"><h2>Where AdPulse Guard fits</h2>
+<p>AdPulse Guard is a browser-side monitoring project for Google Ad Manager publishers. It observes page-load GPT, DOM and rendering signals, and surfaces issue-specific technical context so teams can investigate patterns rather than manually reproduce every page load.</p>
+<p>APG signals are investigative evidence, not proof of verified revenue loss. Its free 14-day pilot evaluates usefulness and alert accuracy on an agreed publisher site, without intentionally changing ad delivery.</p>
+<a class="button" href="mailto:adpulse.guard@gmail.com?subject=AdPulse%20Guard%20%E2%80%94%2014-day%20pilot%20inquiry">Ask about the 14-day pilot →</a></section>
+<section class="sources"><h2>Technical references</h2>
+<ul><li><a href="https://developers.google.com/publisher-tag/reference">Google Publisher Tag API and event reference</a></li>
+<li><a href="https://developers.google.com/publisher-tag/guides/control-ad-loading">Google: control ad loading and refresh</a></li>
+<li><a href="https://developers.google.com/publisher-tag/samples/ad-event-listeners">Google: ad event listeners</a></li></ul>
+<p>Related guide: <a href="../google-publisher-tag-monitoring/">Google Publisher Tag monitoring: delivery signals to watch</a>.</p></section></article></div></main>
+<footer class="foot"><div class="wrap"><span>© 2026 AdPulse Guard · Independent AdTech monitoring project</span><a href="https://adpulse-guard.github.io/adpulse-guard/website/">Back to AdPulse Guard →</a></div></footer>
+</body></html>
